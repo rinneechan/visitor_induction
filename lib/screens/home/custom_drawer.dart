@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:go_router/go_router.dart';
+
 
 class CustomDrawer extends StatelessWidget {
   final String? username;
 
   const CustomDrawer({Key? key, this.username}) : super(key: key);
+
+  Future<void> logout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('isLoggedIn');
+    context.go('/choose-access');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,10 +43,9 @@ class CustomDrawer extends StatelessWidget {
             child: ListView(
               children: [
                 ListTile(
-                  title: Text(username ?? 'Guest'),
+                  title: Text(username ?? 'Visitor'),
                   leading: const Icon(Icons.person),
                   onTap: () {
-                    // Navigasi saat item ditekan
                     Navigator.pop(context); // Menutup drawer
                   },
                 ),
@@ -76,11 +84,9 @@ class CustomDrawer extends StatelessWidget {
 
   // Tombol logout
   Widget _buildLogOutButton(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        // Tambahkan logika logout di sini
-        Navigator.pop(context); // Menutup drawer setelah logout
-      },
+    return Expanded(
+      child: ElevatedButton(
+      onPressed: () => logout(context),
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFFDDDDDD), // Warna latar tombol
         padding: const EdgeInsets.symmetric(vertical: 16.0), // Padding tombol
@@ -91,13 +97,11 @@ class CustomDrawer extends StatelessWidget {
         alignment: Alignment.centerLeft, // Konten diatur ke kiri
       ),
       child: Row(
-        crossAxisAlignment:
-            CrossAxisAlignment.center, // Konten sejajar vertikal
-        mainAxisAlignment: MainAxisAlignment.start, // Konten sejajar horizontal
+        mainAxisAlignment: MainAxisAlignment.center,
         children: const [
           Icon(
             Icons.logout, // Ikon logout
-            color: Color(0xFF4F4D4D), // Warna ikon
+            color: Color(0xFFFFFF), // Warna ikon
             size: 24.0,
           ),
           SizedBox(width: 8), // Jarak antara ikon dan teks
@@ -111,6 +115,7 @@ class CustomDrawer extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:go_router/go_router.dart';
 
 class ChooseAccess extends StatefulWidget {
   @override
@@ -19,12 +20,14 @@ class _ChooseAccessScreenState extends State<ChooseAccess> {
     final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
     if (isLoggedIn) {
-      Navigator.pushReplacementNamed(context, '/main-menu');
+      //Navigator.pushReplacementNamed(context, '/main-menu');
+      context.go('/main-menu');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final bodyWidth = MediaQuery.of(context).size.shortestSide;
     double screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 600;
     final isTablet = screenWidth >= 600 && screenWidth < 1200;
@@ -42,41 +45,50 @@ class _ChooseAccessScreenState extends State<ChooseAccess> {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Sedia',
-              style: TextStyle(
-                fontSize: fontSize(32, 32, 38),
-                fontWeight: FontWeight.w900,
-                color: Color(0xFFA4A4A4),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: SafeArea(
+          child: Center( // Center memastikan AppBar konsisten dengan lebar body
+            child: Container(
+              width: bodyWidth, // Menyamakan lebar dengan body
+              padding: const EdgeInsets.symmetric(horizontal: 16.0), // Padding kiri-kanan
+              color: Colors.transparent, // Warna transparan
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Teks di sisi kiri
+                  Text(
+                    'Sedia',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFFA4A4A4),
+                    ),
+                  ),
+                  // Logo di sisi kanan
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/images/logo-cg.svg',
+                        height: 40.0,
+                        placeholderBuilder: (context) =>
+                            CircularProgressIndicator(),
+                      ),
+                      SizedBox(width: 10),
+                      Image.asset(
+                        'assets/images/Logo-badak.png',
+                        height: 40.0,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Icon(Icons.broken_image, size: 40.0),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SvgPicture.asset(
-                  'assets/images/logo-cg.svg',
-                  height: elementSize(30, 35, 40),
-                  placeholderBuilder: (context) =>
-                      CircularProgressIndicator(),
-                ),
-                SizedBox(width: 10),
-                Image.asset(
-                  'assets/images/Logo-badak.png',
-                  height: elementSize(30, 35, 40),
-                  errorBuilder: (context, error, stackTrace) =>
-                      Icon(Icons.broken_image, size: elementSize(30, 35, 40)),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        automaticallyImplyLeading: false,
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -186,7 +198,8 @@ class _ChooseAccessScreenState extends State<ChooseAccess> {
               title: 'CG Employee',
               subtitle: 'Login with your Employee ID.',
               iconPath: 'assets/images/Right-Scroll.svg',
-              onTap: () => Navigator.pushNamed(context, '/login'),
+              onTap: () => context.push('/login'),
+                  //Navigator.pushNamed(context, '/login'),
               fontSize: fontSize,
               elementSize: elementSize,
             ),
@@ -195,8 +208,9 @@ class _ChooseAccessScreenState extends State<ChooseAccess> {
               title: 'External Visitor',
               subtitle: 'Provide with your details.',
               iconPath: 'assets/images/Right-Scroll.svg',
-              onTap: () =>
-                  Navigator.pushNamed(context, '/externalVisitor'),
+              onTap: () => context.push('/main-menu-ext'),
+                  //Navigator.pushNamed(context, '/externalVisitor'),
+                  //context.go('/externalVisitor'), // Gunakan context.go
               fontSize: fontSize,
               elementSize: elementSize,
             ),

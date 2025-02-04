@@ -17,6 +17,7 @@ class InductionRequestId {
   final String plantName; // Field baru
   final String passType; // Field baru
   final String statusName; // Field baru
+  final String qrcode;
 
   InductionRequestId({
     required this.id, // Field baru
@@ -37,6 +38,7 @@ class InductionRequestId {
     required this.plantName, // Field baru
     required this.passType, // Field baru
     required this.statusName, // Field baru
+    required this.qrcode,
   });
 
   factory InductionRequestId.fromJson(Map<String, dynamic> json) {
@@ -59,6 +61,7 @@ class InductionRequestId {
       plantName: json['plant_name'], // Field baru
       passType: json['pass_type'], // Field baru
       statusName: json['status_name'], // Field baru
+      qrcode: json['qr_code'],
     );
   }
 
@@ -69,4 +72,5 @@ class InductionRequestId {
   String get visitDuration => passType; //'$durationId days'; // Contoh format
   String get statusid => statusId.toString(); // Menggunakan statusId dari API
   String get status => statusName; // Menggunakan statusName dari API
+  String get qr_code => qrcode;
 }

@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:she_vi/services/api_service.dart';
 import 'package:she_vi/models/InductionRequestId.dart';
-import '../induction_test/welcome_testsatu_screen.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 
-class SubMissionHistory extends StatefulWidget {
+class Detaiinfo extends StatefulWidget {
   final String idrequest;
-  const SubMissionHistory({Key? key, required this.idrequest}) : super(key: key);
+  const Detaiinfo({Key? key, required this.idrequest}) : super(key: key);
 
   @override
-  _SubMissionHistoryState createState() => _SubMissionHistoryState();
+  _DetaiinfoState createState() => _DetaiinfoState();
 }
 
-class _SubMissionHistoryState extends State<SubMissionHistory> {
+class _DetaiinfoState extends State<Detaiinfo> {
   late String idrequest;
   late Box box;
   String? username;
@@ -25,6 +25,7 @@ class _SubMissionHistoryState extends State<SubMissionHistory> {
   //bool _showInductionRequest = true;
   ApiService apiService = ApiService();
   late Future<List<InductionRequestId>> fetchInductionId;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -44,7 +45,8 @@ class _SubMissionHistoryState extends State<SubMissionHistory> {
       String? token = box.get('token');
 
       if (token == null || token.isEmpty) {
-        Navigator.pushReplacementNamed(context, '/chooseaccess');
+        //Navigator.pushReplacementNamed(context, '/chooseaccess');
+        context.go('/chooseaccess');
       } else {
         _loadData(); // Memuat data dari API jika token tersedia
       }
@@ -52,6 +54,9 @@ class _SubMissionHistoryState extends State<SubMissionHistory> {
   }
 
   Future<void> _loadData() async {
+    setState(() {
+      _isLoading = true;
+    });
     try {
       final String idrequest = widget.idrequest;
       final result = await apiService.fetchInductionrequestId(idrequest);
@@ -60,26 +65,22 @@ class _SubMissionHistoryState extends State<SubMissionHistory> {
         setState(() {
           datashow = result.first; // Ambil data pertama
           fetchInductionId = Future.value(result); // Untuk FutureBuilder
+          _isLoading = false;
         });
       } else {
         setState(() {
           datashow = null; // Kosongkan jika tidak ada data
+          _isLoading = false;
         });
         print('API mengembalikan data kosong.');
+        _isLoading = false;
       }
     } catch (e) {
       print('Error saat memuat data: $e');
+      _isLoading = false;
     }
   }
 
-
-  // void toggleInductionRequest() {
-  //   setState(() {
-  //     _showInductionRequest = !_showInductionRequest;
-  //   });
-  // }
-
-  // Fungsi untuk mengubah format tanggal
   String formatDate(String dateString) {
     try {
       final date = DateTime.parse(dateString); // Mengonversi string menjadi DateTime
@@ -100,58 +101,21 @@ class _SubMissionHistoryState extends State<SubMissionHistory> {
         elevation: 2,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF343434)),
-          onPressed: () => Navigator.pop(context),
+          //onPressed: () => context.pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop(); // Kembali ke halaman sebelumnya
+            } else {
+              context.go('/request-induction', extra: {'username': username ?? 'defaultID'});
+            }
+          },
         ),
       ),
-      // body: Center(
-      //   child: Container(
-      //     width: MediaQuery.of(context).size.shortestSide,
-      //     child: Column(
-      //       children: [
-      //         _buildInductionRequestCard(),
-      //         SizedBox(height: 0),
-      //
-      //         // Expanded yang bisa di-scroll
-      //         Expanded(
-      //           child: LayoutBuilder(
-      //             builder: (context, constraints) {
-      //               return SingleChildScrollView(
-      //                 physics: BouncingScrollPhysics(),
-      //                 child: ConstrainedBox(
-      //                   constraints: BoxConstraints(
-      //                     minHeight: constraints.maxHeight,
-      //                   ),
-      //                   child: IntrinsicHeight(
-      //                     child: Column(
-      //                       crossAxisAlignment: CrossAxisAlignment.start,
-      //                       children: [
-      //                         _buildVisitorProfileCard(),
-      //                         // Tambahkan konten lainnya di sini
-      //                         SizedBox(height: 20),
-      //                         Text(
-      //                           "Scroll lebih banyak konten di sini",
-      //                           style: TextStyle(fontSize: 18),
-      //                         ),
-      //                         SizedBox(height: 20),
-      //                         // Tambahkan lebih banyak konten jika diperlukan
-      //                       ],
-      //                     ),
-      //                   ),
-      //                 ),
-      //               );
-      //             },
-      //           ),
-      //         ),
-      //
-      //         _buildBottomButton(),
-      //       ],
-      //     ),
-      //   ),
-      // ),
       body: Center(
         child: Container(
           width: MediaQuery.of(context).size.shortestSide,
           height: MediaQuery.of(context).size.height,
+          color: Colors.white,
           child: Stack(
             children: [
               SingleChildScrollView(
@@ -167,7 +131,6 @@ class _SubMissionHistoryState extends State<SubMissionHistory> {
                   ],
                 ),
               ),
-
               // Tombol tetap di bawah
               Positioned(
                 bottom: 0,
@@ -175,12 +138,20 @@ class _SubMissionHistoryState extends State<SubMissionHistory> {
                 right: 0,
                 child: _buildBottomButton(),
               ),
+              if (_isLoading)
+                Positioned.fill(
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                          Color(0xFF07840B)), // Warna hijau
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
       ),
-
-
 
     );
   }
@@ -256,7 +227,7 @@ class _SubMissionHistoryState extends State<SubMissionHistory> {
                               SizedBox(height: 16),
                               _buildDetailRow('Arrival Date', formatDate(data.arrivalDate), textAlign: TextAlign.left),
                               SizedBox(height: 16),
-                              _buildDetailRow('Visit Duration', '', textAlign: TextAlign.left),
+                              _buildDetailRow('Visit Duration', data.visitDuration, textAlign: TextAlign.left),
                               SizedBox(height: 16),
                               _buildDetailRow('Reason to Visit', data.reasonToVisit, textAlign: TextAlign.left),
                             ],
@@ -388,24 +359,14 @@ class _SubMissionHistoryState extends State<SubMissionHistory> {
 
   Widget _buildBottomButton() {
     return GestureDetector(
-
         child: Padding(
           padding: const EdgeInsets.all(16.0), // Padding di semua sisi (top, bottom, left, right)
           child: ElevatedButton(
             onPressed: () {
               //Navigator.pushNamed(context, '/request-new-induction');
               if (datashow != null) {
-                print('welcom  Plant test satu: ${datashow!.plantId?.toString()}');
-                Navigator.pushNamed(
-                  context,
-                  '/welcome-test',
-                  arguments: <String, String>{
-                    'idrequest': datashow!.idrequest ?? '',
-                    'plantId': datashow!.plantId?.toString() ?? '',
-                    'plantName': datashow!.plantName ?? '',
-                  },
-                );
-
+                //context.go('/welcome-test?idrequest=${datashow!.idrequest ?? ''}&plantId=${datashow!.plantId?.toString() ?? ''}&plantName=${datashow!.plantName ?? ''}',);
+                context.push('/welcome-test?idrequest=${datashow!.idrequest ?? ''}&plantId=${datashow!.plantId?.toString() ?? ''}&plantName=${datashow!.plantName ?? ''}',);
               } else {
                 // Berikan pesan error jika data null
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -436,7 +397,6 @@ class _SubMissionHistoryState extends State<SubMissionHistory> {
             ),
           ),
         )
-
     );
   }
 

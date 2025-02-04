@@ -19,13 +19,18 @@ class QuestionRequestIdPlant {
   });
 
   factory QuestionRequestIdPlant.fromJson(Map<String, dynamic> json) {
+    //print("JSON data: $json");
     return QuestionRequestIdPlant(
-      id: json['id'],
-      questionId: json['question_id'],
-      plantId: json['plant_id'],
-      updatedAt: json['updated_at'],
-      question: Question.fromJson(json['question']),
-      plant: Plantvisit.fromJson(json['plant']),
+      id: json['id'] ?? 0,
+      questionId: json['question_id'] ?? 0,
+      plantId: json['plant_id'] ?? 0,
+      updatedAt: json['updated_at'] ?? '',
+      question: json['question'] != null
+          ? Question.fromJson(json['question'])
+          : throw Exception('Missing question data'),
+      plant: json['plant'] != null
+          ? Plantvisit.fromJson(json['plant'])
+          : throw Exception('Missing plant data'),
     );
   }
 

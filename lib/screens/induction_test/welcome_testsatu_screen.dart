@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hive/hive.dart';
-//import '../induction_test/welcome_testdua_screen.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:dio/dio.dart';
+import 'dart:io';
+import 'package:go_router/go_router.dart';
 
 class WelcomeTestSatuScreen extends StatefulWidget {
   final String idrequest;
@@ -20,10 +24,13 @@ class WelcomeTestSatuScreen extends StatefulWidget {
 }
 
 class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
+  GlobalKey<ScaffoldState> _formKey_W1 = GlobalKey<ScaffoldState>();
   late Box box;
   String? username;
   String? visitorid;
   String? email;
+  bool isDocumentRead = false;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -51,37 +58,67 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
 
   @override
   Widget build(BuildContext context) {
+    double bodyWidth = MediaQuery.of(context).size.width * 0.5; // 90% dari lebar layar
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
+        //key: _formKey_W1,
         extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          title: _buildAppBarContent(),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          automaticallyImplyLeading: false,
-        ),
+        appBar: _buildAppBar(bodyWidth),
         body: _buildBody(),
       ),
     );
   }
 
-  Widget _buildAppBarContent() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        SvgPicture.asset('assets/images/logo-cg.svg', height: 40),
-        Text(
-          'CEMINDO GEMILANG',
-          style: const TextStyle(
-            fontSize: 11.429,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFFB0191F),
-            fontFamily: 'Lato',
-          ),
+  PreferredSizeWidget _buildAppBar(double bodyWidth) {
+    return PreferredSize(
+      preferredSize: Size.fromHeight(kToolbarHeight), // Tinggi AppBar
+      child: AppBar(
+        backgroundColor: Colors.white, // Warna latar AppBar
+        elevation: 0, // Menghapus bayangan pada AppBar
+        centerTitle: false, // Menyelaraskan elemen ke sisi kiri dan kanan
+        titleSpacing: 0, // Mengatur jarak awal judul
+        automaticallyImplyLeading: false,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Logo di sisi kiri
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0), // Jarak dari kiri
+                  child: SvgPicture.asset(
+                    'assets/images/logo-cg.svg',
+                    height: 35.0,
+                    placeholderBuilder: (context) =>
+                        CircularProgressIndicator(), // Placeholder jika logo belum dimuat
+                  ),
+                ),
+                const SizedBox(width: 8.0), // Jarak antara logo dan teks
+                Text(
+                  'CEMINDO GEMILANG',
+                  style: const TextStyle(
+                    fontSize: 11.429,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFFB0191F),
+                    fontFamily: 'Lato',
+                  ),
+                ),
+              ],
+            ),
+            // Logo di sisi kanan
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0), // Jarak dari kanan
+              child: Image.asset(
+                'assets/images/logo-sedia.png',
+                height: 40.0,
+                errorBuilder: (context, error, stackTrace) =>
+                const Icon(Icons.broken_image, size: 40.0),
+              ),
+            ),
+          ],
         ),
-        Image.asset('assets/images/logo-sedia.png', height: 80),
-      ],
+      ),
     );
   }
 
@@ -89,12 +126,13 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
     return Center(
       child: Container(
         width: MediaQuery.of(context).size.shortestSide,
-        height: MediaQuery.of(context).size.height,
+        //width: MediaQuery.of(context).size.width, // Memastikan lebar sesuai layar
+        height: MediaQuery.of(context).size.height, // Memastikan tinggi sesuai layar
         child: Stack(
           children: [
-            Container(color: Color(0xFFF0F0F0)),
+            Container(color: Colors.white),
             Positioned(
-              top: 90,
+              top: 90, // Jarak dari atas, sesuaikan dengan kebutuhan
               left: 0,
               right: 0,
               child: Card(
@@ -119,6 +157,8 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
                       _buildInstructions(),
                       const SizedBox(height: 24),
                       _buildDownloadButton(),
+                      // const SizedBox(height: 24),
+                      // _buildButton(),
                       const SizedBox(height: 24),
                       _buildConfirmationButton(),
                     ],
@@ -126,16 +166,23 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
                 ),
               ),
             ),
+
+            // Menampilkan loading spinner jika isLoading bernilai true
+            if (isLoading)
+              Center(
+                child: CircularProgressIndicator(),
+              ),
           ],
         ),
       ),
     );
   }
 
+  // Header content
   Widget _buildHeader() {
     return Column(
       children: [
-        Divider(color: Color(0xFF07840B), thickness: 1.0),
+        Divider(color: Colors.grey, thickness: 1.0),
         const SizedBox(height: 8),
         Text(
           'VISITOR INDUCTIONS',
@@ -147,25 +194,27 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        Divider(color: Color(0xFF07840B), thickness: 1.0),
+        Divider(color: Colors.grey, thickness: 1.0),
       ],
     );
   }
 
+  // User greeting
   Widget _buildUserGreeting() {
     return username == null
         ? const CircularProgressIndicator()
         : Text(
-            'Hello, $username',
-            style: const TextStyle(
-              color: Color(0xFF757575),
-              fontFamily: 'Hanken Grotesk',
-              fontSize: 16.0,
-              fontWeight: FontWeight.w400,
-            ),
-          );
+      'Hello, $username',
+      style: const TextStyle(
+        color: Color(0xFF757575),
+        fontFamily: 'Hanken Grotesk',
+        fontSize: 16.0,
+        fontWeight: FontWeight.w400,
+      ),
+    );
   }
 
+  // CG welcome message
   Widget _buildCG() {
     return Text(
       'WELCOME TO\nPT CEMINDO GEMILANG TBK',
@@ -175,12 +224,12 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
         fontFamily: 'Hanken Grotesk',
         fontSize: 20.0,
         fontWeight: FontWeight.w900,
-        fontStyle: FontStyle.normal,
         height: 1.0,
       ),
     );
   }
 
+  // Plant info
   Widget _buildPlantInfo() {
     return Text(
       widget.plantName,
@@ -193,6 +242,7 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
     );
   }
 
+  // Instructions for the visitor
   Widget _buildInstructions() {
     return Text(
       'Before taking your access pass test, please download and read our safety materials to fully understand the safety rules at our plant sites.',
@@ -207,10 +257,11 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
     );
   }
 
+  // Download button
   Widget _buildDownloadButton() {
     return InkWell(
       onTap: () {
-        // TODO: Tambahkan logika unduh material
+        _showDocument(context);  // Panggil untuk menampilkan dokumen PDF
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12.0),
@@ -232,25 +283,46 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
       ),
     );
   }
+  // Widget _buildDownloadButton() {
+  //   return ElevatedButton(
+  //     onPressed: () => _showDocument(context),
+  //     style: ElevatedButton.styleFrom(
+  //       side: BorderSide(color: Colors.grey),
+  //       backgroundColor: Colors.white,
+  //       padding: EdgeInsets.symmetric(vertical: 12),
+  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+  //     ),
+  //     child: Text(
+  //       'Download Induction Material',
+  //       style: TextStyle(
+  //         fontFamily: 'Hanken Grotesk',
+  //         fontSize: 16.0,
+  //         fontWeight: FontWeight.w700,
+  //         color: Color(0xFF07840B),
+  //       ),
+  //     ),
+  //   );
+  // }
 
+
+  // Confirmation button
   Widget _buildConfirmationButton() {
     return InkWell(
-      onTap: () {
-        print('Sending test satu: ${widget.plantId}');
-        Navigator.pushNamed(
-          context,
+      onTap: isDocumentRead ? () {
+
+        context.push(
           '/welcome-test-intructions',
-          arguments: {
+          extra: {
             'idrequest': widget.idrequest,
-            'plantId': widget.plantId.toString(),
+            'plantId': widget.plantId,
             'plantName': widget.plantName,
           },
         );
-      },
+      } : null,  // Disable button jika dokumen belum dibaca
       child: Container(
         height: 60.0,
         decoration: BoxDecoration(
-          color: Color(0xFF07840B),
+          color: isDocumentRead ? Color(0xFF07840B) : Colors.white,
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: const Center(
@@ -265,6 +337,195 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // Function untuk menampilkan dokumen
+  void _showDocument(BuildContext context) async {
+    setState(() {isLoading = true;
+    });
+    // URL dokumen PDF
+    String documentUrl = 'https://drive.google.com/uc?export=download&id=1qMD67WKbjXRwBJzUwdUka0fX6K_QEGgT';
+
+    try {
+      // Menyimpan file PDF sementara
+      Dio dio = Dio();
+      Directory appDocDir = await getTemporaryDirectory();
+      String savePath = '${appDocDir.path}/induction_material.pdf';
+
+      // Mendownload file
+      await dio.download(documentUrl, savePath);
+      setState(() {
+        isLoading = false;
+      });
+
+      // Menampilkan PDF setelah diunduh
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PDFViewPage(
+            filePath: savePath,
+            onFinishedReading: () {
+              setState(() {
+                isDocumentRead = true;
+              });
+            },
+          ),
+        ),
+      );
+    } catch (e) {
+      // Menangani error jika gagal mendownload file
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to download document: $e')),
+      );
+    }
+  }
+
+  Widget _buildButton() {
+    return InkWell(
+      onTap: () {
+        // Pastikan logika yang ada disini hanya dijalankan saat kondisi sudah benar
+        context.go(
+          '/welcome-test-intructions',
+          extra: {
+            'idrequest': widget.idrequest,
+            'plantId': widget.plantId,
+            'plantName': widget.plantName,
+          },
+        );
+      },
+      child: Container(
+        height: 60.0,
+        decoration: BoxDecoration(
+          color: Colors.blue,  // Warna tombol yang selalu aktif
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Center(
+          child: Text(
+            'I have read and understood the safety rules of the plant sites.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Hanken Grotesk',
+              fontSize: 16.0,
+              fontWeight: FontWeight.w700,
+              color: Colors.white, // Teks tetap putih
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+
+
+  // void _showDocumentWeb(BuildContext context) {
+  //   String documentUrl = 'https://drive.google.com/file/d/1qMD67WKbjXRwBJzUwdUka0fX6K_QEGgT/view?usp=sharing';
+  //
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         contentPadding: EdgeInsets.zero,
+  //         insetPadding: const EdgeInsets.all(16.0),
+  //         content: SizedBox(
+  //           width: 800, // Sesuaikan ukuran popup
+  //           height: 600,
+  //           child: Column(
+  //             children: [
+  //               Container(
+  //                 padding: const EdgeInsets.all(8.0),
+  //                 color: Colors.grey.shade200,
+  //                 child: Row(
+  //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                   children: [
+  //                     const Text(
+  //                       'Dokumen PDF',
+  //                       style: TextStyle(fontWeight: FontWeight.bold),
+  //                     ),
+  //                     IconButton(
+  //                       icon: const Icon(Icons.close),
+  //                       onPressed: () => Navigator.of(context).pop(),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
+  //               const Divider(height: 1, thickness: 1),
+  //               Expanded(
+  //                 child: HtmlElementView(
+  //                   viewType: 'iframe',
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       );
+  //     },
+  //   );
+  //
+  //   // Membuat iframe untuk menampilkan dokumen PDF
+  //   final html.IFrameElement iframe = html.IFrameElement()
+  //     ..src = documentUrl
+  //     ..style.border = 'none';
+  //
+  //   // Mendaftarkan IFrame pada platform view registry
+  //   ui.platformViewRegistry.registerViewFactory(
+  //     'iframe',
+  //         (int viewId) => iframe,
+  //   );
+  // }
+
+}
+
+class PDFViewPage extends StatelessWidget {
+  final String filePath;
+  final VoidCallback onFinishedReading;
+
+  const PDFViewPage({Key? key, required this.filePath, required this.onFinishedReading}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Induction Material')),
+      body: PDFView(
+        filePath: filePath,
+        onPageError: (page, error) {
+          print('Error loading page $page: $error');
+        },
+        onPageChanged: (int? currentPage, int? totalPages) {
+          if (currentPage == totalPages! - 1) {  // Memastikan currentPage dan totalPages tidak null
+            onFinishedReading();
+          }
+        },
+      ),
+    );
+  }
+}
+
+class PDFViewerPage extends StatelessWidget {
+  final String filePath;
+
+  PDFViewerPage({required this.filePath});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('PDF Viewer'),
+      ),
+      body: PDFView(
+        filePath: filePath,
+        onPageError: (page, error) {
+          print('Error loading page $page: $error');
+        },
+        // onPageChanged: (int? currentPage, int? totalPages) {
+        //   if (currentPage == totalPages! - 1) {  // Memastikan currentPage dan totalPages tidak null
+        //     onFinishedReading();
+        //   }
+        // },
       ),
     );
   }

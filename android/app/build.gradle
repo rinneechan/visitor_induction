@@ -1,35 +1,15 @@
+
 plugins {
     id "com.android.application"
+    id 'com.google.gms.google-services'
     id "kotlin-android"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
+
+
 }
 
-//android {
-//    namespace = "com.example.she_vi"
-//    compileSdkVersion 33
-//
-//    defaultConfig {
-//        applicationId "com.example.she_vi"
-//        minSdkVersion 21
-//        targetSdkVersion 33
-//        versionCode 1
-//        versionName "1.0"
-//    }
-//
-//    buildTypes {
-//        release {
-//            minifyEnabled true
-//            shrinkResources true
-//            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
-//        }
-//        debug {
-//        // Nonaktifkan penghapusan sumber daya di mode debug
-//        shrinkResources false
-//        minifyEnabled false
-//    }
-//    }
-//}
+
 
  android {
      namespace = "com.example.she_vi"
@@ -70,6 +50,8 @@ plugins {
  }
 
 dependencies {
+    implementation platform('com.google.firebase:firebase-bom:33.7.0')
+    implementation 'com.google.firebase:firebase-analytics'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.0"
     //implementation 'androidx.multidex:multidex:2.0.1'
 }

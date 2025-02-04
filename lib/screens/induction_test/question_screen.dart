@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:she_vi/services/api_service.dart';
 import 'package:she_vi/models/QuestionRequestIdPlant.dart';
+import 'package:she_vi/models/choices.dart';
+import 'package:go_router/go_router.dart';
 
 class QuestionScreen extends StatefulWidget {
   final String idrequest;
@@ -20,24 +22,28 @@ class QuestionScreen extends StatefulWidget {
 }
 
 class _QuestionScreenState extends State<QuestionScreen> {
-  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  //GlobalKey<ScaffoldState> _formKey_Q = GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
-  late Box box; // Definisikan Box untuk Hive
+
+  late Box box;
   String? username;
   String? visitorid;
   String? email;
   ApiService apiService = ApiService();
-  // Future<List<QuestionRequestIdPlant>>? futureQuestionrequest;
   List<QuestionRequestIdPlant> questionlist = [];
 
   bool _isLoading = false;
-
   int currentQuestionIndex = 0;
+  int incorrectCount = 0;
   int score = 0;
   int? selectedOptionIndex;
+  late QuestionRequestIdPlant currentQuestion;
 
   late Future<List<QuestionRequestIdPlant>>? futureQuestionrequest;
   List<QuestionRequestIdPlant> pertanyaan = [];
+  List<Map<String, dynamic>> questions = [];
+
   int questionIndex = 0;
 
   @override
@@ -63,154 +69,304 @@ class _QuestionScreenState extends State<QuestionScreen> {
     });
   }
 
-  void _loadData() {
-    setState(() {
-      _isLoading = true;
-    });
+  void _loadData() async {
+    setState(() => _isLoading = true); // Mulai loading indikator
 
-    final String plantid = widget.plantId;
+    try {
+      final String plantId = widget.plantId;
+      print('Fetching data for Plant ID: $plantId');
 
-    futureQuestionrequest = apiService.fetchQuestionrequestplant(plantid);
-    futureQuestionrequest!.then((data) {
-      setState(() {
-        pertanyaan = data; // Simpan data ke variabel state
-        _isLoading = false;
-      });
-      print('Data berhasil dimuat: ${pertanyaan.map((e) => e.toJson()).toList()}');
-    }).catchError((error) {
+      // Panggil API untuk mendapatkan data pertanyaan
+      pertanyaan = await apiService.fetchQuestionrequestplant(plantId);
+      print('Data pertanyaan diterima: $pertanyaan');
+
+      // Proses data yang diterima
+      questions = pertanyaan.map((item) {
+        print('Processing question with ID: ${item.id}');
+        print('Choices: ${item.question.choices}');
+        print('Correct Answers: ${item.question.correctAnswers}');
+
+        // Log setiap pilihan
+        for (var choice in item.question.choices) {
+          print('Choice ID: ${choice.id}, Text: ${choice.choiceText}');
+        }
+
+        // Log setiap jawaban benar
+        for (var correctAnswer in item.question.correctAnswers) {
+          print('Correct Answer ID: ${correctAnswer.choiceId}');
+        }
+
+        // Cari pilihan yang cocok dengan jawaban benar
+        final correctChoice = item.question.choices.firstWhere(
+              (choice) =>
+              item.question.correctAnswers.any((ans) => ans.choiceId == choice.id),
+          orElse: () => Choice(
+            id: 0,
+            questionId: item.id,
+            choiceText: 'Unknown',
+          ),
+        );
+
+        print('Selected Correct Choice: ${correctChoice.choiceText}');
+
+        // Kembalikan data dalam bentuk map untuk UI
+        return {
+          'id': item.id,
+          'question_text': item.question.questionText,
+          'explanation': item.question.explanation,
+          'options': item.question.choices.map((choice) => choice.choiceText).toList(),
+          'answer': correctChoice.choiceText,
+        };
+      }).toList();
+
+      print('Data berhasil diproses: $questions');
+
+      // Debugging akhir untuk memverifikasi data
+      for (var question in questions) {
+        print('Question ID: ${question['id']}');
+        print('Question Text: ${question['question_text']}');
+        print('Options: ${question['options']}');
+        print('Correct Answer: ${question['answer']}');
+        print('Explanation: ${question['explanation']}');
+      }
+    } catch (error) {
       print('Error loading data: $error');
-      setState(() {
-        _isLoading = false;
-      });
-    });
+
+      // Menampilkan dialog kesalahan
+      _showErrorDialog(
+        'Gagal memuat data. Pastikan koneksi internet stabil atau coba lagi nanti.',
+      );
+    } finally {
+      // Pastikan loading indikator dihentikan meskipun terjadi kesalahan
+      setState(() => _isLoading = false);
+    }
   }
 
-  List<Map<String, dynamic>> questions = [
-    {
-      'question':
-          'Which of the following is NOT a recommended practice when working with hazardous chemicals in a plant site?',
-      'options': [
-        'Wearing appropriate Personal Protective Equipment (PPE)',
-        'Reading the Safety Data Sheet (SDS) before handling',
-        'Storing chemicals in unlabeled containers to save time',
-        'Using proper ventilation in the work area'
-      ],
-      'answer': 'Storing chemicals in unlabeled containers to save time',
-    },
-    {
-      'question':
-          'True or False: It is acceptable to store chemicals in unlabeled containers to save time in a plant site?',
-      'options': ['True', 'False'],
-      'answer': 'False',
-    },
-    // Tambahkan soal lainnya di sini
-  ];
 
-  void nextQuestion() {
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> nextQuestion(int questionId, int selectedChoiceId) async {
     if (selectedOptionIndex != null) {
-      String correctAnswer = questions[currentQuestionIndex]['answer'];
-      List<String> options =
-          List<String>.from(questions[currentQuestionIndex]['options']);
-
-      // Cek apakah jawabannya benar
+      final String correctAnswer = questions[currentQuestionIndex]['answer'] ?? '';
+      List<String> options = List<String>.from(questions[currentQuestionIndex]['options']);
       bool isCorrect = options[selectedOptionIndex!] == correctAnswer;
 
-      // Tampilkan dialog untuk memberi tahu apakah jawaban benar atau salah
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(isCorrect ? 'Correct!' : 'Wrong!'),
-            content: Text(isCorrect
-                ? 'You selected the correct answer!'
-                : 'Sorry, that\'s not the correct answer.'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Tutup dialog
-                  setState(() {
-                    if (isCorrect) {
-                      score++; // Tambah skor jika jawabannya benar
-                    }
+      // Kirim data ke API setelah memilih opsi
+      final int idrequest = int.parse(widget.idrequest.toString());
+      //final int question_id = int.parse(questions[currentQuestionIndex]['id'].toString());
+      final int question_id = questionId;
+      final int choice_id = selectedChoiceId;
 
-                    // Cek apakah ada soal berikutnya
-                    if (currentQuestionIndex < questions.length - 1) {
-                      currentQuestionIndex++; // Lanjut ke soal berikutnya
-                    } else {
-                      _showResult(); // Tampilkan hasil jika sudah selesai
-                    }
+      try {
+        final result = await apiService.createAnswerQuestion(
+          idrequest,
+          question_id,
+          choice_id,
+        );
+        // Cek jika berhasil
+        if (result) {
+          if (!isCorrect) {
+            incorrectCount++; // Tambah jumlah kesalahan
+          }
 
-                    selectedOptionIndex = null; // Reset pilihan
-                  });
-                },
-                child: Text('Continue'),
-              ),
-            ],
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            isDismissible: false,
+            enableDrag: false,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+            ),
+            builder: (BuildContext context) {
+              return Padding(
+                padding: EdgeInsets.only(
+                  top: 16.0,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
+                  left: 16.0,
+                  right: 16.0,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Icon(
+                          isCorrect ? Icons.check_circle : Icons.error,
+                          size: 48.0,
+                          color: isCorrect ? Colors.green : Colors.red,
+                        ),
+                        SizedBox(width: 8.0),
+                        Text(
+                          isCorrect ? 'Correct!' : 'Incorrect',
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,
+                            color: isCorrect ? Colors.green : Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (!isCorrect)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          'Correct Answer: $correctAnswer',
+                          style: TextStyle(fontSize: 16.0, color: Colors.grey[700]),
+                        ),
+                      ),
+                    SizedBox(height: 8.0),
+                    Text(
+                      questions[currentQuestionIndex]['explanation'] ?? '',
+                      style: TextStyle(fontSize: 16.0, color: Colors.grey[700]),
+                    ),
+                    SizedBox(height: 16.0),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+
+                        if (mounted) {
+                          setState(() {
+                            if (isCorrect) {
+                              score++;
+                            }
+
+                            if (incorrectCount >= 3) {
+                              //_showResult();
+                              // Navigasi langsung setelah dialog ditutup
+                              // Navigator.pushReplacementNamed(
+                              //   context,
+                              //   '/request-induction',
+                              //   arguments: {'username': username ?? 'defaultID'},
+                              // );
+                              return;
+                            }
+
+                            if (currentQuestionIndex < questions.length - 1) {
+                              currentQuestionIndex++;
+                            } else {
+
+                              context.go(
+                                '/test-complated?idrequest=${widget.idrequest ?? ''}&plantId=${widget.plantId?.toString() ?? ''}&plantName=${widget.plantName ?? ''}',
+                              );
+                            }
+
+                            selectedOptionIndex = null;
+                          });
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size(double.infinity, 48.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        backgroundColor: isCorrect ? Color(0xFF07840B) : Color(0xFF8F0B0B),
+                      ),
+                      child: Text(
+                        isCorrect ? 'Continue' : 'I Understood',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           );
-        },
-      );
+
+        } else {
+          print('Insert Data Gagal');
+        }
+      } catch (e) {
+        print('Terjadi kesalahan');
+      }
+
+    } else {
+      print('No option selected!');
     }
   }
 
   void _showResult() {
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
+      barrierDismissible: false,
       builder: (BuildContext context) {
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.5,
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          contentPadding: const EdgeInsets.all(16.0),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Image.asset(
+                  'assets/images/groupOfHeart3.png',
+                  height: 40.0,
+                  errorBuilder: (context, error, stackTrace) =>
+                      Icon(Icons.broken_image, size: 40.0),
+                ),
+              ),
+              SizedBox(height: 16),
               Text(
-                'Correct Answers',
+                'You\'ve lost all your hearts. Please start over.',
                 style: TextStyle(
+                  color: Color(0xFF343434),
                   fontFamily: 'Hanken Grotesk',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
+                  fontSize: 20.0,
+                  fontStyle: FontStyle.normal,
+                  fontWeight: FontWeight.w400,
+                  height: 1.0,
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 16),
-              Text(
-                'You scored $score out of ${questions.length}!',
-                style: TextStyle(fontSize: 16, fontFamily: 'Hanken Grotesk'),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 16),
-              score == questions.length
-                  ? Text(
-                      'Perfect score! Well done!',
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  : Text(
-                      'Keep practicing to improve your score.',
-                      style: TextStyle(
-                        color: Colors.orange,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-              Spacer(),
+              SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context); // Tutup modal
+                  // Tutup dialog terlebih dahulu
+                  Navigator.of(context).pop();
+
+                  // Navigasi langsung setelah dialog ditutup
+
+                  Future.delayed(Duration(milliseconds: 500), () {
+                    if (mounted) {  // Pastikan widget masih mounted
+                      Navigator.pushReplacementNamed(
+                        context,
+                        '/request-induction',
+                        arguments: {'username': username ?? 'defaultID'},
+                      );
+                    }
+                  });
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF07840B),
+                  backgroundColor: Color(0x8F0B0B),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                   padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                 ),
                 child: Text(
-                  'Continue',
+                  'Start Over',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -226,8 +382,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   @override
-Widget build(BuildContext context) {
-    // Saat masih loading, tampilkan indikator loading
+  Widget build(BuildContext context) {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -240,15 +395,15 @@ Widget build(BuildContext context) {
       );
     }
     // Ambil pertanyaan saat ini
-    final currentQuestion = pertanyaan[questionIndex];
+    final currentQuestion = pertanyaan[currentQuestionIndex];
     return WillPopScope(
       onWillPop: () async => true,
       child: Scaffold(
-        key: _scaffoldKey,
+        //key: _formKey_Q,
         extendBodyBehindAppBar: true,
         appBar: AppBar(
           title: Text(
-            'Question ${questionIndex + 1} / ${questions.length}',
+            'Question ${currentQuestionIndex + 1} / ${questions.length}',
             style: TextStyle(
               color: Color(0xFF343434),
               fontFamily: 'Hanken Grotesk',
@@ -259,32 +414,58 @@ Widget build(BuildContext context) {
           ),
           backgroundColor: Color(0xFFFFFFFF),
           elevation: 2,
+          automaticallyImplyLeading: false,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Image.asset(
+                // Memilih gambar berdasarkan jumlah kesalahan
+                incorrectCount == 1
+                    ? 'assets/images/groupOfHeart1.png'  // Jika salah 1, gambar groupOfHeart1.png
+                    : incorrectCount == 2
+                    ? 'assets/images/groupOfHeart2.png'  // Jika salah 2, gambar groupOfHeart3.png
+                    : incorrectCount == 3
+                    ? 'assets/images/groupOfHeart3.png'  // Jika salah 3, gambar groupOfHeart4.png
+                    : 'assets/images/groupOfHeart.png',  // Default gambar
+                height: 40.0,
+                errorBuilder: (context, error, stackTrace) =>
+                    Icon(Icons.broken_image, size: 40.0),
+              ),
+            ),
+          ],
         ),
-        body: Center(
+
+
+        body: _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : Center(
             child: Container(
               width: MediaQuery.of(context).size.shortestSide,
               child: Stack(
-                  children: <Widget>[
-                    Positioned.fill(
-                      child: Container(
-                        color: Color(0xFFF0F0F0),
-                      ),
+                children: [
+                  Positioned.fill(
+                    child: Container(
+                      color: Color(0xFFF0F0F0),
                     ),
-                    Positioned(
-                      top: 90,
-                      left: 0,
-                      right: 0,
-                      child: Card(
-                        elevation: 0,
-                        color: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
+                  ),
+                  Positioned(
+                    top: 90,
+                    left: 0,
+                    right: 0,
+                    child: Card(
+                      elevation: 0,
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Menampilkan pertanyaan jika incorrectCount < 3
+                            if (incorrectCount < 3) ...[
+                              // Menampilkan teks pertanyaan
                               Text(
                                 currentQuestion.question.questionText,
                                 style: TextStyle(
@@ -295,65 +476,65 @@ Widget build(BuildContext context) {
                                   height: 1.0,
                                 ),
                               ),
-                              SizedBox(height: 1),
-                              ListView(
+                              SizedBox(height: 16),
+
+                              // Daftar pilihan
+                              ListView.builder(
                                 shrinkWrap: true,
-                                children: currentQuestion.question.choices.map<Widget>((choice) {
-                                  return Column(
-                                    children: [
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            selectedOptionIndex = currentQuestion.question.choices.indexOf(choice);
-                                          });
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                          backgroundColor: selectedOptionIndex ==
-                                              currentQuestion.question.choices.indexOf(choice)
-                                              ? Colors.green // Pilihan yang dipilih
-                                              : const Color.fromARGB(255, 232, 223, 222), // Pilihan default
-                                          side: BorderSide(
-                                            color: Color(0xFFFFFF),
-                                            width: 1,
-                                          ),
+                                itemCount: currentQuestion.question.choices.length,
+                                itemBuilder: (context, index) {
+                                  final choice = currentQuestion.question.choices[index];
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          selectedOptionIndex = index;
+                                        });
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(8),
                                         ),
-                                        child: Row(
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                choice!.choiceText,  // Pastikan properti ini sesuai dengan model Choice
-                                                style: TextStyle(fontSize: 16),
-                                              ),
-                                            ),
-                                          ],
+                                        backgroundColor: selectedOptionIndex == index
+                                            ? Colors.green // Pilihan yang dipilih
+                                            : const Color.fromARGB(255, 232, 223, 222), // Pilihan default
+                                        side: BorderSide(color: Colors.white, width: 1),
+                                      ),
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          choice.choiceText,
+                                          style: TextStyle(fontSize: 16),
                                         ),
                                       ),
-                                      SizedBox(height: 8),
-                                    ],
+                                    ),
                                   );
-                                }).toList(),
+                                },
                               ),
-
                               SizedBox(height: 20),
 
-
+                              // Tombol Check Answer
                               InkWell(
                                 onTap: selectedOptionIndex != null
-                                    ? nextQuestion
+                                    ? () {
+                                  final selectedChoice = currentQuestion.question.choices[selectedOptionIndex!];
+                                  //print('ID Pilihan Terpilih: ${selectedChoice.id}');
+                                  //print('Teks Pilihan Terpilih: ${selectedChoice.choiceText}');
+                                  nextQuestion(currentQuestion.questionId, selectedChoice.id);
+                                }
                                     : null,
                                 child: Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.all(24.0),
                                   decoration: BoxDecoration(
-                                    color: Color(0xFF07840B),
+                                    color: selectedOptionIndex != null
+                                        ? Color(0xFF07840B) // Hijau jika pilihan dipilih
+                                        : Colors.grey, // Abu-abu jika tidak ada pilihan
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
-                                  child: Text(
-                                    'Check Answer',
+                                  child: Text('Periksa Jawaban',
                                     style: TextStyle(
                                       fontFamily: 'Hanken Grotesk',
                                       fontSize: 16.0,
@@ -364,59 +545,96 @@ Widget build(BuildContext context) {
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
-                              )
+                              ),
+                              SizedBox(height: 20),
                             ],
-                          ),
+
+                            // Menampilkan pesan jika incorrectCount == 3
+                            if (incorrectCount == 3) ...[
+                              Center(
+                                child: Dialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  elevation: 16,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(24.0),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        // Menampilkan gambar di tengah
+                                        Image.asset(
+                                          'assets/images/groupOfHeart3.png',
+                                          height: 40.0,
+                                          errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image, size: 40.0),
+                                        ),
+                                        SizedBox(height: 16),
+
+                                        // Menampilkan teks di tengah
+                                        Text(
+                                          'You\'ve lost all your hearts. Please start over.',
+                                          style: TextStyle(
+                                            color: Color(0xFF343434),
+                                            fontFamily: 'Hanken Grotesk',
+                                            fontSize: 20.0,
+                                            fontStyle: FontStyle.normal,
+                                            fontWeight: FontWeight.w400,
+                                            height: 1.0,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        SizedBox(height: 24),
+
+                                        // Tombol Mulai Ulang di tengah
+                                        ElevatedButton(
+                                          onPressed: () {
+
+                                            context.go(
+                                              '/welcome-test?idrequest=${widget.idrequest ?? ''}&plantId=${widget.plantId?.toString() ?? ''}&plantName=${widget.plantName ?? ''}',
+                                            );
+                                            // Logika untuk mulai ulang
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Color(0x8F0B0B),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                                          ),
+                                          child: Text(
+                                            'Mulai Ulang',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ]
+
+
+                          ],
+
                         ),
                       ),
+
                     ),
 
-                  ],
+
+                  ),
+                ],
               ),
             ),
-        ),
-
+            ),
 
       ),
-      );
+    );
   }
+
+
 }
-
-// body: Column(
-// crossAxisAlignment: CrossAxisAlignment.start,
-// children: [
-// // Tampilkan pertanyaan saat ini
-// Text(
-// currentQuestion.question.questionText,
-// style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-// ),
-// const SizedBox(height: 16),
-// // Tampilkan pilihan jawaban
-// ...currentQuestion.question.choices.map((choice) {
-// return ListTile(
-// title: Text(choice.choiceText),
-// onTap: () {
-// // Tindakan ketika pilihan dipilih
-// print('Jawaban yang dipilih: ${choice.choiceText}');
-// },
-// );
-// }).toList(),
-// const SizedBox(height: 16),
-// // Tombol untuk pertanyaan berikutnya
-// ElevatedButton(
-// onPressed: questionIndex < pertanyaan.length - 1
-// ? () {
-// setState(() {
-// questionIndex++;
-// });
-// }
-//     : null,
-// child: const Text('Pertanyaan Berikutnya'),
-// ),
-// ],
-// ),
-//
-
-
-
-

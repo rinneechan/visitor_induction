@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-//import 'package:flutter/services.dart';
 import '../home/custom_drawer.dart';
 import 'package:she_vi/services/api_service.dart';
-
 import 'package:she_vi/models/Dept.dart';
 import 'package:she_vi/models/Plant.dart';
 import 'package:she_vi/models/Durations.dart' as customDurations;
 import 'package:hive/hive.dart';
-import 'package:she_vi/screens/page/requestpagesatu_screen.dart';
+//import 'package:she_vi/screens/page/requestpagesatu_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class ReqInductionySatu extends StatefulWidget {
   @override
@@ -16,7 +15,7 @@ class ReqInductionySatu extends StatefulWidget {
 }
 
 class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
-  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  //GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool _isLoading = false;
   bool _isButtonEnabled = false;
@@ -79,7 +78,7 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
       final String idplant = "";
       final loadPlantsFuture = _loadPlants();
       final loadDeptFuture =
-          _loadDept(idplant); // Jalankan fungsi dan simpan Future
+      _loadDept(idplant); // Jalankan fungsi dan simpan Future
       final loadVisitFuture = _loadVisit();
 
       await Future.wait([
@@ -112,11 +111,11 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
   Future<void> _loadDept(String idplant) async {
     try {
       final dept =
-          await apiService.fetchDept(idplant); // Fetch Dept berdasarkan Plant
+      await apiService.fetchDept(idplant); // Fetch Dept berdasarkan Plant
       setState(() {
         deptlist = dept; // Tetapkan Dept ke daftar
         _selectedDept =
-            dept.isNotEmpty ? dept.first : null; // Tetapkan Dept default
+        dept.isNotEmpty ? dept.first : null; // Tetapkan Dept default
       });
     } catch (e) {
       print('Error fetching Dept: $e');
@@ -173,7 +172,7 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
     } else {
       setState(() {
         _isButtonEnabled =
-            false; // Nonaktifkan tombol jika tidak ada plant yang dipilih
+        false; // Nonaktifkan tombol jika tidak ada plant yang dipilih
       });
     }
   }
@@ -199,11 +198,10 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
       return;
     }
 
-    final String statusid = "0"; // status_id diatur ke "0" sebagai string
+    final String statusid = "0";
     final String plant_id = _selectedPlant?.id?.toString() ?? '';
-    final String departmentname =
-        _selectedDept?.namedept ?? ''; //_selectedDept!.codedept;
-    final String picname = 'test';
+    final String departmentname = _selectedDept?.namedept ?? '';
+    final String picname = '-';
     final String arrivaldate = _selectedDate?.toIso8601String() ?? '';
     final String durationid = _selectedDuras?.id?.toString() ?? '';
     final String reasontovisit = _reasonController.text;
@@ -219,9 +217,8 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
     setState(() {
       _isLoading = true; // Tampilkan indikator loading
     });
-
     try {
-      // Panggil fungsi API
+
       final result = await apiService.createInductionRequest(
         visitorid,
         statusid,
@@ -236,14 +233,18 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
       );
 
       setState(() {
-        _isLoading = false; // Sembunyikan indikator loading
+        _isLoading = false;
       });
 
       // Cek jika berhasil
       if (result) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => ReqPageSatu()),
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => ReqPageSatu()),
+        // );
+        context.go(
+          '/request-induction',
+          extra: {'username': username},
         );
       } else {
         _showCreateError('Gagal membuat Induction Request.');
@@ -282,17 +283,17 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
     );
   }
 
-  void _showSuccessMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
+  // void _showSuccessMessage(String message) {
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(content: Text(message)),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
     final keyboardSpace = MediaQuery.of(context).viewInsets.bottom;
     return Scaffold(
-      key: _scaffoldKey,
+      //key: _scaffoldKey,
       appBar: AppBar(
         title: Text(
           'Visitor Induction',
@@ -315,7 +316,7 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
           width: MediaQuery.of(context).size.shortestSide,
           height: MediaQuery.of(context).size.height,
           child: Stack(
-            children: <Widget>[
+            children: [
               SafeArea(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.only(bottom: 80.0),
@@ -333,17 +334,18 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
                   ),
                 ),
               ),
-              Positioned(
-                bottom:
-                    MediaQuery.of(context).viewInsets.bottom > 0 ? 0.0 : 10.0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  color: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: _buildButtons(context),
-                ),
-              ),
+              // Positioned(
+              //   bottom:
+              //   MediaQuery.of(context).viewInsets.bottom > 0 ? 0.0 : 10.0,
+              //   left: 0,
+              //   right: 0,
+              //   child: Container(
+              //     color: Colors.white,
+              //     padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              //     child: _buildButtons(context),
+              //   ),
+              // ),
+              _buildButtons(context),
               if (_isLoading)
                 Positioned.fill(
                   child: Align(
@@ -508,28 +510,28 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
         SizedBox(height: 8),
         items.isEmpty
             ? Center(
-                child:
-                    CircularProgressIndicator()) // Loader jika data Plant belum ada
+            child:
+            CircularProgressIndicator()) // Loader jika data Plant belum ada
             : DropdownButtonFormField<PlantModel>(
-                items: items.map((item) {
-                  return DropdownMenuItem<PlantModel>(
-                    value: item,
-                    child: Text(item.nameplants), // Nama Plant yang ditampilkan
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  onChanged(value);
-                  setState(() {
-                    _selectedPlant = value;
-                    _updateButtonState(); // Perbarui Dept sesuai Plant
-                  });
-                },
-                value: selectedValue,
-                decoration: InputDecoration(
-                  hintText: 'Choose $title',
-                  border: OutlineInputBorder(),
-                ),
-              ),
+          items: items.map((item) {
+            return DropdownMenuItem<PlantModel>(
+              value: item,
+              child: Text(item.nameplants), // Nama Plant yang ditampilkan
+            );
+          }).toList(),
+          onChanged: (value) {
+            onChanged(value);
+            setState(() {
+              _selectedPlant = value;
+              _updateButtonState(); // Perbarui Dept sesuai Plant
+            });
+          },
+          value: selectedValue,
+          decoration: InputDecoration(
+            hintText: 'Choose $title',
+            border: OutlineInputBorder(),
+          ),
+        ),
       ],
     );
   }
@@ -546,38 +548,38 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
         SizedBox(height: 8),
         items.isEmpty
             ? DropdownButtonFormField<String>(
-                items: [
-                  DropdownMenuItem<String>(
-                    value: 'No Select Plant',
-                    child: Text('Select Plant'),
-                  ),
-                ],
-                onChanged: null, // Tidak ada interaksi karena Dept kosong
-                value: 'No Select Plant',
-                decoration: InputDecoration(
-                  hintText: 'Choose $title',
-                  border: OutlineInputBorder(),
-                ),
-              )
+          items: [
+            DropdownMenuItem<String>(
+              value: 'No Select Plant',
+              child: Text('Select Plant'),
+            ),
+          ],
+          onChanged: null, // Tidak ada interaksi karena Dept kosong
+          value: 'No Select Plant',
+          decoration: InputDecoration(
+            hintText: 'Choose $title',
+            border: OutlineInputBorder(),
+          ),
+        )
             : DropdownButtonFormField<Dept>(
-                items: items.map((item) {
-                  return DropdownMenuItem<Dept>(
-                    value: item,
-                    child: Text(item.namedept),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  onChanged(value);
-                  setState(() {
-                    _selectedDept = value;
-                  });
-                },
-                value: selectedValue,
-                decoration: InputDecoration(
-                  hintText: 'Choose $title',
-                  border: OutlineInputBorder(),
-                ),
-              ),
+          items: items.map((item) {
+            return DropdownMenuItem<Dept>(
+              value: item,
+              child: Text(item.namedept),
+            );
+          }).toList(),
+          onChanged: (value) {
+            onChanged(value);
+            setState(() {
+              _selectedDept = value;
+            });
+          },
+          value: selectedValue,
+          decoration: InputDecoration(
+            hintText: 'Choose $title',
+            border: OutlineInputBorder(),
+          ),
+        ),
       ],
     );
   }
@@ -628,9 +630,28 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
     );
   }
 
-  Widget _buildButtons(BuildContext context) {
+  Widget ____buildButtons(BuildContext context) {
     return Positioned(
       bottom: 0,
+      left: 0,
+      right: 0,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildBackButton(context),
+            SizedBox(width: 8),
+            _buildNextButton(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildButtons(BuildContext context) {
+    return Positioned(
+      bottom: 0, // Posisikan di bawah
       left: 0,
       right: 0,
       child: Padding(
@@ -650,6 +671,7 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
   Widget _buildBackButton(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
+        color: Colors.white,
         border: Border.all(color: Colors.grey, width: 2.0),
         borderRadius: BorderRadius.circular(8.0),
       ),
@@ -682,7 +704,7 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
         ),
         style: ButtonStyle(
           backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-            (Set<MaterialState> states) {
+                (Set<MaterialState> states) {
               if (states.contains(MaterialState.disabled)) {
                 return Color(0xFFA4A4A4);
               }
@@ -716,27 +738,27 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
         SizedBox(height: 8),
         items.isEmpty
             ? Center(
-                child: Text('No items available'),
-              )
+          child: Text('No items available'),
+        )
             : DropdownButtonFormField<dynamic>(
-                items: items.map((item) {
-                  return DropdownMenuItem<dynamic>(
-                    value: item,
-                    child: Text(item.nameduration),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  onChanged(value); // Panggil callback onChanged
-                  setState(() {
-                    _selectedDuras = value; // Update _selectedDuras
-                  });
-                },
-                value: selectedValue,
-                decoration: InputDecoration(
-                  hintText: 'Choose $title',
-                  border: OutlineInputBorder(),
-                ),
-              ),
+          items: items.map((item) {
+            return DropdownMenuItem<dynamic>(
+              value: item,
+              child: Text(item.nameduration),
+            );
+          }).toList(),
+          onChanged: (value) {
+            onChanged(value); // Panggil callback onChanged
+            setState(() {
+              _selectedDuras = value; // Update _selectedDuras
+            });
+          },
+          value: selectedValue,
+          decoration: InputDecoration(
+            hintText: 'Choose $title',
+            border: OutlineInputBorder(),
+          ),
+        ),
       ],
     );
   }

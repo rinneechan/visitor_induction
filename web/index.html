@@ -1,38 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="$FLUTTER_BASE_HREF">
-
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
-
+  <base href="$FLUTTER_BASE_HREF">
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="she_vi">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: url('assets/images/BackgroundSedia.png') no-repeat center center fixed;
+      background-size: cover;
+    }
+  </style>
+  <link rel="apple-touch-icon" href="icons/logo-sedia.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="icons/logo-sedia.png"/>
 
   <title>SHE Visitor Induction</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Firebase SDK for Web -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-messaging-compat.js"></script>
+<!--  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/build/pdf.min.mjs" type="module"></script>-->
+  <script type="module">
+    import { getDocument, GlobalWorkerOptions } from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/build/pdf.mjs';
+
+    GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/build/pdf.worker.mjs';
+
+    getDocument('example.pdf').promise.then((pdf) => {
+      console.log('PDF Loaded:', pdf);
+    });
+  </script>
+
+
+
+  <!-- Service Worker Registration for Firebase Messaging -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('js/firebase-messaging-sw.js')
+        .then((registration) => {
+          console.log('✅ Service Worker registered with scope:', registration.scope);
+        })
+        .catch((error) => {
+          console.error('❌ Service Worker registration failed:', error);
+        });
+    }
+  </script>
+
+  <!-- Load PDF.js -->
+
+<!--  <script type="module">-->
+<!--    import { pdfjsLib } from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/build/pdf.min.mjs';-->
+<!--    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/build/pdf.worker.mjs';-->
+<!--    const pdfRenderOptions = {-->
+<!--      cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/cmaps/',-->
+<!--      cMapPacked: true,-->
+<!--    };-->
+<!--  </script>-->
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+
+<!-- Flutter Web App -->
+<script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

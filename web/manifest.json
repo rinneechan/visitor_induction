@@ -1,7 +1,7 @@
 {
     "name": "she_vi",
     "short_name": "she_vi",
-    "start_url": ".",
+    "start_url": "/web-visitor-induction/",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",

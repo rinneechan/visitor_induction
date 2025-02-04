@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import '../home/custom_drawer.dart';
-
-//import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hive/hive.dart';
-
+import 'package:go_router/go_router.dart';
 class ReqPageSatu extends StatefulWidget {
   @override
   _ReqPageSatuScreenState createState() => _ReqPageSatuScreenState();
@@ -55,16 +53,6 @@ class _ReqPageSatuScreenState extends State<ReqPageSatu> {
     _jobpositionController.dispose();
     super.dispose();
   }
-
-  // void _next() {
-  //   //String email = _emailController.text;
-  //   //print(email);
-  //   Navigator.pushNamed(
-  //     context,
-  //     '/request-induction',
-  //     arguments: username,
-  //   );
-  // }
 
 
   @override
@@ -191,7 +179,6 @@ class _ReqPageSatuScreenState extends State<ReqPageSatu> {
               ),
             ),
           ),
-          // Buttons positioned at the bottom of the screen
           Positioned(
             bottom: 0,
             left: 0,
@@ -209,10 +196,9 @@ class _ReqPageSatuScreenState extends State<ReqPageSatu> {
                       child: ElevatedButton(
                         //onPressed: _isButtonNextEnabled ? _next : null,
                         onPressed: () {
-                          Navigator.pushNamed(
-                            context,
+                          context.go(
                             '/request-induction',
-                            arguments: username,
+                            extra: {'username': username},
                           );
                         },
                         child: Row(

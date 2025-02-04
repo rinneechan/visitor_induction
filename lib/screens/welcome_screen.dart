@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart'; // Tambahkan import GoRouter
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({Key? key}) : super(key: key);
@@ -15,7 +16,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     // Menunda perpindahan ke halaman berikutnya dengan memastikan context siap
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.delayed(const Duration(seconds: 5), () {
-        Navigator.pushReplacementNamed(context, '/choose-access');
+        context.go('/choose-access');
+
       });
     });
   }
@@ -23,6 +25,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,

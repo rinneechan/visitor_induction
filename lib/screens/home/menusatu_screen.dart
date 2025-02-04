@@ -5,10 +5,10 @@ import 'package:she_vi/models/SubmissionHistory.dart';
 import 'package:she_vi/models/InductionRequestHistory.dart';
 import 'package:she_vi/models/InductionRequestProgress.dart';
 import 'package:she_vi/services/api_service.dart';
-//import 'package:she_vi/screens/page/reqinductionysatu_screen.dart';
-import 'package:she_vi/screens/page/submissionhistory.dart';
 import 'package:she_vi/screens/home/documentviewer_screen.dart';
 import 'package:hive/hive.dart';
+import 'package:go_router/go_router.dart';
+import 'package:she_vi/screens/setting/navigator_service.dart';
 
 class MenusatuScreen extends StatefulWidget {
   final String username;
@@ -18,7 +18,7 @@ class MenusatuScreen extends StatefulWidget {
 }
 
 class _MenusatuScreenState extends State<MenusatuScreen> {
-  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  //GlobalKey<ScaffoldState> _formKey_menusatu = GlobalKey<ScaffoldState>();
 
   late Box box;
   String? username;
@@ -39,6 +39,10 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
   @override
   void initState() {
     super.initState();
+    // print("Global Navigator Key Status:");
+    // print("Navigator State: ${globalNavigatorKey.currentState}");
+    // print("Navigator Context: ${globalNavigatorKey.currentContext}");
+    // print("Is Key Null: ${globalNavigatorKey.currentState == null}");
     _openBox();
   }
 
@@ -69,11 +73,9 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
     });
 
     final String safeVisitorId = visitorid ?? 'defaultVisitorId';
-    futureMaterials =
-        apiService.fetchInductionMaterials(); // Inisialisasi di sini
+    futureMaterials = apiService.fetchInductionMaterials();
     futureHistoryrequest = apiService.fetchInductionrequest(safeVisitorId);
-    fetchInductionProgress =
-        apiService.fetchInductionProgressrequest(safeVisitorId);
+    fetchInductionProgress = apiService.fetchInductionProgressrequest(safeVisitorId);
 
     Future.wait([
       futureMaterials!,
@@ -93,39 +95,46 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bodyWidth = MediaQuery.of(context).size.shortestSide;
     // Fungsi untuk mendapatkan warna berdasarkan status
     Color _getStatusColor(String status) {
-      if (status == 'On-Review') {
+      if (status == '0') {
         return Color(0xFFD18410); // Warna untuk On-Review
-      } else if (status == 'Induction Test') {
+      } else if (status == '1') {
         return Color(0xFF1357BD); // Warna untuk Induction Test
-      } else if (status == 'Declined') {
-        return Color(0x757575); // Warna untuk Induction Test
-      } else if (status == 'Active') {
+      } else if (status == '2') {
         return Color(0x07840B); // Warna untuk Induction Test
-      } else if (status == 'Expired') {
-        return Color.fromARGB(0, 227, 43, 43); // Warna untuk Induction Test
+      } else if (status == '3') {
+        return Color(0xFF07840B); // Warna untuk Induction Test
+      } else if (status == '4') {
+        return Color(0xFF757575); // Warna untuk Induction Test
       }
-      return Color(0x757575); // Warna default (misalnya untuk status lainnya)
+      return Color(0x00757575); // Warna default (misalnya untuk status lainnya)
     }
-
     Color _getStatusColorRequest(String status) {
-      if (status == 'On-Review') {
+      if (status == '0') {
         return Color(0xFFD18410); // Warna untuk On-Review
-      } else if (status == 'Induction Test') {
+      } else if (status == '1') {
         return Color(0xFF1357BD); // Warna untuk Induction Test
-      } else if (status == 'Declined') {
-        return Color(0x757575); // Warna untuk Induction Test
-      } else if (status == 'Active') {
-        return Color(0x07840B); // Warna untuk Induction Test
-      } else if (status == 'Expired') {
-        return Color.fromARGB(0, 227, 43, 43); // Warna untuk Induction Test
+      } else if (status == '2') {
+        return Color(0xFF757575); // Warna untuk Induction Test
+      } else if (status == '3') {
+        return Color(0xFF07840B); // Warna untuk Induction Test
+      } else if (status == '4') {
+        return Color(0xFF757575); // Warna untuk Induction Test
       }
-      return Color(0x757575); // Warna default (misalnya untuk status lainnya)
+      return Color(0x00757575); // Warna default (misalnya untuk status lainnya)
     }
 
-    return Scaffold(
-      key: _scaffoldKey,
+    return WillPopScope(
+      onWillPop: () async {
+        context.go('/main-menu', extra: {
+          'username': username ?? 'defaultID',
+        });
+        return false; // Hindari keluar langsung dari aplikasi
+      },
+      child: Scaffold(
+      //key: _formKey_menusatu,
       appBar: AppBar(
         title: Text(
           'Visitor Induction',
@@ -141,6 +150,7 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
         backgroundColor: Color(0xFFFFFFFF),
         elevation: 2,
       ),
+
       drawer: CustomDrawer(username: username),
       body: Center(
         child: Container(
@@ -184,8 +194,12 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                             Padding(
                               padding: const EdgeInsets.all(16.0), // Padding di semua sisi (top, bottom, left, right)
                               child: ElevatedButton(
+
                                 onPressed: () {
-                                  Navigator.pushNamed(context, '/request-new-induction');
+                                  context.push('/request-new-induction');
+                                  // context.go(
+                                  //   '/request-new-induction',
+                                  // );
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF07840B),
@@ -216,7 +230,6 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                       ),
                     ),
                     // SizedBox(height: 8),
-
                     Card(
                       elevation: 0,
                       color: Colors.white,
@@ -226,8 +239,7 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
-                          mainAxisSize: MainAxisSize
-                              .min, //  Column tidak mengambil ruang tak terbatas
+                          mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
@@ -240,7 +252,7 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                       height: 24.0,
                                     ),
                                     onPressed: () {
-                                      Navigator.pop(context);
+                                      context.pop();
                                     },
                                   ),
                                 ),
@@ -274,29 +286,30 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                         child: Text("No data available"));
                                   } else {
                                     return ListView.builder(
-                                      physics:
-                                          const NeverScrollableScrollPhysics(),
-                                      shrinkWrap:
-                                          true, // Membatasi tinggi ListView
+                                      physics: const NeverScrollableScrollPhysics(),
+                                      shrinkWrap: true, // Membatasi tinggi ListView
                                       itemCount: snapshot.data!.length,
                                       itemBuilder: (context, index) {
-                                        final progresson =
-                                            snapshot.data![index];
+                                        final progresson = snapshot.data![index];
                                         return InkWell(
-                                          onTap: () {
-                                            Navigator.pushNamed(
-                                              context,
-                                              '/detail-info',
-                                              arguments: progresson.idrequest,
-                                            );
-
-
-                                            },
+                                          // onTap: progresson.statusId == 1
+                                          //     ? () {
+                                          //   context.push('/detail-info?id=${progresson.idrequest}');
+                                          // }
+                                          //     : null,
+                                          onTap: (progresson.statusId == 1 || progresson.statusId == 3)
+                                              ? () {
+                                            if (progresson.statusId == 1) {
+                                              context.push('/detail-info?id=${progresson.idrequest}');
+                                            } else if (progresson.statusId == 3) {
+                                              context.push('/aktif-info?id=${progresson.idrequest}');
+                                            }
+                                          }
+                                              : null,
                                           child: Container(
                                             decoration: BoxDecoration(
                                               border: Border.all(
-                                                color: const Color.fromARGB(
-                                                    255, 143, 140, 140),
+                                                color: const Color.fromARGB(255, 143, 140, 140),
                                                 width: 1.0,
                                               ),
                                               borderRadius:
@@ -305,19 +318,14 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                             padding: const EdgeInsets.symmetric(
                                                 horizontal: 16.0,
                                                 vertical: 8.0),
-                                            margin: EdgeInsets.symmetric(
-                                                vertical: 5.0),
+                                            margin: EdgeInsets.symmetric(vertical: 5.0),
                                             child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                              mainAxisAlignment:MainAxisAlignment.spaceBetween,
                                               children: [
                                                 Container(
                                                   width: 230,
                                                   child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
+                                                    crossAxisAlignment:CrossAxisAlignment.start,
                                                     children: [
                                                       Text(
                                                         progresson.plant,
@@ -325,73 +333,48 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                                           fontFamily:
                                                               'Hanken Grotesk',
                                                           fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color:
-                                                              Color(0xFF343434),
+                                                          fontWeight:FontWeight.w400,
+                                                          color: Color(0xFF343434),
                                                         ),
                                                       ),
                                                       SizedBox(height: 5),
                                                       Text(
                                                         progresson.department,
                                                         style: TextStyle(
-                                                          fontFamily:
-                                                              'Hanken Grotesk',
+                                                          fontFamily:'Hanken Grotesk',
                                                           fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color:
-                                                              Color(0xFF757575),
+                                                          fontWeight:FontWeight.w400,
+                                                          color:Color(0xFF757575),
                                                         ),
                                                       ),
                                                       SizedBox(height: 5),
                                                       Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .start, // Mengatur posisi elemen pada baris
+                                                        mainAxisAlignment: MainAxisAlignment.start, // Mengatur posisi elemen pada baris
                                                         children: <Widget>[
-                                                          // Text untuk arrivalDate
-                                                          Text(
-                                                            progresson
-                                                                .arrivalDate,
+                                                          Text(progresson.arrivalDate,
                                                             style: TextStyle(
-                                                              fontFamily:
-                                                                  'Hanken Grotesk',
+                                                              fontFamily:'Hanken Grotesk',
                                                               fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w400,
-                                                              color: Color(
-                                                                  0xFF757575),
+                                                              fontWeight:FontWeight.w400,
+                                                              color: Color(0xFF757575),
                                                             ),
                                                           ),
                                                           SizedBox(width: 5),
-                                                          Text(
-                                                            '-',
+                                                          Text('-',
                                                             style: TextStyle(
-                                                              fontFamily:
-                                                                  'Hanken Grotesk',
+                                                              fontFamily:'Hanken Grotesk',
                                                               fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w400,
-                                                              color: Color(
-                                                                  0xFF757575),
+                                                              fontWeight:FontWeight.w400,
+                                                              color: Color(0xFF757575),
                                                             ),
                                                           ),
                                                           SizedBox(width: 5),
-                                                          Text(
-                                                            progresson
-                                                                .visitDuration,
+                                                          Text(progresson.visitDuration,
                                                             style: TextStyle(
-                                                              fontFamily:
-                                                                  'Hanken Grotesk',
+                                                              fontFamily:'Hanken Grotesk',
                                                               fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w400,
-                                                              color: Color(
-                                                                  0xFF757575),
+                                                              fontWeight:FontWeight.w400,
+                                                              color: Color(0xFF757575),
                                                             ),
                                                           ),
                                                         ],
@@ -411,8 +394,7 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                                         fontSize: 14,
                                                         fontWeight:
                                                             FontWeight.w700,
-                                                        color: _getStatusColor(
-                                                            progresson.status),
+                                                        color: _getStatusColor(progresson.statusid),
                                                       ),
                                                     ),
                                                     SizedBox(height: 5),
@@ -460,8 +442,7 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                   ),
                                 ),
                                 SizedBox(width: 10),
-                                Text(
-                                  'Induction Material',
+                                Text('Induction Material',
                                   style: TextStyle(
                                     color: Color(0xFF757575),
                                     fontFamily: 'Hanken Grotesk',
@@ -475,44 +456,39 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                             SizedBox(height: 16),
                             // Membungkus FutureBuilder dengan Expanded atau Flexible
                             Flexible(
-                              fit: FlexFit
-                                  .loose, // Membiarkan FutureBuilder mengatur tingginya sendiri
+                              fit: FlexFit.loose, // Membiarkan FutureBuilder mengatur tingginya sendiri
                               child: FutureBuilder<List<InductionMaterial>>(
                                 future: futureMaterials,
                                 builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
+                                  if (snapshot.connectionState ==  ConnectionState.waiting) {
                                     return Center(
                                         // child: CircularProgressIndicator()
                                         );
                                   } else if (snapshot.hasError) {
                                     return Center(
-                                        child:
-                                            Text('Error: ${snapshot.error}'));
+                                        child: Text('Error: ${snapshot.error}'));
                                   } else if (!snapshot.hasData ||
                                       snapshot.data!.isEmpty) {
                                     return Center(
                                         child: Text("No data available"));
                                   } else {
                                     return ListView.builder(
-                                      physics:
-                                          const NeverScrollableScrollPhysics(),
-                                      shrinkWrap:
-                                          true, // Membatasi tinggi ListView
+                                      physics: const NeverScrollableScrollPhysics(),
+                                      shrinkWrap: true, // Membatasi tinggi ListView
                                       itemCount: snapshot.data!.length,
                                       itemBuilder: (context, index) {
                                         final material = snapshot.data![index];
                                         return InkWell(
                                           onTap: () {
-
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
                                                 builder: (context) =>
                                                     DocumentViewer(
-                                                      namaFile: material.namaMateri,
-                                                        fileUrl:
-                                                            material.urlMateri),
+                                                        idmateri: material.idMateri.toString(),
+                                                        namaFile: material.namaMateri,
+                                                        //fileUrl: material.urlMateri
+                                                    ),
                                               ),
                                             );
                                           },
@@ -601,8 +577,7 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
-                          mainAxisSize: MainAxisSize
-                              .min, // Memastikan Column tidak mengambil ruang tak terbatas
+                          mainAxisSize: MainAxisSize.min, // Memastikan Column tidak mengambil ruang tak terbatas
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
@@ -620,8 +595,7 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                   ),
                                 ),
                                 SizedBox(width: 10),
-                                Text(
-                                  'Submission History',
+                                Text('Submission History',
                                   style: TextStyle(
                                     color: Color(0xFF757575),
                                     fontFamily: 'Hanken Grotesk',
@@ -633,22 +607,19 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                               ],
                             ),
                             //SizedBox(height: 16),
-
                             Flexible(
                               fit: FlexFit.loose,
                               child:
                                   FutureBuilder<List<InductionRequestHistory>>(
                                 future: futureHistoryrequest,
                                 builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
                                     return Center(
                                         //child: CircularProgressIndicator()
                                         );
                                   } else if (snapshot.hasError) {
                                     return Center(
-                                        child:
-                                            Text('Error: ${snapshot.error}'));
+                                        child: Text(''));
                                   } else if (!snapshot.hasData ||
                                       snapshot.data!.isEmpty) {
                                     return Center(
@@ -663,16 +634,10 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                       itemBuilder: (context, index) {
                                         final history = snapshot.data![index];
                                         return InkWell(
+
                                           onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    SubMissionHistory(
-                                                  idrequest: history.idrequest,
-                                                ),
-                                              ),
-                                            );
+                                            context.push('/detail-history?id=${history.idrequest}');
+                                            //context.push('/visitor-request?id=${history.idrequest}');
                                           },
                                           child: Container(
                                             decoration: BoxDecoration(
@@ -691,15 +656,13 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                                 vertical: 5.0),
                                             child: Row(
                                               mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                                  MainAxisAlignment.spaceBetween,
                                               children: [
                                                 Container(
                                                   width: 230,
                                                   child: Column(
                                                     crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
+                                                        CrossAxisAlignment.start,
                                                     children: [
                                                       Text(
                                                         history.plant,
@@ -729,50 +692,36 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                                       SizedBox(height: 5),
                                                       Row(
                                                         mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .start, // Mengatur posisi elemen pada baris
+                                                            MainAxisAlignment.start, // Mengatur posisi elemen pada baris
                                                         children: <Widget>[
                                                           // Text untuk arrivalDate
                                                           Text(
                                                             history.arrivalDate,
                                                             style: TextStyle(
-                                                              fontFamily:
-                                                                  'Hanken Grotesk',
+                                                              fontFamily:'Hanken Grotesk',
                                                               fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w400,
-                                                              color: Color(
-                                                                  0xFF757575),
+                                                              fontWeight:FontWeight.w400,
+                                                              color: Color(0xFF757575),
                                                             ),
                                                           ),
                                                           SizedBox(width: 5),
                                                           Text(
                                                             '-',
                                                             style: TextStyle(
-                                                              fontFamily:
-                                                                  'Hanken Grotesk',
+                                                              fontFamily:'Hanken Grotesk',
                                                               fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w400,
-                                                              color: Color(
-                                                                  0xFF757575),
+                                                              fontWeight: FontWeight.w400,
+                                                              color: Color(0xFF757575),
                                                             ),
                                                           ),
                                                           SizedBox(width: 5),
                                                           Text(
-                                                            history
-                                                                .visitDuration,
+                                                            history.visitDuration,
                                                             style: TextStyle(
-                                                              fontFamily:
-                                                                  'Hanken Grotesk',
+                                                              fontFamily:'Hanken Grotesk',
                                                               fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w400,
-                                                              color: Color(
-                                                                  0xFF757575),
+                                                              fontWeight:FontWeight.w400,
+                                                              color: Color(0xFF757575),
                                                             ),
                                                           ),
                                                         ],
@@ -784,19 +733,15 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.start,
                                                   children: [
-                                                    Text(
-                                                      history.status,
+                                                    Text(history.statusname,
                                                       style: TextStyle(
-                                                        fontFamily:
-                                                            'Hanken Grotesk',
+                                                        fontFamily:'Hanken Grotesk',
                                                         fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                        color:
-                                                            _getStatusColorRequest(
-                                                                history.status),
+                                                        fontWeight:FontWeight.w700,
+                                                        color:_getStatusColorRequest(history.statusid),
                                                       ),
                                                     ),
+
                                                     SizedBox(height: 5),
                                                   ],
                                                 ),
@@ -831,6 +776,7 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
           ),
         ),
       ),
+      )
     );
   }
 }
