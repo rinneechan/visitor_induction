@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import '../home/custom_drawer.dart';
 import 'package:hive/hive.dart';
 import 'package:go_router/go_router.dart';
-class ReqPageSatu extends StatefulWidget {
+
+class RequestSubmitted extends StatefulWidget {
+  final String username;
+  const RequestSubmitted({Key? key, required this.username}) : super(key: key);
   @override
-  _ReqPageSatuScreenState createState() => _ReqPageSatuScreenState();
+  _RequestSubmittedScreenState createState() => _RequestSubmittedScreenState();
 }
 
-class _ReqPageSatuScreenState extends State<ReqPageSatu> {
+class _RequestSubmittedScreenState extends State<RequestSubmitted> {
   late Box box;
   String? username;
   String? visitorid;
@@ -17,7 +20,7 @@ class _ReqPageSatuScreenState extends State<ReqPageSatu> {
   final _companynameController = TextEditingController();
   final _jobpositionController = TextEditingController();
   //bool _isEmailValid = true;
-  bool _isButtonNextEnabled = true;
+  //bool _isButtonNextEnabled = true;
   //bool _isLoading = false;
 
   @override
@@ -76,7 +79,8 @@ class _ReqPageSatuScreenState extends State<ReqPageSatu> {
         elevation: 2,
       ),
       drawer: CustomDrawer(),
-      body: Stack(
+      body: SafeArea(
+        child:Stack(
         children: <Widget>[
           Positioned.fill(
             child: Container(
@@ -194,24 +198,22 @@ class _ReqPageSatuScreenState extends State<ReqPageSatu> {
                     // Next button
                     Expanded(
                       child: ElevatedButton(
-                        //onPressed: _isButtonNextEnabled ? _next : null,
                         onPressed: () {
-                          context.go(
-                            '/request-induction',
-                            extra: {'username': username},
-                          );
+                          GoRouter.of(context).go('/request-induction', extra: {'username': username ?? 'defaultID'});
                         },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             SizedBox(width: 10),
-                            Text(
-                              'Back to Main Menu',
+                            Text('Back to Main Menu',
                               style: TextStyle(
                                 color: const Color.fromARGB(255, 79, 77, 77),
-                                fontFamily: 'Hanken Grotesk',
+                                fontFamily: 'Hanken Grotesk', // Gunakan font yang sesuai
                                 fontSize: 16.0,
-                                fontWeight: FontWeight.w400,
+                                fontWeight: FontWeight.w700, // Bold style
+                                letterSpacing: 1.28, // Set letter spacing
+                                textBaseline: TextBaseline.alphabetic, // Text edge cap
+                               // textTransform: TextTransform.uppercase, // Text transform untuk uppercase
                               ),
                             ),
                           ],
@@ -232,6 +234,7 @@ class _ReqPageSatuScreenState extends State<ReqPageSatu> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

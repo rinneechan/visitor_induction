@@ -6,6 +6,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
 import 'dart:io';
 import 'package:go_router/go_router.dart';
+import 'package:she_vi/services/api_service.dart';
+import 'package:flutter/foundation.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'video_player_page.dart';
 
 class WelcomeTestSatuScreen extends StatefulWidget {
   final String idrequest;
@@ -24,7 +28,6 @@ class WelcomeTestSatuScreen extends StatefulWidget {
 }
 
 class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
-  GlobalKey<ScaffoldState> _formKey_W1 = GlobalKey<ScaffoldState>();
   late Box box;
   String? username;
   String? visitorid;
@@ -58,13 +61,12 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double bodyWidth = MediaQuery.of(context).size.width * 0.5; // 90% dari lebar layar
+    double bodyWidth = MediaQuery.of(context).size.width * 0.5;
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        //key: _formKey_W1,
         extendBodyBehindAppBar: true,
-        appBar: _buildAppBar(bodyWidth),
+        // appBar: _buildAppBar(bodyWidth),
         body: _buildBody(),
       ),
     );
@@ -72,33 +74,32 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
 
   PreferredSizeWidget _buildAppBar(double bodyWidth) {
     return PreferredSize(
-      preferredSize: Size.fromHeight(kToolbarHeight), // Tinggi AppBar
+      preferredSize: Size.fromHeight(kToolbarHeight),
       child: AppBar(
-        backgroundColor: Colors.white, // Warna latar AppBar
-        elevation: 0, // Menghapus bayangan pada AppBar
-        centerTitle: false, // Menyelaraskan elemen ke sisi kiri dan kanan
-        titleSpacing: 0, // Mengatur jarak awal judul
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: false,
+        titleSpacing: 0,
         automaticallyImplyLeading: false,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Logo di sisi kiri
             Row(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(left: 8.0), // Jarak dari kiri
+                  padding: const EdgeInsets.only(left: 8.0),
                   child: SvgPicture.asset(
                     'assets/images/logo-cg.svg',
                     height: 35.0,
                     placeholderBuilder: (context) =>
-                        CircularProgressIndicator(), // Placeholder jika logo belum dimuat
+                        CircularProgressIndicator(),
                   ),
                 ),
-                const SizedBox(width: 8.0), // Jarak antara logo dan teks
+                const SizedBox(width: 8.0),
                 Text(
                   'CEMINDO GEMILANG',
                   style: const TextStyle(
-                    fontSize: 11.429,
+                    fontSize: 24.0,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFFB0191F),
                     fontFamily: 'Lato',
@@ -106,14 +107,13 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
                 ),
               ],
             ),
-            // Logo di sisi kanan
             Padding(
-              padding: const EdgeInsets.only(right: 8.0), // Jarak dari kanan
+              padding: const EdgeInsets.only(right: 8.0),
               child: Image.asset(
                 'assets/images/logo-sedia.png',
                 height: 40.0,
                 errorBuilder: (context, error, stackTrace) =>
-                const Icon(Icons.broken_image, size: 40.0),
+                    const Icon(Icons.broken_image, size: 40.0),
               ),
             ),
           ],
@@ -122,54 +122,107 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
     );
   }
 
+  // Widget _buildBody() {
+  //   return Center(
+  //     child: Container(
+  //       width: MediaQuery.of(context).size.shortestSide,
+  //       height: MediaQuery.of(context).size.height,
+  //       child: Stack(
+  //         children: [
+  //           Container(color: Colors.white),
+  //           Positioned(
+  //             top: 5,
+  //             left: 0,
+  //             right: 0,
+  //             child: Card(
+  //               color: Colors.white,
+  //               margin: const EdgeInsets.symmetric(horizontal: 0),
+  //               shape: RoundedRectangleBorder(
+  //                 borderRadius: BorderRadius.circular(0),
+  //               ),
+  //               child: Padding(
+  //                 padding: const EdgeInsets.all(16.0),
+  //                 child: Column(
+  //                   mainAxisSize: MainAxisSize.min,
+  //                   children: [
+  //                     _buildHeader(),
+  //                     const SizedBox(height: 24),
+  //                     _buildHeaderTitle(),
+  //                     const SizedBox(height: 24),
+  //                     _buildUserGreeting(),
+  //                     const SizedBox(height: 24),
+  //                     _buildCG(),
+  //                     const SizedBox(height: 24),
+  //                     _buildPlantInfo(),
+  //                     const SizedBox(height: 24),
+  //                     _buildInstructions(),
+  //                     const SizedBox(height: 24),
+  //                     _buildDownloadButton(),
+  //                     const SizedBox(height: 24),
+  //                     _buildConfirmationButton(),
+  //                   ],
+  //                 ),
+  //               ),
+  //             ),
+  //           ),
+  //           if (isLoading)
+  //             Center(
+  //               child: CircularProgressIndicator(),
+  //             ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+
   Widget _buildBody() {
     return Center(
       child: Container(
         width: MediaQuery.of(context).size.shortestSide,
-        //width: MediaQuery.of(context).size.width, // Memastikan lebar sesuai layar
-        height: MediaQuery.of(context).size.height, // Memastikan tinggi sesuai layar
+        height: MediaQuery.of(context).size.height,
         child: Stack(
           children: [
             Container(color: Colors.white),
             Positioned(
-              top: 90, // Jarak dari atas, sesuaikan dengan kebutuhan
+              top: 5,
               left: 0,
               right: 0,
-              child: Card(
-                color: Colors.white,
-                margin: const EdgeInsets.symmetric(horizontal: 0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(0),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _buildHeader(),
-                      const SizedBox(height: 24),
-                      _buildUserGreeting(),
-                      const SizedBox(height: 24),
-                      _buildCG(),
-                      const SizedBox(height: 24),
-                      _buildPlantInfo(),
-                      const SizedBox(height: 24),
-                      _buildInstructions(),
-                      const SizedBox(height: 24),
-                      _buildDownloadButton(),
-                      // const SizedBox(height: 24),
-                      // _buildButton(),
-                      const SizedBox(height: 24),
-                      _buildConfirmationButton(),
-                    ],
+              bottom: 0, // tambahkan agar batas bawah terdeteksi
+              child: SingleChildScrollView(
+                child: Card(
+                  color: Colors.white,
+                  margin: const EdgeInsets.symmetric(horizontal: 0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(0),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildHeader(),
+                        const SizedBox(height: 24),
+                        _buildHeaderTitle(),
+                        const SizedBox(height: 24),
+                        _buildUserGreeting(),
+                        const SizedBox(height: 24),
+                        _buildCG(),
+                        const SizedBox(height: 24),
+                        _buildPlantInfo(),
+                        const SizedBox(height: 24),
+                        _buildInstructions(),
+                        const SizedBox(height: 24),
+                        _buildDownloadButton(),
+                        const SizedBox(height: 24),
+                        _buildConfirmationButton(),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-
-            // Menampilkan loading spinner jika isLoading bernilai true
             if (isLoading)
-              Center(
+              const Center(
                 child: CircularProgressIndicator(),
               ),
           ],
@@ -178,43 +231,7 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
     );
   }
 
-  // Header content
-  Widget _buildHeader() {
-    return Column(
-      children: [
-        Divider(color: Colors.grey, thickness: 1.0),
-        const SizedBox(height: 8),
-        Text(
-          'VISITOR INDUCTIONS',
-          style: const TextStyle(
-            color: Color(0xFF07840B),
-            fontFamily: 'Hanken Grotesk',
-            fontSize: 16.0,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Divider(color: Colors.grey, thickness: 1.0),
-      ],
-    );
-  }
-
-  // User greeting
-  Widget _buildUserGreeting() {
-    return username == null
-        ? const CircularProgressIndicator()
-        : Text(
-      'Hello, $username',
-      style: const TextStyle(
-        color: Color(0xFF757575),
-        fontFamily: 'Hanken Grotesk',
-        fontSize: 16.0,
-        fontWeight: FontWeight.w400,
-      ),
-    );
-  }
-
-  // CG welcome message
+// CG welcome message
   Widget _buildCG() {
     return Text(
       'WELCOME TO\nPT CEMINDO GEMILANG TBK',
@@ -242,6 +259,95 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
     );
   }
 
+  Widget _buildHeader() {
+    return Column(
+      children: [
+        //Divider(color: Colors.grey, thickness: 1.0),
+        // const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 1.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Kiri: Icon + Logo CG + Text
+              Row(
+                children: [
+                  // Icon(Icons.business,
+                  //     color: Color(0xFFB0191F), size: 30), // Ikon di kiri
+                  // const SizedBox(width: 8.0),
+                  SvgPicture.asset(
+                    'assets/images/logo-cg.svg',
+                    height: 35.0,
+                    placeholderBuilder: (context) =>
+                        CircularProgressIndicator(),
+                  ),
+                  const SizedBox(width: 8.0),
+                  Text(
+                    'CEMINDO GEMILANG',
+                    style: const TextStyle(
+                      fontSize: 11.42,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFFB0191F),
+                      fontFamily: 'Lato',
+                    ),
+                  ),
+                ],
+              ),
+
+              // Kanan: Logo Sedia
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: Image.asset(
+                  'assets/images/logo-sedia.png',
+                  height: 40.0,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.broken_image, size: 40.0),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        // Divider(color: Colors.grey, thickness: 1.0),
+      ],
+    );
+  }
+
+  Widget _buildHeaderTitle() {
+    return Column(
+      children: [
+        Divider(color: Colors.grey, thickness: 1.0),
+        const SizedBox(height: 8),
+        Text(
+          'VISITOR INDUCTIONS',
+          style: const TextStyle(
+            color: Color(0xFF07840B),
+            fontFamily: 'Hanken Grotesk',
+            fontSize: 16.0,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Divider(color: Colors.grey, thickness: 1.0),
+      ],
+    );
+  }
+
+  // User greeting
+  Widget _buildUserGreeting() {
+    return username == null
+        ? const CircularProgressIndicator()
+        : Text(
+            'Hello, $username',
+            style: const TextStyle(
+              color: Color(0xFF757575),
+              fontFamily: 'Hanken Grotesk',
+              fontSize: 16.0,
+              fontWeight: FontWeight.w400,
+            ),
+          );
+  }
+
   // Instructions for the visitor
   Widget _buildInstructions() {
     return Text(
@@ -257,11 +363,10 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
     );
   }
 
-  // Download button
   Widget _buildDownloadButton() {
     return InkWell(
       onTap: () {
-        _showDocument(context);  // Panggil untuk menampilkan dokumen PDF
+        _showDocument(context, widget.plantId);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12.0),
@@ -283,125 +388,27 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
       ),
     );
   }
-  // Widget _buildDownloadButton() {
-  //   return ElevatedButton(
-  //     onPressed: () => _showDocument(context),
-  //     style: ElevatedButton.styleFrom(
-  //       side: BorderSide(color: Colors.grey),
-  //       backgroundColor: Colors.white,
-  //       padding: EdgeInsets.symmetric(vertical: 12),
-  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-  //     ),
-  //     child: Text(
-  //       'Download Induction Material',
-  //       style: TextStyle(
-  //         fontFamily: 'Hanken Grotesk',
-  //         fontSize: 16.0,
-  //         fontWeight: FontWeight.w700,
-  //         color: Color(0xFF07840B),
-  //       ),
-  //     ),
-  //   );
-  // }
 
-
-  // Confirmation button
   Widget _buildConfirmationButton() {
     return InkWell(
-      onTap: isDocumentRead ? () {
-
-        context.push(
-          '/welcome-test-intructions',
-          extra: {
-            'idrequest': widget.idrequest,
-            'plantId': widget.plantId,
-            'plantName': widget.plantName,
-          },
-        );
-      } : null,  // Disable button jika dokumen belum dibaca
+      onTap: isDocumentRead
+          ? () {
+              context.push(
+                '/welcome-test-intructions',
+                extra: {
+                  'idrequest': widget.idrequest,
+                  'plantId': widget.plantId,
+                  'plantName': widget.plantName,
+                },
+              );
+            }
+          : null, // Disable button jika dokumen belum dibaca
       child: Container(
         height: 60.0,
         decoration: BoxDecoration(
-          color: isDocumentRead ? Color(0xFF07840B) : Colors.white,
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: const Center(
-          child: Text(
-            'I have read and understood the safety rules of the plant sites.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Hanken Grotesk',
-              fontSize: 16.0,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Function untuk menampilkan dokumen
-  void _showDocument(BuildContext context) async {
-    setState(() {isLoading = true;
-    });
-    // URL dokumen PDF
-    String documentUrl = 'https://drive.google.com/uc?export=download&id=1qMD67WKbjXRwBJzUwdUka0fX6K_QEGgT';
-
-    try {
-      // Menyimpan file PDF sementara
-      Dio dio = Dio();
-      Directory appDocDir = await getTemporaryDirectory();
-      String savePath = '${appDocDir.path}/induction_material.pdf';
-
-      // Mendownload file
-      await dio.download(documentUrl, savePath);
-      setState(() {
-        isLoading = false;
-      });
-
-      // Menampilkan PDF setelah diunduh
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PDFViewPage(
-            filePath: savePath,
-            onFinishedReading: () {
-              setState(() {
-                isDocumentRead = true;
-              });
-            },
-          ),
-        ),
-      );
-    } catch (e) {
-      // Menangani error jika gagal mendownload file
-      setState(() {
-        isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to download document: $e')),
-      );
-    }
-  }
-
-  Widget _buildButton() {
-    return InkWell(
-      onTap: () {
-        // Pastikan logika yang ada disini hanya dijalankan saat kondisi sudah benar
-        context.go(
-          '/welcome-test-intructions',
-          extra: {
-            'idrequest': widget.idrequest,
-            'plantId': widget.plantId,
-            'plantName': widget.plantName,
-          },
-        );
-      },
-      child: Container(
-        height: 60.0,
-        decoration: BoxDecoration(
-          color: Colors.blue,  // Warna tombol yang selalu aktif
+          color: isDocumentRead
+              ? Color(0xFF07840B)
+              : Colors.grey, // Tombol disabled abu-abu
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Center(
@@ -412,7 +419,9 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
               fontFamily: 'Hanken Grotesk',
               fontSize: 16.0,
               fontWeight: FontWeight.w700,
-              color: Colors.white, // Teks tetap putih
+              color: isDocumentRead
+                  ? Colors.white
+                  : Colors.black54, // Warna teks berubah saat disabled
             ),
           ),
         ),
@@ -420,84 +429,146 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
     );
   }
 
+  void _showDocument(BuildContext context, String byplant) async {
+    setState(() {
+      isLoading = true;
+    });
 
+    try {
+      ApiService apiService = ApiService();
+      final response = await apiService.materiByPlant(byplant);
 
-  // void _showDocumentWeb(BuildContext context) {
-  //   String documentUrl = 'https://drive.google.com/file/d/1qMD67WKbjXRwBJzUwdUka0fX6K_QEGgT/view?usp=sharing';
-  //
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         contentPadding: EdgeInsets.zero,
-  //         insetPadding: const EdgeInsets.all(16.0),
-  //         content: SizedBox(
-  //           width: 800, // Sesuaikan ukuran popup
-  //           height: 600,
-  //           child: Column(
-  //             children: [
-  //               Container(
-  //                 padding: const EdgeInsets.all(8.0),
-  //                 color: Colors.grey.shade200,
-  //                 child: Row(
-  //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                   children: [
-  //                     const Text(
-  //                       'Dokumen PDF',
-  //                       style: TextStyle(fontWeight: FontWeight.bold),
-  //                     ),
-  //                     IconButton(
-  //                       icon: const Icon(Icons.close),
-  //                       onPressed: () => Navigator.of(context).pop(),
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //               const Divider(height: 1, thickness: 1),
-  //               Expanded(
-  //                 child: HtmlElementView(
-  //                   viewType: 'iframe',
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  //
-  //   // Membuat iframe untuk menampilkan dokumen PDF
-  //   final html.IFrameElement iframe = html.IFrameElement()
-  //     ..src = documentUrl
-  //     ..style.border = 'none';
-  //
-  //   // Mendaftarkan IFrame pada platform view registry
-  //   ui.platformViewRegistry.registerViewFactory(
-  //     'iframe',
-  //         (int viewId) => iframe,
-  //   );
-  // }
+      if (response.isEmpty) {
+        throw Exception('No document URL found');
+      }
 
+      String documentUrl = response[0].linkData;
+
+      setState(() {
+        isLoading = false;
+      });
+      // print("File yang didapat: $documentUrl");
+      final extension =
+          documentUrl.split('.').last.split('?').first.toLowerCase();
+
+      if (extension == 'mp4') {
+        // print("Ini adalah file video, navigasi ke VideoPlayerPage");
+        // Jika file video
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VideoPlayerPage(
+              videoUrl: documentUrl,
+              onFinishedWatching: () {
+                setState(() {
+                  isDocumentRead = true;
+                });
+              },
+            ),
+          ),
+        );
+      } else if (extension == 'pdf') {
+        if (kIsWeb) {
+          setState(() {
+            isLoading = false;
+          });
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => WebPdfViewer(
+                documentUrl: documentUrl,
+                onFinishedReading: () {
+                  setState(() {
+                    isDocumentRead = true;
+                  });
+                },
+              ),
+            ),
+          );
+        } else {
+          print("Mulai download PDF dari: $documentUrl");
+
+          Dio dio = Dio();
+          Directory appDocDir = await getTemporaryDirectory();
+          String savePath = '${appDocDir.path}/induction_material.pdf';
+
+          await dio.download(documentUrl, savePath);
+          print("PDF berhasil didownload di: $savePath");
+
+          if (!context.mounted) return;
+
+          setState(() {
+            isLoading = false;
+          });
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PDFViewPage(
+                filePath: savePath,
+                onFinishedReading: () {
+                  setState(() {
+                    isDocumentRead = true;
+                  });
+                },
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e, stacktrace) {
+      print("Error loading document: $e\n$stacktrace");
+
+      if (!context.mounted) return;
+
+      setState(() {
+        isLoading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load document: $e')),
+      );
+    }
+  }
 }
 
-class PDFViewPage extends StatelessWidget {
+class PDFViewPage extends StatefulWidget {
   final String filePath;
-  final VoidCallback onFinishedReading;
+  final Function() onFinishedReading;
 
-  const PDFViewPage({Key? key, required this.filePath, required this.onFinishedReading}) : super(key: key);
+  const PDFViewPage({
+    Key? key,
+    required this.filePath,
+    required this.onFinishedReading,
+  }) : super(key: key);
+
+  @override
+  _PDFViewPageState createState() => _PDFViewPageState();
+}
+
+class _PDFViewPageState extends State<PDFViewPage> {
+  int _totalPages = 1;
+  int _currentPage = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Induction Material')),
       body: PDFView(
-        filePath: filePath,
-        onPageError: (page, error) {
-          print('Error loading page $page: $error');
+        filePath: widget.filePath,
+        onRender: (pages) {
+          setState(() {
+            _totalPages = pages!;
+          });
         },
-        onPageChanged: (int? currentPage, int? totalPages) {
-          if (currentPage == totalPages! - 1) {  // Memastikan currentPage dan totalPages tidak null
-            onFinishedReading();
+        onPageChanged: (page, _) {
+          setState(() {
+            _currentPage = page!;
+          });
+
+          if (_currentPage == _totalPages - 1) {
+            widget.onFinishedReading();
           }
         },
       ),
@@ -505,28 +576,84 @@ class PDFViewPage extends StatelessWidget {
   }
 }
 
-class PDFViewerPage extends StatelessWidget {
-  final String filePath;
+class WebPdfViewer extends StatefulWidget {
+  final String documentUrl;
+  final Function() onFinishedReading;
 
-  PDFViewerPage({required this.filePath});
+  const WebPdfViewer({
+    Key? key,
+    required this.documentUrl,
+    required this.onFinishedReading,
+  }) : super(key: key);
+
+  @override
+  _WebPdfViewerState createState() => _WebPdfViewerState();
+}
+
+class _WebPdfViewerState extends State<WebPdfViewer> {
+  final PdfViewerController _pdfViewerController = PdfViewerController();
+  int _totalPages = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _pdfViewerController.addListener(() {
+      if (_pdfViewerController.pageNumber == _totalPages) {
+        widget.onFinishedReading();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('PDF Viewer'),
-      ),
-      body: PDFView(
-        filePath: filePath,
-        onPageError: (page, error) {
-          print('Error loading page $page: $error');
-        },
-        // onPageChanged: (int? currentPage, int? totalPages) {
-        //   if (currentPage == totalPages! - 1) {  // Memastikan currentPage dan totalPages tidak null
-        //     onFinishedReading();
-        //   }
-        // },
+      appBar: AppBar(title: Text('Induction Material')),
+      body: SingleChildScrollView(
+        // Membuat tampilan scrollable
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height, // Menyesuaikan tinggi
+          child: SfPdfViewer.network(
+            widget.documentUrl,
+            controller: _pdfViewerController,
+            onDocumentLoaded: (PdfDocumentLoadedDetails details) {
+              setState(() {
+                _totalPages = details.document.pages.count;
+              });
+            },
+          ),
+        ),
       ),
     );
   }
 }
+
+// class _WebPdfViewerState extends State<WebPdfViewer> {
+//   final PdfViewerController _pdfViewerController = PdfViewerController();
+//   int _totalPages = 1;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _pdfViewerController.addListener(() {
+//       if (_pdfViewerController.pageNumber == _totalPages) {
+//         widget.onFinishedReading();
+//       }
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(title: Text('Induction Material')),
+//       body: SfPdfViewer.network(
+//         widget.documentUrl,
+//         controller: _pdfViewerController,
+//         onDocumentLoaded: (PdfDocumentLoadedDetails details) {
+//           setState(() {
+//             _totalPages = details.document.pages.count;
+//           });
+//         },
+//       ),
+//     );
+//   }
+// }

@@ -23,11 +23,7 @@ class _MainmenuExternalScreenScreenState extends State<MainmenuExternalScreen> {
     super.initState();
     //_openBox();
   }
-  void _loadData() {
-    setState(() {
-      //_isLoading = true;
-    });
-  }
+
 
 
 

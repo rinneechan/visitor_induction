@@ -4,6 +4,7 @@ import 'package:she_vi/services/api_service.dart';
 import 'package:she_vi/models/QuestionRequestIdPlant.dart';
 import 'package:she_vi/models/choices.dart';
 import 'package:go_router/go_router.dart';
+import 'dart:html' as html;
 
 class QuestionScreen extends StatefulWidget {
   final String idrequest;
@@ -22,14 +23,12 @@ class QuestionScreen extends StatefulWidget {
 }
 
 class _QuestionScreenState extends State<QuestionScreen> {
-  //GlobalKey<ScaffoldState> _formKey_Q = GlobalKey<ScaffoldState>();
-  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
-
-
   late Box box;
   String? username;
   String? visitorid;
   String? email;
+  DateTime? lastPressed;
+
   ApiService apiService = ApiService();
   List<QuestionRequestIdPlant> questionlist = [];
 
@@ -50,6 +49,17 @@ class _QuestionScreenState extends State<QuestionScreen> {
   void initState() {
     super.initState();
     _openBox();
+    // Mencegah tombol back browser
+    html.window.history.pushState(null, '', html.window.location.href);
+    html.window.onPopState.listen((event) {
+      html.window.history.pushState(null, '', html.window.location.href);
+    });
+    // Tambahkan konfirmasi sebelum reload/tab close
+    html.window.onBeforeUnload.listen((event) {
+      final e = event as html.BeforeUnloadEvent;
+      e.preventDefault();
+      e.returnValue = '';
+    });
   }
 
   Future<void> _openBox() async {
@@ -70,69 +80,52 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   void _loadData() async {
-    setState(() => _isLoading = true); // Mulai loading indikator
-
+    setState(() => _isLoading = true);
     try {
       final String plantId = widget.plantId;
-      print('Fetching data for Plant ID: $plantId');
-
       // Panggil API untuk mendapatkan data pertanyaan
       pertanyaan = await apiService.fetchQuestionrequestplant(plantId);
-      print('Data pertanyaan diterima: $pertanyaan');
-
-      // Proses data yang diterima
       questions = pertanyaan.map((item) {
-        print('Processing question with ID: ${item.id}');
-        print('Choices: ${item.question.choices}');
-        print('Correct Answers: ${item.question.correctAnswers}');
-
-        // Log setiap pilihan
         for (var choice in item.question.choices) {
-          print('Choice ID: ${choice.id}, Text: ${choice.choiceText}');
+//        print('Choice ID: ${choice.id}, Text: ${choice.choiceText}');
         }
 
         // Log setiap jawaban benar
         for (var correctAnswer in item.question.correctAnswers) {
-          print('Correct Answer ID: ${correctAnswer.choiceId}');
+          //      print('Correct Answer ID: ${correctAnswer.choiceId}');
         }
 
         // Cari pilihan yang cocok dengan jawaban benar
         final correctChoice = item.question.choices.firstWhere(
-              (choice) =>
-              item.question.correctAnswers.any((ans) => ans.choiceId == choice.id),
+          (choice) => item.question.correctAnswers
+              .any((ans) => ans.choiceId == choice.id),
           orElse: () => Choice(
             id: 0,
             questionId: item.id,
             choiceText: 'Unknown',
           ),
         );
-
-        print('Selected Correct Choice: ${correctChoice.choiceText}');
-
         // Kembalikan data dalam bentuk map untuk UI
         return {
           'id': item.id,
           'question_text': item.question.questionText,
           'explanation': item.question.explanation,
-          'options': item.question.choices.map((choice) => choice.choiceText).toList(),
+          'options':
+              item.question.choices.map((choice) => choice.choiceText).toList(),
           'answer': correctChoice.choiceText,
         };
       }).toList();
 
-      print('Data berhasil diproses: $questions');
-
       // Debugging akhir untuk memverifikasi data
       for (var question in questions) {
-        print('Question ID: ${question['id']}');
-        print('Question Text: ${question['question_text']}');
-        print('Options: ${question['options']}');
-        print('Correct Answer: ${question['answer']}');
-        print('Explanation: ${question['explanation']}');
+//      print('Question ID: ${question['id']}');
+        //     print('Question Text: ${question['question_text']}');
+        //     print('Options: ${question['options']}');
+//      print('Correct Answer: ${question['answer']}');
+//      print('Explanation: ${question['explanation']}');
       }
     } catch (error) {
-      print('Error loading data: $error');
-
-      // Menampilkan dialog kesalahan
+      //   print('Error loading data: $error');
       _showErrorDialog(
         'Gagal memuat data. Pastikan koneksi internet stabil atau coba lagi nanti.',
       );
@@ -141,7 +134,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
       setState(() => _isLoading = false);
     }
   }
-
 
   void _showErrorDialog(String message) {
     showDialog(
@@ -161,13 +153,14 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   Future<void> nextQuestion(int questionId, int selectedChoiceId) async {
     if (selectedOptionIndex != null) {
-      final String correctAnswer = questions[currentQuestionIndex]['answer'] ?? '';
-      List<String> options = List<String>.from(questions[currentQuestionIndex]['options']);
+      final String correctAnswer =
+          questions[currentQuestionIndex]['answer'] ?? '';
+      List<String> options =
+          List<String>.from(questions[currentQuestionIndex]['options']);
       bool isCorrect = options[selectedOptionIndex!] == correctAnswer;
 
       // Kirim data ke API setelah memilih opsi
       final int idrequest = int.parse(widget.idrequest.toString());
-      //final int question_id = int.parse(questions[currentQuestionIndex]['id'].toString());
       final int question_id = questionId;
       final int choice_id = selectedChoiceId;
 
@@ -227,7 +220,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Text(
                           'Correct Answer: $correctAnswer',
-                          style: TextStyle(fontSize: 16.0, color: Colors.grey[700]),
+                          style: TextStyle(
+                              fontSize: 16.0, color: Colors.grey[700]),
                         ),
                       ),
                     SizedBox(height: 8.0),
@@ -260,7 +254,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
                             if (currentQuestionIndex < questions.length - 1) {
                               currentQuestionIndex++;
                             } else {
-
                               context.go(
                                 '/test-complated?idrequest=${widget.idrequest ?? ''}&plantId=${widget.plantId?.toString() ?? ''}&plantName=${widget.plantName ?? ''}',
                               );
@@ -275,7 +268,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8.0),
                         ),
-                        backgroundColor: isCorrect ? Color(0xFF07840B) : Color(0xFF8F0B0B),
+                        backgroundColor:
+                            isCorrect ? Color(0xFF07840B) : Color(0xFF8F0B0B),
                       ),
                       child: Text(
                         isCorrect ? 'Continue' : 'I Understood',
@@ -291,94 +285,15 @@ class _QuestionScreenState extends State<QuestionScreen> {
               );
             },
           );
-
         } else {
           print('Insert Data Gagal');
         }
       } catch (e) {
         print('Terjadi kesalahan');
       }
-
     } else {
       print('No option selected!');
     }
-  }
-
-  void _showResult() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          contentPadding: const EdgeInsets.all(16.0),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Image.asset(
-                  'assets/images/groupOfHeart3.png',
-                  height: 40.0,
-                  errorBuilder: (context, error, stackTrace) =>
-                      Icon(Icons.broken_image, size: 40.0),
-                ),
-              ),
-              SizedBox(height: 16),
-              Text(
-                'You\'ve lost all your hearts. Please start over.',
-                style: TextStyle(
-                  color: Color(0xFF343434),
-                  fontFamily: 'Hanken Grotesk',
-                  fontSize: 20.0,
-                  fontStyle: FontStyle.normal,
-                  fontWeight: FontWeight.w400,
-                  height: 1.0,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  // Tutup dialog terlebih dahulu
-                  Navigator.of(context).pop();
-
-                  // Navigasi langsung setelah dialog ditutup
-
-                  Future.delayed(Duration(milliseconds: 500), () {
-                    if (mounted) {  // Pastikan widget masih mounted
-                      Navigator.pushReplacementNamed(
-                        context,
-                        '/request-induction',
-                        arguments: {'username': username ?? 'defaultID'},
-                      );
-                    }
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0x8F0B0B),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                ),
-                child: Text(
-                  'Start Over',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   @override
@@ -397,161 +312,180 @@ class _QuestionScreenState extends State<QuestionScreen> {
     // Ambil pertanyaan saat ini
     final currentQuestion = pertanyaan[currentQuestionIndex];
     return WillPopScope(
-      onWillPop: () async => true,
+      //onWillPop: () async => true,
+      onWillPop: () async {
+        final now = DateTime.now();
+        if (lastPressed == null ||
+            now.difference(lastPressed!) > Duration(seconds: 2)) {
+          lastPressed = now;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text("Tekan sekali lagi untuk keluar"),
+                duration: Duration(seconds: 2)),
+          );
+          return false;
+        }
+        return true;
+      },
       child: Scaffold(
-        //key: _formKey_Q,
+        backgroundColor: Colors.white,
         extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          title: Text(
-            'Question ${currentQuestionIndex + 1} / ${questions.length}',
-            style: TextStyle(
-              color: Color(0xFF343434),
-              fontFamily: 'Hanken Grotesk',
-              fontSize: 16.0,
-              fontWeight: FontWeight.w400,
-              height: 1.0,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(56), // Tinggi AppBar
+          child: SizedBox(
+            width: MediaQuery.of(context)
+                .size
+                .shortestSide, // Lebar menyesuaikan shortestSide
+            child: AppBar(
+              backgroundColor: Colors.white,
+              elevation: 0,
+              automaticallyImplyLeading: false,
+              toolbarHeight: 56,
+              title: Text(
+                'Question ${currentQuestionIndex + 1} / ${questions.length}',
+                style: const TextStyle(
+                  color: Color(0xFF343434),
+                  fontFamily: 'Hanken Grotesk',
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w400,
+                  height: 1.0,
+                ),
+              ),
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Image.asset(
+                    incorrectCount == 1
+                        ? 'assets/images/groupOfHeart1.png'
+                        : incorrectCount == 2
+                            ? 'assets/images/groupOfHeart2.png'
+                            : incorrectCount == 3
+                                ? 'assets/images/groupOfHeart3.png'
+                                : 'assets/images/groupOfHeart.png',
+                    height: 40.0,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.broken_image, size: 40.0),
+                  ),
+                ),
+              ],
             ),
           ),
-          backgroundColor: Color(0xFFFFFFFF),
-          elevation: 2,
-          automaticallyImplyLeading: false,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Image.asset(
-                // Memilih gambar berdasarkan jumlah kesalahan
-                incorrectCount == 1
-                    ? 'assets/images/groupOfHeart1.png'  // Jika salah 1, gambar groupOfHeart1.png
-                    : incorrectCount == 2
-                    ? 'assets/images/groupOfHeart2.png'  // Jika salah 2, gambar groupOfHeart3.png
-                    : incorrectCount == 3
-                    ? 'assets/images/groupOfHeart3.png'  // Jika salah 3, gambar groupOfHeart4.png
-                    : 'assets/images/groupOfHeart.png',  // Default gambar
-                height: 40.0,
-                errorBuilder: (context, error, stackTrace) =>
-                    Icon(Icons.broken_image, size: 40.0),
-              ),
-            ),
-          ],
         ),
-
-
         body: _isLoading
-            ? Center(child: CircularProgressIndicator())
-            : Center(
-            child: Container(
-              width: MediaQuery.of(context).size.shortestSide,
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: Container(
-                      color: Color(0xFFF0F0F0),
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : SingleChildScrollView(
+                child: Container(
+                  color: const Color(0xFFF0F0F0),
+                  width: MediaQuery.of(context).size.shortestSide,
+                  padding:
+                      const EdgeInsets.only(top: 50), // supaya posisinya tetap
+                  child: Card(
+                    elevation: 0,
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
                     ),
-                  ),
-                  Positioned(
-                    top: 90,
-                    left: 0,
-                    right: 0,
-                    child: Card(
-                      elevation: 0,
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Menampilkan pertanyaan jika incorrectCount < 3
-                            if (incorrectCount < 3) ...[
-                              // Menampilkan teks pertanyaan
-                              Text(
-                                currentQuestion.question.questionText,
-                                style: TextStyle(
-                                  color: Color(0xFF343434),
-                                  fontFamily: 'Hanken Grotesk',
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.w700,
-                                  height: 1.0,
-                                ),
+                    margin: const EdgeInsets.all(16),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (incorrectCount < 3) ...[
+                            Text(
+                              currentQuestion.question.questionText,
+                              style: const TextStyle(
+                                color: Color(0xFF343434),
+                                fontFamily: 'Hanken Grotesk',
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.w700,
+                                height: 1.0,
                               ),
-                              SizedBox(height: 16),
-
-                              // Daftar pilihan
-                              ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: currentQuestion.question.choices.length,
-                                itemBuilder: (context, index) {
-                                  final choice = currentQuestion.question.choices[index];
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          selectedOptionIndex = index;
-                                        });
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        backgroundColor: selectedOptionIndex == index
-                                            ? Colors.green // Pilihan yang dipilih
-                                            : const Color.fromARGB(255, 232, 223, 222), // Pilihan default
-                                        side: BorderSide(color: Colors.white, width: 1),
+                            ),
+                            const SizedBox(height: 12),
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount:
+                                  currentQuestion.question.choices.length,
+                              itemBuilder: (context, index) {
+                                final choice =
+                                    currentQuestion.question.choices[index];
+                                return Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 4.0),
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        selectedOptionIndex = index;
+                                      });
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 12, horizontal: 16),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          choice.choiceText,
-                                          style: TextStyle(fontSize: 16),
-                                        ),
+                                      backgroundColor:
+                                          selectedOptionIndex == index
+                                              ? Colors.green
+                                              : const Color.fromARGB(
+                                                  255, 232, 223, 222),
+                                      side: const BorderSide(
+                                          color: Colors.white, width: 1),
+                                    ),
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        choice.choiceText,
+                                        style: const TextStyle(fontSize: 14),
                                       ),
                                     ),
-                                  );
-                                },
-                              ),
-                              SizedBox(height: 20),
-
-                              // Tombol Check Answer
-                              InkWell(
-                                onTap: selectedOptionIndex != null
-                                    ? () {
-                                  final selectedChoice = currentQuestion.question.choices[selectedOptionIndex!];
-                                  //print('ID Pilihan Terpilih: ${selectedChoice.id}');
-                                  //print('Teks Pilihan Terpilih: ${selectedChoice.choiceText}');
-                                  nextQuestion(currentQuestion.questionId, selectedChoice.id);
-                                }
-                                    : null,
-                                child: Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(24.0),
-                                  decoration: BoxDecoration(
-                                    color: selectedOptionIndex != null
-                                        ? Color(0xFF07840B) // Hijau jika pilihan dipilih
-                                        : Colors.grey, // Abu-abu jika tidak ada pilihan
-                                    borderRadius: BorderRadius.circular(8.0),
                                   ),
-                                  child: Text('Periksa Jawaban',
-                                    style: TextStyle(
-                                      fontFamily: 'Hanken Grotesk',
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                      height: 1.2,
-                                    ),
-                                    textAlign: TextAlign.center,
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 20),
+                            InkWell(
+                              onTap: selectedOptionIndex != null
+                                  ? () {
+                                      final selectedChoice = currentQuestion
+                                          .question
+                                          .choices[selectedOptionIndex!];
+                                      nextQuestion(currentQuestion.questionId,
+                                          selectedChoice.id);
+                                    }
+                                  : null,
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(24.0),
+                                decoration: BoxDecoration(
+                                  color: selectedOptionIndex != null
+                                      ? const Color(0xFF07840B)
+                                      : Colors.grey,
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                child: const Text(
+                                  'Periksa Jawaban',
+                                  style: TextStyle(
+                                    fontFamily: 'Hanken Grotesk',
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                    height: 1.2,
                                   ),
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
-                              SizedBox(height: 20),
-                            ],
-
-                            // Menampilkan pesan jika incorrectCount == 3
-                            if (incorrectCount == 3) ...[
-                              Center(
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+                          if (incorrectCount == 3) ...[
+                            Center(
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 100.0),
                                 child: Dialog(
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
@@ -562,47 +496,48 @@ class _QuestionScreenState extends State<QuestionScreen> {
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        // Menampilkan gambar di tengah
                                         Image.asset(
                                           'assets/images/groupOfHeart3.png',
                                           height: 40.0,
-                                          errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image, size: 40.0),
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  const Icon(Icons.broken_image,
+                                                      size: 40.0),
                                         ),
-                                        SizedBox(height: 16),
-
-                                        // Menampilkan teks di tengah
-                                        Text(
+                                        const SizedBox(height: 16),
+                                        const Text(
                                           'You\'ve lost all your hearts. Please start over.',
                                           style: TextStyle(
                                             color: Color(0xFF343434),
                                             fontFamily: 'Hanken Grotesk',
                                             fontSize: 20.0,
-                                            fontStyle: FontStyle.normal,
                                             fontWeight: FontWeight.w400,
                                             height: 1.0,
                                           ),
                                           textAlign: TextAlign.center,
                                         ),
-                                        SizedBox(height: 24),
-
-                                        // Tombol Mulai Ulang di tengah
+                                        const SizedBox(height: 24),
                                         ElevatedButton(
                                           onPressed: () {
-
                                             context.go(
-                                              '/welcome-test?idrequest=${widget.idrequest ?? ''}&plantId=${widget.plantId?.toString() ?? ''}&plantName=${widget.plantName ?? ''}',
+                                              '/welcome-test?idrequest=${widget.idrequest}&plantId=${widget.plantId ?? ''}&plantName=${widget.plantName ?? ''}',
                                             );
-                                            // Logika untuk mulai ulang
                                           },
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: Color(0x8F0B0B),
+                                            backgroundColor:
+                                                const Color(0xFF8F0B0B),
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                             ),
-                                            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 16),
+                                            minimumSize:
+                                                const Size(double.infinity, 56),
+                                            elevation: 2,
                                           ),
-                                          child: Text(
-                                            'Mulai Ulang',
+                                          child: const Text(
+                                            'Start Over',
                                             style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 16,
@@ -615,26 +550,15 @@ class _QuestionScreenState extends State<QuestionScreen> {
                                   ),
                                 ),
                               ),
-                            ]
-
-
-                          ],
-
-                        ),
+                            ),
+                          ]
+                        ],
                       ),
-
                     ),
-
-
                   ),
-                ],
+                ),
               ),
-            ),
-            ),
-
       ),
     );
   }
-
-
 }

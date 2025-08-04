@@ -83,13 +83,14 @@ class _DetaiinfoState extends State<Detaiinfo> {
 
   String formatDate(String dateString) {
     try {
-      final date = DateTime.parse(dateString); // Mengonversi string menjadi DateTime
-      return DateFormat('d MMMM yyyy', 'id_ID').format(date); // Format tanggal: 18 September 2024
+      final date =
+          DateTime.parse(dateString); // Mengonversi string menjadi DateTime
+      return DateFormat('d MMMM yyyy', 'id_ID')
+          .format(date); // Format tanggal: 18 September 2024
     } catch (e) {
       return dateString; // Jika format tanggal gagal, kembalikan string aslinya
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +107,8 @@ class _DetaiinfoState extends State<Detaiinfo> {
             if (context.canPop()) {
               context.pop(); // Kembali ke halaman sebelumnya
             } else {
-              context.go('/request-induction', extra: {'username': username ?? 'defaultID'});
+              context.go('/request-induction',
+                  extra: {'username': username ?? 'defaultID'});
             }
           },
         ),
@@ -120,14 +122,13 @@ class _DetaiinfoState extends State<Detaiinfo> {
             children: [
               SingleChildScrollView(
                 physics: BouncingScrollPhysics(),
-                padding: EdgeInsets.only(top: 5,bottom: 80),
+                padding: EdgeInsets.only(top: 5, bottom: 80),
                 child: Column(
                   children: [
                     _buildInductionRequestCard(),
                     SizedBox(height: 1),
                     _buildVisitorProfileCard(),
                     SizedBox(height: 20),
-
                   ],
                 ),
               ),
@@ -152,128 +153,151 @@ class _DetaiinfoState extends State<Detaiinfo> {
           ),
         ),
       ),
-
     );
   }
 
   Widget _buildInductionRequestCard() {
     return Card(
-        elevation: 2,
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(0.5),
-        ),
-        child: Container(
-      child: Theme(
-        data: ThemeData(
-          // Menonaktifkan garis dividers
-          dividerColor: Colors.transparent,
-          // Atur warna icon agar tidak terlihat
-          iconTheme: IconThemeData(color: Colors.transparent),
-        ),
-        child: ExpansionTile(
-
-          title: Container(
-            height: 52, // Tinggi kontainer
-            padding: const EdgeInsets.symmetric(horizontal: 16), // Padding kiri dan kanan
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween, // Justify-content: space-between
-              crossAxisAlignment: CrossAxisAlignment.center, // Align-items: center
-              children: [
-                Text(
-                  'Induction Request',
-                  style: _textStyle(16, FontWeight.w700),
-                ),
-
-              ],
-            ),
+      elevation: 2,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(0.5),
+      ),
+      child: Container(
+        child: Theme(
+          data: ThemeData(
+            // Menonaktifkan garis dividers
+            dividerColor: Colors.transparent,
+            // Atur warna icon agar tidak terlihat
+            iconTheme: IconThemeData(color: Colors.transparent),
           ),
-          initiallyExpanded: true,
-          childrenPadding: EdgeInsets.zero,  // Menghapus padding anak
-
-          children: [
-            FutureBuilder<List<InductionRequestId>>(
-              future: fetchInductionId,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      'Error: ${snapshot.error}',
-                      style: const TextStyle(color: Colors.red, fontSize: 14),
+          child: ExpansionTile(
+            title: Container(
+              height: 52, // Tinggi kontainer
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16), // Padding kiri dan kanan
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment
+                    .spaceBetween, // Justify-content: space-between
+                crossAxisAlignment:
+                    CrossAxisAlignment.center, // Align-items: center
+                children: [
+                  Text(
+                    'Induction Request',
+                    //style: _textStyle(16, FontWeight.w700),
+                    style: TextStyle(
+                      fontFamily: "Hanken Grotesk",
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF343434), // Warna dari CSS
                     ),
-                  );
-                } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                  final dataList = snapshot.data!;
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 16.0, bottom: 16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: dataList.map((data) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildDetailRow('Status', data.status, textAlign: TextAlign.left),
-                              SizedBox(height: 16),
-                              _buildDetailRow('Plant Name', data.plantName, textAlign: TextAlign.left),
-                              SizedBox(height: 16),
-                              _buildDetailRow('Department Destination', data.department, textAlign: TextAlign.left),
-                              SizedBox(height: 16),
-                              _buildDetailRow('PIC Name', data.picName, textAlign: TextAlign.left),
-                              SizedBox(height: 16),
-                              _buildDetailRow('Arrival Date', formatDate(data.arrivalDate), textAlign: TextAlign.left),
-                              SizedBox(height: 16),
-                              _buildDetailRow('Visit Duration', data.visitDuration, textAlign: TextAlign.left),
-                              SizedBox(height: 16),
-                              _buildDetailRow('Reason to Visit', data.reasonToVisit, textAlign: TextAlign.left),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  );
-                } else {
-                  return const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text(
-                      'No data found',
-                      style: TextStyle(fontSize: 14, color: Color(0xFF555555)),
-                    ),
-                  );
-                }
-              },
+                  ),
+                ],
+              ),
             ),
-          ],
+            initiallyExpanded: true,
+            childrenPadding: EdgeInsets.zero, // Menghapus padding anak
+
+            children: [
+              FutureBuilder<List<InductionRequestId>>(
+                future: fetchInductionId,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        'Error: ${snapshot.error}',
+                        style: const TextStyle(color: Colors.red, fontSize: 14),
+                      ),
+                    );
+                  } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                    final dataList = snapshot.data!;
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 16.0, bottom: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: dataList.map((data) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildDetailRow('Status', data.status,
+                                    textAlign: TextAlign.left),
+                                SizedBox(height: 16),
+                                _buildDetailRow('Plant Name', data.plantName,
+                                    textAlign: TextAlign.left),
+                                SizedBox(height: 16),
+                                _buildDetailRow(
+                                    'Department Destination', data.department,
+                                    textAlign: TextAlign.left),
+                                SizedBox(height: 16),
+                                _buildDetailRow('PIC Name', data.picName,
+                                    textAlign: TextAlign.left),
+                                SizedBox(height: 16),
+                                _buildDetailRow('Arrival Date',
+                                    formatDate(data.arrivalDate),
+                                    textAlign: TextAlign.left),
+                                SizedBox(height: 16),
+                                _buildDetailRow(
+                                    'Visit Duration', data.visitDuration,
+                                    textAlign: TextAlign.left),
+                                SizedBox(height: 16),
+                                _buildDetailRow(
+                                    'Reason to Visit', data.reasonToVisit,
+                                    textAlign: TextAlign.left),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    );
+                  } else {
+                    return const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text(
+                        'No data found',
+                        style:
+                            TextStyle(fontSize: 14, color: Color(0xFF555555)),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 
-  Widget _buildDetailRow(String title, String value, {TextAlign textAlign = TextAlign.left}) {
+  Widget _buildDetailRow(String title, String value,
+      {TextAlign textAlign = TextAlign.left}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start, // Sesuaikan posisi column
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.start, // memastikan text sejajar ke kiri
+            mainAxisAlignment:
+                MainAxisAlignment.start, // memastikan text sejajar ke kiri
             children: [
               Expanded(
                 child: Text(
                   '$title:',
                   style: TextStyle(
-                      //fontWeight: FontWeight.bold
-                    color: Color(0xFF343434), // Menggunakan nilai warna dari CSS
-                    fontFamily: 'Hanken Grotesk', // Menggunakan font-family dari CSS
+                    //fontWeight: FontWeight.bold
+                    color:
+                        Color(0xFF343434), // Menggunakan nilai warna dari CSS
+                    fontFamily:
+                        'Hanken Grotesk', // Menggunakan font-family dari CSS
                     fontSize: 14.0, // Ukuran font
                     fontWeight: FontWeight.w400, // Weight font
                     fontStyle: FontStyle.normal, // Style font
-                    height: 1.0, // Line height sesuai dengan CSS line-height: normal
+                    height:
+                        1.0, // Line height sesuai dengan CSS line-height: normal
                   ),
                 ),
               ),
@@ -281,7 +305,8 @@ class _DetaiinfoState extends State<Detaiinfo> {
           ),
           SizedBox(height: 5),
           Row(
-            mainAxisAlignment: MainAxisAlignment.start, // memastikan text sejajar ke kiri
+            mainAxisAlignment:
+                MainAxisAlignment.start, // memastikan text sejajar ke kiri
             children: [
               Expanded(
                 child: Text(
@@ -320,38 +345,48 @@ class _DetaiinfoState extends State<Detaiinfo> {
             iconTheme: IconThemeData(color: Colors.transparent),
           ),
           child: ExpansionTile(
-          //title: Text('Visitor Profile', style: _textStyle(16, FontWeight.w700)),
+            //title: Text('Visitor Profile', style: _textStyle(16, FontWeight.w700)),
             title: Container(
               height: 52, // Tinggi kontainer
-              padding: const EdgeInsets.symmetric(horizontal: 16), // Padding kiri dan kanan
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16), // Padding kiri dan kanan
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween, // Justify-content: space-between
-                crossAxisAlignment: CrossAxisAlignment.center, // Align-items: center
+                mainAxisAlignment: MainAxisAlignment
+                    .spaceBetween, // Justify-content: space-between
+                crossAxisAlignment:
+                    CrossAxisAlignment.center, // Align-items: center
                 children: [
                   Text(
                     'Visitor Profile',
-                    style: _textStyle(16, FontWeight.w700),
+                    //style: _textStyle(16, FontWeight.w700),
+                    style: TextStyle(
+                      fontFamily: "Hanken Grotesk", // Sesuai dengan font di CSS
+                      fontSize: 16, // Ukuran font
+                      fontWeight: FontWeight.w700, // Ketebalan font
+                      fontStyle: FontStyle.normal, // Gaya font normal
+                      height: 1.0, // Line-height di Flutter
+                      color: Color(0xFF343434), // Warna teks dari CSS
+                    ),
                   ),
-
                 ],
               ),
             ),
             children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 16.0, bottom: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildDetailRow('Full Name', username ?? '-'),
-                  SizedBox(height: 24),
-                  _buildDetailRow('Company Name', compname ?? '-'),
-                  SizedBox(height: 24),
-                  _buildDetailRow('Job Position', jobposs ?? '-'),
-                ],
+              Padding(
+                padding: const EdgeInsets.only(left: 16.0, bottom: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildDetailRow('Full Name', username ?? '-'),
+                    SizedBox(height: 24),
+                    _buildDetailRow('Company Name', compname ?? '-'),
+                    SizedBox(height: 24),
+                    _buildDetailRow('Job Position', jobposs ?? '-'),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
         ),
       ),
     );
@@ -360,44 +395,47 @@ class _DetaiinfoState extends State<Detaiinfo> {
   Widget _buildBottomButton() {
     return GestureDetector(
         child: Padding(
-          padding: const EdgeInsets.all(16.0), // Padding di semua sisi (top, bottom, left, right)
-          child: ElevatedButton(
-            onPressed: () {
-              //Navigator.pushNamed(context, '/request-new-induction');
-              if (datashow != null) {
-                //context.go('/welcome-test?idrequest=${datashow!.idrequest ?? ''}&plantId=${datashow!.plantId?.toString() ?? ''}&plantName=${datashow!.plantName ?? ''}',);
-                context.push('/welcome-test?idrequest=${datashow!.idrequest ?? ''}&plantId=${datashow!.plantId?.toString() ?? ''}&plantName=${datashow!.plantName ?? ''}',);
-              } else {
-                // Berikan pesan error jika data null
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Data belum tersedia')),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF07840B),
-              padding: const EdgeInsets.symmetric(vertical: 16.0), // Padding vertikal dalam tombol
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
+      padding: const EdgeInsets.all(
+          16.0), // Padding di semua sisi (top, bottom, left, right)
+      child: ElevatedButton(
+        onPressed: () {
+          //Navigator.pushNamed(context, '/request-new-induction');
+          if (datashow != null) {
+            //context.go('/welcome-test?idrequest=${datashow!.idrequest ?? ''}&plantId=${datashow!.plantId?.toString() ?? ''}&plantName=${datashow!.plantName ?? ''}',);
+            context.push(
+              '/welcome-test?idrequest=${datashow!.idrequest ?? ''}&plantId=${datashow!.plantId?.toString() ?? ''}&plantName=${datashow!.plantName ?? ''}',
+            );
+          } else {
+            // Berikan pesan error jika data null
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Data belum tersedia')),
+            );
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF07840B),
+          padding: const EdgeInsets.symmetric(
+              vertical: 16.0), // Padding vertikal dalam tombol
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Text(
+              'Start Induction',
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: 'Hanken Grotesk',
+                fontSize: 16.0,
+                fontWeight: FontWeight.w700,
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Text(
-                  'Start Induction',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Hanken Grotesk',
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        )
-    );
+          ],
+        ),
+      ),
+    ));
   }
 
   TextStyle _textStyle(double size, FontWeight weight) {

@@ -119,20 +119,11 @@ class _DetailHistoryState extends State<DetailHistory> {
                   ],
                 ),
               ),
-              // Tombol tetap di bawah
-              // Positioned(
-              //   bottom: 0,
-              //   left: 0,
-              //   right: 0,
-              //   child: _buildBottomButton(),
-              // ),
+
             ],
           ),
         ),
       ),
-
-
-
     );
   }
 

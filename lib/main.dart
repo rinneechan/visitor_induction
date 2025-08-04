@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'route/app_route.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:she_vi/screens/setting/navigator_service.dart';
+import 'package:she_vi/utils/env_helper.dart'; // Import helper
 
 // Fungsi global untuk menangani notifikasi di background
 Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
@@ -52,6 +53,7 @@ Future<void> main() async {
     } else {
       await Firebase.initializeApp();
     }
+    await EnvHelper.loadEnv(); // Load env.json
   } catch (e) {
     debugPrint("❌ Error initializing Firebase: $e");
   }
@@ -66,7 +68,8 @@ Future<void> main() async {
 
   // Inisialisasi layanan Firebase Notification
   await FirebaseNotificationService().initNotifications();
-  RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+  RemoteMessage? initialMessage =
+      await FirebaseMessaging.instance.getInitialMessage();
   if (initialMessage != null) {
     debugPrint("🔔 [Terminated] Notifikasi dibuka:");
     debugPrint("📌 Title: ${initialMessage.notification?.title}");
@@ -80,7 +83,8 @@ Future<void> main() async {
       Future.delayed(Duration(milliseconds: 500), () {
         if (globalNavigatorKey.currentContext != null) {
           if (initialMessage.data['screen'] == 'EmailApproval') {
-            globalNavigatorKey.currentContext!.go('/visitor-request?id=${initialMessage.data['id']}');
+            globalNavigatorKey.currentContext!
+                .go('/visitor-request?id=${initialMessage.data['id']}');
           } else {
             globalNavigatorKey.currentContext!.go('$route?id=$idRequest');
           }
@@ -120,7 +124,8 @@ class _MyAppState extends State<MyApp> {
         Future.delayed(Duration(milliseconds: 500), () {
           if (globalNavigatorKey.currentContext != null) {
             if (message.data['screen'] == 'EmailApproval') {
-              globalNavigatorKey.currentContext!.go('/visitor-request?id=${message.data['id']}');
+              globalNavigatorKey.currentContext!
+                  .go('/visitor-request?id=${message.data['id']}');
             } else {
               // Navigasi ke route lain
               globalNavigatorKey.currentContext!.go('$route?id=$idRequest');
@@ -133,7 +138,6 @@ class _MyAppState extends State<MyApp> {
         debugPrint("⚠️ Tidak ada 'route' dalam data notifikasi");
       }
     });
-
   }
 
   @override
@@ -151,11 +155,13 @@ class _MyAppState extends State<MyApp> {
 
 class FirebaseNotificationService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _localNotifications =
+      FlutterLocalNotificationsPlugin();
 
   Future<void> initNotifications() async {
     try {
-      NotificationSettings settings = await _firebaseMessaging.requestPermission(
+      NotificationSettings settings =
+          await _firebaseMessaging.requestPermission(
         alert: true,
         badge: true,
         sound: true,
@@ -168,21 +174,24 @@ class FirebaseNotificationService {
         return;
       }
       String? token = await _firebaseMessaging.getToken();
-      if (token != null) {
-        debugPrint("🔥 FCM Token: $token");
-      }
+      //if (token != null) {
+      // debugPrint("🔥 FCM Token: $token");
+      // }
       _initLocalNotifications();
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        debugPrint("🔔 [Foreground] Notifikasi diterima: ${message.notification?.title}");
+        debugPrint(
+            "🔔 [Foreground] Notifikasi diterima: ${message.notification?.title}");
         debugPrint("📦 Payload: ${message.data}");
         _showForegroundNotification(message);
       });
 
       FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
       // Tangani notifikasi ketika aplikasi dalam keadaan terminated
-      RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+      RemoteMessage? initialMessage =
+          await FirebaseMessaging.instance.getInitialMessage();
       if (initialMessage != null) {
-        debugPrint("🔔 [Terminated] Notifikasi diklik saat aplikasi belum berjalan");
+        debugPrint(
+            "🔔 [Terminated] Notifikasi diklik saat aplikasi belum berjalan");
         _handleNotificationClick(initialMessage);
       }
     } catch (e) {
@@ -200,7 +209,8 @@ class FirebaseNotificationService {
       Future.delayed(Duration(milliseconds: 500), () {
         if (globalNavigatorKey.currentContext != null) {
           if (message.data['screen'] == 'EmailApproval') {
-            globalNavigatorKey.currentContext!.go('/visitor-request?id=${message.data['id']}');
+            globalNavigatorKey.currentContext!
+                .go('/visitor-request?id=${message.data['id']}');
           } else {
             globalNavigatorKey.currentContext!.go('$route?id=$idRequest');
           }
@@ -214,13 +224,16 @@ class FirebaseNotificationService {
   }
 
   void _initLocalNotifications() {
-    const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const InitializationSettings initializationSettings = InitializationSettings(android: androidSettings);
+    const AndroidInitializationSettings androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const InitializationSettings initializationSettings =
+        InitializationSettings(android: androidSettings);
     _localNotifications.initialize(initializationSettings);
   }
 
   void _showForegroundNotification(RemoteMessage message) async {
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
       'high_importance_channel',
       'High Importance Notifications',
       importance: Importance.max,
@@ -228,9 +241,11 @@ class FirebaseNotificationService {
       playSound: true,
     );
 
-    const NotificationDetails notificationDetails = NotificationDetails(android: androidDetails);
+    const NotificationDetails notificationDetails =
+        NotificationDetails(android: androidDetails);
 
-    await _localNotifications.show(0,
+    await _localNotifications.show(
+      0,
       message.notification?.title ?? 'No Title',
       message.notification?.body ?? 'No Body',
       notificationDetails,
@@ -257,6 +272,12 @@ class AppUpdateService {
       PackageInfo packageInfo = await PackageInfo.fromPlatform();
       String currentVersion = packageInfo.version;
 
+      // ✅ Tambahkan Debug Print di sini
+      debugPrint("🔍 Versi Saat Ini: $currentVersion");
+      debugPrint("🔍 Versi Terbaru dari Remote Config: $latestVersion");
+      debugPrint("🔍 Apakah Update Paksa: $forceUpdate");
+      debugPrint("🔍 URL Update: $updateUrl");
+
       if (_isNewVersionAvailable(currentVersion, latestVersion)) {
         if (defaultTargetPlatform == TargetPlatform.android) {
           _checkAndroidUpdate(forceUpdate, updateUrl);
@@ -274,8 +295,8 @@ class AppUpdateService {
     List<String> latest = latestVersion.split('.');
 
     for (int i = 0; i < latest.length; i++) {
-      int currentValue = int.tryParse(current[i] ?? '0') ?? 0;
-      int latestValue = int.tryParse(latest[i] ?? '0') ?? 0;
+      int currentValue = int.tryParse(current[i]) ?? 0;
+      int latestValue = int.tryParse(latest[i]) ?? 0;
 
       if (latestValue > currentValue) {
         return true;
@@ -286,21 +307,48 @@ class AppUpdateService {
     return false;
   }
 
+  // void _checkAndroidUpdate(bool forceUpdate, String updateUrl) async {
+  //   try {
+  //     final AppUpdateInfo updateInfo = await InAppUpdate.checkForUpdate();
+
+  //     if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
+  //       if (updateInfo.immediateUpdateAllowed) {
+  //         await InAppUpdate.performImmediateUpdate().catchError((e) {
+  //           debugPrint("❌ Immediate update failed: $e");
+  //         });
+  //       } else if (updateInfo.flexibleUpdateAllowed) {
+  //         await InAppUpdate.startFlexibleUpdate().catchError((e) {
+  //           debugPrint("❌ Flexible update failed: $e");
+  //         });
+  //       }
+  //     } else {
+  //       _showUpdateDialog(forceUpdate, updateUrl);
+  //     }
+  //   } catch (e) {
+  //     debugPrint("❌ Error checking Android update: $e");
+  //     _showUpdateDialog(forceUpdate, updateUrl);
+  //   }
+  // }
   void _checkAndroidUpdate(bool forceUpdate, String updateUrl) async {
     try {
       final AppUpdateInfo updateInfo = await InAppUpdate.checkForUpdate();
 
       if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
         if (updateInfo.immediateUpdateAllowed) {
-          await InAppUpdate.performImmediateUpdate().catchError((e) {
+          try {
+            await InAppUpdate.performImmediateUpdate();
+          } catch (e) {
             debugPrint("❌ Immediate update failed: $e");
-          });
+          }
         } else if (updateInfo.flexibleUpdateAllowed) {
-          await InAppUpdate.startFlexibleUpdate().catchError((e) {
+          try {
+            await InAppUpdate.startFlexibleUpdate();
+          } catch (e) {
             debugPrint("❌ Flexible update failed: $e");
-          });
+          }
         }
       } else {
+        // Tidak ada update, bisa tampilkan dialog jika perlu
         _showUpdateDialog(forceUpdate, updateUrl);
       }
     } catch (e) {
@@ -309,39 +357,87 @@ class AppUpdateService {
     }
   }
 
-  void _showUpdateDialog(bool forceUpdate, String updateUrl) {
+  void _showUpdateDialog(bool forceUpdate, String? updateUrl) {
     if (globalNavigatorKey.currentContext == null) {
       debugPrint("❌ Context is null, cannot show update dialog.");
       return;
     }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      showDialog(
-        context: globalNavigatorKey.currentContext!,
-        barrierDismissible: !forceUpdate,
-        builder: (context) => AlertDialog(
-          title: const Text('Pembaruan Tersedia'),
-          content: const Text('Versi terbaru aplikasi telah tersedia. Harap perbarui aplikasi Anda.'),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                final Uri url = Uri.parse(updateUrl);
-                if (await canLaunchUrl(url)) {
-                  await launchUrl(url, mode: LaunchMode.externalApplication);
-                } else {
-                  debugPrint('❌ Gagal membuka URL pembaruan');
-                }
-              },
-              child: const Text('Perbarui Sekarang'),
-            ),
-            if (!forceUpdate)
+    if (updateUrl == null || updateUrl.isEmpty) {
+      debugPrint("❌ URL pembaruan tidak valid atau kosong");
+      return;
+    }
+
+    try {
+      final Uri url = Uri.parse(updateUrl);
+      debugPrint('✅ URL Valid: $url');
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showDialog(
+          context: globalNavigatorKey.currentContext!,
+          barrierDismissible: !forceUpdate,
+          builder: (context) => AlertDialog(
+            title: const Text('Pembaruan Tersedia'),
+            content: const Text(
+                'Versi terbaru aplikasi telah tersedia. Harap perbarui aplikasi Anda.'),
+            actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Nanti'),
+                onPressed: () async {
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  } else {
+                    debugPrint('❌ Gagal membuka URL pembaruan');
+                  }
+                },
+                child: const Text('Perbarui Sekarang'),
               ),
-          ],
-        ),
-      );
-    });
+              if (!forceUpdate)
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Nanti'),
+                ),
+            ],
+          ),
+        );
+      });
+    } catch (e) {
+      debugPrint('❌ Error saat parsing URL: $e');
+    }
   }
 }
+
+// void _showUpdateDialog(bool forceUpdate, String updateUrl) {
+//   if (globalNavigatorKey.currentContext == null) {
+//     debugPrint("❌ Context is null, cannot show update dialog.");
+//     return;
+//   }
+//
+//   WidgetsBinding.instance.addPostFrameCallback((_) {
+//     showDialog(
+//       context: globalNavigatorKey.currentContext!,
+//       barrierDismissible: !forceUpdate,
+//       builder: (context) => AlertDialog(
+//         title: const Text('Pembaruan Tersedia'),
+//         content: const Text('Versi terbaru aplikasi telah tersedia. Harap perbarui aplikasi Anda.'),
+//         actions: [
+//           TextButton(
+//             onPressed: () async {
+//               final Uri url = Uri.parse(updateUrl);
+//               if (await canLaunchUrl(url)) {
+//                 await launchUrl(url, mode: LaunchMode.externalApplication);
+//               } else {
+//                 debugPrint('❌ Gagal membuka URL pembaruan');
+//               }
+//             },
+//             child: const Text('Perbarui Sekarang'),
+//           ),
+//           if (!forceUpdate)
+//             TextButton(
+//               onPressed: () => Navigator.pop(context),
+//               child: const Text('Nanti'),
+//             ),
+//         ],
+//       ),
+//     );
+//   });
+// }

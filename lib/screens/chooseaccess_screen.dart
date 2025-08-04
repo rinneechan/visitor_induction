@@ -20,158 +20,102 @@ class _ChooseAccessScreenState extends State<ChooseAccess> {
     final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
     if (isLoggedIn) {
-      //Navigator.pushReplacementNamed(context, '/main-menu');
       context.go('/main-menu');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final bodyWidth = MediaQuery.of(context).size.shortestSide;
-    double screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     final isMobile = screenWidth < 600;
     final isTablet = screenWidth >= 600 && screenWidth < 1200;
 
-    double fontSize(double mobile, double tablet, double web) => isMobile
-        ? mobile
-        : isTablet
-        ? tablet
-        : web;
-    double elementSize(double mobile, double tablet, double web) => isMobile
-        ? mobile
-        : isTablet
-        ? tablet
-        : web;
+    double fontSize(double mobile, double tablet, double web) =>
+        isMobile ? mobile : (isTablet ? tablet : web);
+
+    double elementSize(double mobile, double tablet, double web) =>
+        isMobile ? mobile : (isTablet ? tablet : web);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight),
-        child: SafeArea(
-          child: Center( // Center memastikan AppBar konsisten dengan lebar body
-            child: Container(
-              width: bodyWidth, // Menyamakan lebar dengan body
-              padding: const EdgeInsets.symmetric(horizontal: 16.0), // Padding kiri-kanan
-              color: Colors.transparent, // Warna transparan
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Teks di sisi kiri
-                  Text(
-                    'Sedia',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFFA4A4A4),
-                    ),
-                  ),
-                  // Logo di sisi kanan
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SvgPicture.asset(
-                        'assets/images/logo-cg.svg',
-                        height: 40.0,
-                        placeholderBuilder: (context) =>
-                            CircularProgressIndicator(),
-                      ),
-                      SizedBox(width: 10),
-                      Image.asset(
-                        'assets/images/Logo-badak.png',
-                        height: 40.0,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Center(
+              child: Container(
+                width: MediaQuery.of(context).size.shortestSide,
+                height: screenHeight,
+                child: Stack(
+                  children: [
+                    // Background Image
+                    Positioned.fill(
+                      child: Image.asset(
+                        'assets/images/BackgroundSedia.png',
+                        fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) =>
-                            Icon(Icons.broken_image, size: 40.0),
+                            Container(color: Colors.grey),
                       ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return Center(
-            child: Container(
-              width: MediaQuery.of(context).size.shortestSide,
-              height: MediaQuery.of(context).size.height,
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: Image.asset(
-                      'assets/images/BackgroundSedia.png',
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          Container(color: Colors.grey),
                     ),
-                  ),
-                  Column(
-                    children: [
-                      Expanded(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                  vertical: elementSize(16, 24, 32),
-                                  horizontal: elementSize(16, 24, 32),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Are you CG',
-                                      style: TextStyle(
-                                        fontSize: fontSize(40, 36, 40),
-                                        color: Color.fromARGB(255, 7, 132, 11),
-                                        fontFamily: 'Hanken Grotesk',
-                                        fontWeight: FontWeight.w900,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Employee?',
-                                      style: TextStyle(
-                                        fontSize: fontSize(40, 36, 40),
-                                        color: Color.fromARGB(255, 7, 132, 11),
-                                        fontFamily: 'Hanken Grotesk',
-                                        fontWeight: FontWeight.w900,
-                                      ),
-                                    ),
-                                    SizedBox(height: 16),
-                                    Text(
-                                      'Select one option from the list below.',
-                                      style: TextStyle(
-                                        color: const Color.fromARGB(
-                                            255, 117, 117, 117),
-                                        fontFamily: 'Hanken Grotesk',
-                                        fontSize: fontSize(16, 16, 18),
-                                        fontStyle: FontStyle.normal,
-                                        fontWeight: FontWeight.w400,
-                                        height: 1.0,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                    // Content
+                    Column(
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: elementSize(16, 24, 32),
+                              horizontal: elementSize(16, 24, 32),
                             ),
-                          ],
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Are you CG',
+                                  style: TextStyle(
+                                    fontSize: fontSize(40, 36, 40),
+                                    color: Color.fromARGB(255, 7, 132, 11),
+                                    fontFamily: 'Hanken Grotesk',
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                                Text(
+                                  'Employee?',
+                                  style: TextStyle(
+                                    fontSize: fontSize(40, 36, 40),
+                                    color: Color.fromARGB(255, 7, 132, 11),
+                                    fontFamily: 'Hanken Grotesk',
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  'Select one option from the list below.',
+                                  style: TextStyle(
+                                    color: Color(0xFF757575),
+                                    fontFamily: 'Hanken Grotesk',
+                                    fontSize: fontSize(16, 16, 18),
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                      buildBottomOptions(
-                        fontSize: fontSize,
-                        elementSize: elementSize,
-                      ),
-                    ],
-                  ),
-                ],
+                        // Bottom Option Cards
+                        buildBottomOptions(
+                          fontSize: fontSize,
+                          elementSize: elementSize,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -199,7 +143,6 @@ class _ChooseAccessScreenState extends State<ChooseAccess> {
               subtitle: 'Login with your Employee ID.',
               iconPath: 'assets/images/Right-Scroll.svg',
               onTap: () => context.push('/login'),
-                  //Navigator.pushNamed(context, '/login'),
               fontSize: fontSize,
               elementSize: elementSize,
             ),
@@ -209,8 +152,6 @@ class _ChooseAccessScreenState extends State<ChooseAccess> {
               subtitle: 'Provide with your details.',
               iconPath: 'assets/images/Right-Scroll.svg',
               onTap: () => context.push('/main-menu-ext'),
-                  //Navigator.pushNamed(context, '/externalVisitor'),
-                  //context.go('/externalVisitor'), // Gunakan context.go
               fontSize: fontSize,
               elementSize: elementSize,
             ),
@@ -269,7 +210,7 @@ class _ChooseAccessScreenState extends State<ChooseAccess> {
                 height: elementSize(30, 35, 40),
                 width: elementSize(30, 35, 40),
                 placeholderBuilder: (context) =>
-                    CircularProgressIndicator(),
+                    CircularProgressIndicator(strokeWidth: 2),
               ),
             ],
           ),

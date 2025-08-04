@@ -1,5 +1,3 @@
-//import 'package:flutter/material.dart';
-
 class Dept {
   final String namedept;
   final String codedept;

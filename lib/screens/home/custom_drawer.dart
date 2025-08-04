@@ -11,7 +11,7 @@ class CustomDrawer extends StatelessWidget {
   Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('isLoggedIn');
-    context.go('/choose-access');
+    context.go('/login');
   }
 
   @override

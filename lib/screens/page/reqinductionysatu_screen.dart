@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import '../home/custom_drawer.dart';
 import 'package:she_vi/services/api_service.dart';
-import 'package:she_vi/models/Dept.dart';
+import 'package:she_vi/models/EmployeeByOu.dart';
 import 'package:she_vi/models/Plant.dart';
 import 'package:she_vi/models/Durations.dart' as customDurations;
 import 'package:hive/hive.dart';
-//import 'package:she_vi/screens/page/requestpagesatu_screen.dart';
 import 'package:go_router/go_router.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 
 class ReqInductionySatu extends StatefulWidget {
   @override
@@ -15,17 +15,19 @@ class ReqInductionySatu extends StatefulWidget {
 }
 
 class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
-  //GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   bool _isLoading = false;
   bool _isButtonEnabled = false;
   ApiService apiService = ApiService();
+
   PlantModel? _selectedPlant;
   List<PlantModel> plantlist = [];
   DateTime? _selectedDate;
 
-  Dept? _selectedDept;
-  List<Dept> deptlist = [];
+  // Dept? _selectedDept;
+  // List<Dept> deptlist = [];
+
+  EmployeeByOu? _selectedEmplo;
+  List<EmployeeByOu> emplolist = [];
 
   customDurations.Durations? _selectedDuras;
   List<customDurations.Durations> duraslist = [];
@@ -62,8 +64,6 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
         // Jika token ada, setState untuk memperbarui UI
         setState(() {
           _loadData();
-          // Perbarui username jika diperlukan
-          // username = box.get('username');
         });
       }
     });
@@ -77,13 +77,10 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
     try {
       final String idplant = "";
       final loadPlantsFuture = _loadPlants();
-      final loadDeptFuture =
-      _loadDept(idplant); // Jalankan fungsi dan simpan Future
       final loadVisitFuture = _loadVisit();
 
       await Future.wait([
         loadPlantsFuture,
-        loadDeptFuture,
         loadVisitFuture,
       ]);
     } catch (e) {
@@ -108,20 +105,23 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
     }
   }
 
-  Future<void> _loadDept(String idplant) async {
+  Future<void> _loadEmplo(String idplant) async {
+    setState(() {
+      _isLoading = true; // Tampilkan loading indicator
+    });
     try {
-      final dept =
-      await apiService.fetchDept(idplant); // Fetch Dept berdasarkan Plant
+      final emplo = await apiService.employeeByPlant(idplant);
       setState(() {
-        deptlist = dept; // Tetapkan Dept ke daftar
-        _selectedDept =
-        dept.isNotEmpty ? dept.first : null; // Tetapkan Dept default
+        emplolist = emplo;
+        _selectedEmplo = emplo.isNotEmpty ? emplo.first : null;
+        _isLoading = false;
       });
     } catch (e) {
-      print('Error fetching Dept: $e');
+      print('Error fetching Employee: $e');
       setState(() {
-        deptlist = []; // Tetapkan daftar kosong jika gagal
-        _selectedDept = null; // Reset pilihan Dept
+        emplolist = [];
+        _selectedEmplo = null;
+        _isLoading = false;
       });
     }
   }
@@ -136,7 +136,6 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
-        //_updateButtonState();
       });
     }
   }
@@ -155,7 +154,7 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
   void _updateNextButtonState() {
     setState(() {
       _isButtonEnabled = _selectedPlant != null &&
-          _selectedDept != null &&
+          _selectedEmplo != null &&
           _selectedDate != null &&
           _reasonController.text.isNotEmpty;
     });
@@ -165,14 +164,14 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
     if (_selectedPlant != null) {
       setState(() {
         final String idplant = _selectedPlant!.codeplant;
-        _loadDept(idplant);
+        //_loadDept(idplant);
+        _loadEmplo(idplant);
         _updateNextButtonState();
-        //_isButtonEnabled = true; // Aktifkan tombol
       });
     } else {
       setState(() {
         _isButtonEnabled =
-        false; // Nonaktifkan tombol jika tidak ada plant yang dipilih
+            false; // Nonaktifkan tombol jika tidak ada plant yang dipilih
       });
     }
   }
@@ -192,16 +191,16 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
       return;
     }
 
-    // Pastikan _selectedPlant dan _selectedDept sudah dipilih
-    if (_selectedPlant == null || _selectedDept == null) {
+    // Pastikan _selectedPlant dan _selectedEmplo sudah dipilih
+    if (_selectedPlant == null || _selectedEmplo == null) {
       _showCreateError('Pilih plant dan departemen terlebih dahulu.');
       return;
     }
 
     final String statusid = "0";
     final String plant_id = _selectedPlant?.id?.toString() ?? '';
-    final String departmentname = _selectedDept?.namedept ?? '';
-    final String picname = '-';
+    final String departmentname = _selectedEmplo?.unitname ?? '';
+    final String picname = _selectedEmplo?.fullname ?? '';
     final String arrivaldate = _selectedDate?.toIso8601String() ?? '';
     final String durationid = _selectedDuras?.id?.toString() ?? '';
     final String reasontovisit = _reasonController.text;
@@ -213,12 +212,10 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
       _showCreateError('Lengkapi semua kolom yang diperlukan.');
       return;
     }
-
     setState(() {
       _isLoading = true; // Tampilkan indikator loading
     });
     try {
-
       final result = await apiService.createInductionRequest(
         visitorid,
         statusid,
@@ -231,27 +228,20 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
         createdby,
         updatedby,
       );
-
       setState(() {
         _isLoading = false;
       });
 
       // Cek jika berhasil
       if (result) {
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => ReqPageSatu()),
-        // );
-        context.go(
-          '/request-induction',
-          extra: {'username': username},
-        );
+        GoRouter.of(context).go('/request-submitted',
+            extra: {'username': username ?? 'defaultID'});
       } else {
         _showCreateError('Gagal membuat Induction Request.');
       }
     } catch (e) {
       setState(() {
-        _isLoading = false; // Pastikan loading disembunyikan jika error
+        _isLoading = false;
       });
       _showConnectionError('Terjadi kesalahan: $e');
     }
@@ -293,7 +283,6 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
   Widget build(BuildContext context) {
     final keyboardSpace = MediaQuery.of(context).viewInsets.bottom;
     return Scaffold(
-      //key: _scaffoldKey,
       appBar: AppBar(
         title: Text(
           'Visitor Induction',
@@ -311,53 +300,44 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
       ),
       drawer: CustomDrawer(username: username),
       resizeToAvoidBottomInset: true,
-      body: Center(
-        child: Container(
-          width: MediaQuery.of(context).size.shortestSide,
-          height: MediaQuery.of(context).size.height,
-          child: Stack(
-            children: [
-              SafeArea(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.only(bottom: 80.0),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: MediaQuery.of(context).size.height,
-                    ),
-                    child: Column(
-                      children: [
-                        _buildBackground(),
-                        SizedBox(height: 0),
-                        _buildForm(context),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              // Positioned(
-              //   bottom:
-              //   MediaQuery.of(context).viewInsets.bottom > 0 ? 0.0 : 10.0,
-              //   left: 0,
-              //   right: 0,
-              //   child: Container(
-              //     color: Colors.white,
-              //     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              //     child: _buildButtons(context),
-              //   ),
-              // ),
-              _buildButtons(context),
-              if (_isLoading)
-                Positioned.fill(
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Color(0xFF07840B), // Warna hijau
+      body: SafeArea(
+        child: Center(
+          child: Container(
+            width: MediaQuery.of(context).size.shortestSide,
+            height: MediaQuery.of(context).size.height,
+            child: Stack(
+              children: [
+                SafeArea(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.only(bottom: 80.0),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: MediaQuery.of(context).size.height,
+                      ),
+                      child: Column(
+                        children: [
+                          _buildBackground(),
+                          SizedBox(height: 0),
+                          _buildForm(context),
+                        ],
                       ),
                     ),
                   ),
                 ),
-            ],
+                _buildButtons(context),
+                if (_isLoading)
+                  Positioned.fill(
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Color(0xFF07840B), // Warna hijau
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -396,14 +376,20 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
                   });
                 }),
                 SizedBox(height: 24),
-                _buildDropdownDept(
-                    'PIC Name & Department', deptlist, _selectedDept, (value) {
+                _buildDropdownEmplo(
+                    'PIC Name & Department', emplolist, _selectedEmplo,
+                    (value) {
                   setState(() {
-                    _selectedDept = value;
+                    _selectedEmplo = value;
                   });
                 }),
+                // _buildDropdownDept('PIC Name & Department', deptlist, _selectedDept, (value) {
+                //   setState(() { _selectedDept = value; });
+                // }),
+
                 SizedBox(height: 24),
                 _buildDateSection(),
+                SizedBox(height: 24),
                 _buildDropdownVisit(
                     'Visit Duration', duraslist, _selectedDuras, (value) {}),
                 SizedBox(height: 24),
@@ -510,34 +496,36 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
         SizedBox(height: 8),
         items.isEmpty
             ? Center(
-            child:
-            CircularProgressIndicator()) // Loader jika data Plant belum ada
+                // child:CircularProgressIndicator()
+                )
             : DropdownButtonFormField<PlantModel>(
-          items: items.map((item) {
-            return DropdownMenuItem<PlantModel>(
-              value: item,
-              child: Text(item.nameplants), // Nama Plant yang ditampilkan
-            );
-          }).toList(),
-          onChanged: (value) {
-            onChanged(value);
-            setState(() {
-              _selectedPlant = value;
-              _updateButtonState(); // Perbarui Dept sesuai Plant
-            });
-          },
-          value: selectedValue,
-          decoration: InputDecoration(
-            hintText: 'Choose $title',
-            border: OutlineInputBorder(),
-          ),
-        ),
+                items: items.map((item) {
+                  return DropdownMenuItem<PlantModel>(
+                    value: item,
+                    child: Text(item.nameplants), // Nama Plant yang ditampilkan
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  onChanged(value);
+                  setState(() {
+                    _selectedPlant = value;
+                    _updateButtonState(); // Perbarui Dept sesuai Plant
+                  });
+                },
+                value: selectedValue,
+                decoration: InputDecoration(
+                  hintText: 'Choose $title',
+                  border: OutlineInputBorder(),
+                ),
+              ),
       ],
     );
   }
 
-  Widget _buildDropdownDept(String title, List<Dept> items, Dept? selectedValue,
-      Function(Dept?) onChanged) {
+  Widget _buildDropdownEmplo(String title, List<EmployeeByOu> items,
+      EmployeeByOu? selectedValue, Function(EmployeeByOu?) onChanged) {
+    TextEditingController searchController = TextEditingController();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -547,42 +535,206 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
         ),
         SizedBox(height: 8),
         items.isEmpty
-            ? DropdownButtonFormField<String>(
-          items: [
-            DropdownMenuItem<String>(
-              value: 'No Select Plant',
-              child: Text('Select Plant'),
-            ),
-          ],
-          onChanged: null, // Tidak ada interaksi karena Dept kosong
-          value: 'No Select Plant',
-          decoration: InputDecoration(
-            hintText: 'Choose $title',
-            border: OutlineInputBorder(),
-          ),
-        )
-            : DropdownButtonFormField<Dept>(
-          items: items.map((item) {
-            return DropdownMenuItem<Dept>(
-              value: item,
-              child: Text(item.namedept),
-            );
-          }).toList(),
-          onChanged: (value) {
-            onChanged(value);
-            setState(() {
-              _selectedDept = value;
-            });
-          },
-          value: selectedValue,
-          decoration: InputDecoration(
-            hintText: 'Choose $title',
-            border: OutlineInputBorder(),
-          ),
-        ),
+            ? DropdownButton2<String>(
+                isExpanded: true,
+                hint: Text('Choose $title'),
+                items: [
+                  DropdownMenuItem<String>(
+                    value: '',
+                    child: Text('Choose Department destination'),
+                  ),
+                ],
+                onChanged: null,
+                value: '',
+                buttonStyleData: ButtonStyleData(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    //borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              )
+            : DropdownButton2<EmployeeByOu>(
+                isExpanded: true,
+                hint: Text('Choose $title'),
+                items: items
+                    .map((item) => DropdownMenuItem<EmployeeByOu>(
+                          value: item,
+                          child: Text(item.fullname + ' - ' + item.unitname),
+                        ))
+                    .toList(),
+                // items: items
+                //     .take(5) // hanya ambil 5 item pertama
+                //     .map((item) => DropdownMenuItem<EmployeeByOu>(
+                //   value: item,
+                //   child: Text('${item.fullname} - ${item.unitname}'),
+                // ))
+                //     .toList(),
+
+                onChanged: (value) {
+                  onChanged(value);
+                  setState(() {
+                    _selectedEmplo = value;
+                  });
+                },
+                value: selectedValue,
+                buttonStyleData: ButtonStyleData(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                dropdownSearchData: DropdownSearchData(
+                  searchController: searchController,
+                  searchInnerWidgetHeight: 50,
+                  searchInnerWidget: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: TextField(
+                      controller: searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search...',
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (value) {
+                        setState(() {}); // Perbarui tampilan setelah pencarian
+                      },
+                    ),
+                  ),
+                  searchMatchFn: (item, searchValue) {
+                    final query = searchValue.toLowerCase();
+                    final fullname = item.value!.fullname.toLowerCase();
+                    final unitname = item.value!.unitname.toLowerCase();
+                    return fullname.contains(query) || unitname.contains(query);
+                    //return item.value!.fullname.toLowerCase().contains(searchValue.toLowerCase());
+                  },
+                ),
+              ),
       ],
     );
   }
+
+  // Widget _buildDropdownDept(String title, List<Dept> items, Dept? selectedValue, Function(Dept?) onChanged) {
+  //   TextEditingController searchController = TextEditingController();
+  //
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Text(title,
+  //         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+  //       ),
+  //       SizedBox(height: 8),
+  //       items.isEmpty? DropdownButton2<String>(
+  //         isExpanded: true,
+  //         hint: Text('Choose $title'),
+  //         items: [
+  //           DropdownMenuItem<String>(
+  //             value: 'No Select Plant',
+  //             child: Text('Choose Department destination'),
+  //           ),
+  //         ],
+  //         onChanged: null,
+  //         value: 'No Select Plant',
+  //         underline: SizedBox(),
+  //         buttonStyleData: ButtonStyleData(
+  //           decoration: BoxDecoration(
+  //             border: Border.all(color: Colors.grey),
+  //             borderRadius: BorderRadius.circular(8),
+  //           ),
+  //         ),
+  //       )
+  //           : DropdownButton2<Dept>(
+  //         isExpanded: true,
+  //         hint: Text('Choose $title'),
+  //         items: items
+  //             .map((item) => DropdownMenuItem<Dept>(
+  //           value: item,
+  //           child: Text(item.namedept),
+  //         ))
+  //             .toList(),
+  //         onChanged: (value) {
+  //           onChanged(value);
+  //           setState(() {
+  //             _selectedDept = value;
+  //           });
+  //         },
+  //         value: selectedValue,
+  //         buttonStyleData: ButtonStyleData(
+  //           decoration: BoxDecoration(
+  //             border: Border.all(color: Colors.grey),
+  //             borderRadius: BorderRadius.circular(8),
+  //           ),
+  //         ),
+  //         dropdownSearchData: DropdownSearchData(
+  //           searchController: searchController,
+  //           searchInnerWidgetHeight: 50,
+  //           searchInnerWidget: Padding(
+  //             padding: const EdgeInsets.all(8),
+  //             child: TextField(
+  //               controller: searchController,
+  //               decoration: InputDecoration(
+  //                 hintText: 'Search...',
+  //                 border: OutlineInputBorder(),
+  //               ),
+  //               onChanged: (value) {
+  //                 setState(() {}); // Perbarui tampilan setelah pencarian
+  //               },
+  //             ),
+  //           ),
+  //           searchMatchFn: (item, searchValue) {
+  //             return item.value!.namedept.toLowerCase().contains(searchValue.toLowerCase());
+  //           },
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
+
+  // Widget _buildDropdownDept__(String title, List<Dept> items, Dept? selectedValue,
+  //     Function(Dept?) onChanged) {
+  //       return Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           Text(
+  //             title,
+  //             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+  //           ),
+  //           SizedBox(height: 8),
+  //           items.isEmpty
+  //               ? DropdownButtonFormField<String>(
+  //             items: [
+  //               DropdownMenuItem<String>(
+  //                 value: 'No Select Plant',
+  //                 child: Text('Select Plant'),
+  //               ),
+  //             ],
+  //             onChanged: null, // Tidak ada interaksi karena Dept kosong
+  //             value: 'No Select Plant',
+  //             decoration: InputDecoration(
+  //               hintText: 'Choose $title',
+  //               border: OutlineInputBorder(),
+  //             ),
+  //           )
+  //               : DropdownButtonFormField<Dept>(
+  //             items: items.map((item) {
+  //               return DropdownMenuItem<Dept>(
+  //                 value: item,
+  //                 child: Text(item.namedept),
+  //               );
+  //             }).toList(),
+  //             onChanged: (value) {
+  //               onChanged(value);
+  //               setState(() {
+  //                 _selectedDept = value;
+  //               });
+  //             },
+  //             value: selectedValue,
+  //             decoration: InputDecoration(
+  //               hintText: 'Choose $title',
+  //               border: OutlineInputBorder(),
+  //             ),
+  //           ),
+  //         ],
+  //       );
+  // }
 
   Widget _buildDateSection() {
     return Column(
@@ -630,24 +782,24 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
     );
   }
 
-  Widget ____buildButtons(BuildContext context) {
-    return Positioned(
-      bottom: 0,
-      left: 0,
-      right: 0,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildBackButton(context),
-            SizedBox(width: 8),
-            _buildNextButton(),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget ____buildButtons(BuildContext context) {
+  //   return Positioned(
+  //     bottom: 0,
+  //     left: 0,
+  //     right: 0,
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(16.0),
+  //       child: Row(
+  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //         children: [
+  //           _buildBackButton(context),
+  //           SizedBox(width: 8),
+  //           _buildNextButton(),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildButtons(BuildContext context) {
     return Positioned(
@@ -704,7 +856,7 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
         ),
         style: ButtonStyle(
           backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-                (Set<MaterialState> states) {
+            (Set<MaterialState> states) {
               if (states.contains(MaterialState.disabled)) {
                 return Color(0xFFA4A4A4);
               }
@@ -738,27 +890,27 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
         SizedBox(height: 8),
         items.isEmpty
             ? Center(
-          child: Text('No items available'),
-        )
+                child: Text('No items available'),
+              )
             : DropdownButtonFormField<dynamic>(
-          items: items.map((item) {
-            return DropdownMenuItem<dynamic>(
-              value: item,
-              child: Text(item.nameduration),
-            );
-          }).toList(),
-          onChanged: (value) {
-            onChanged(value); // Panggil callback onChanged
-            setState(() {
-              _selectedDuras = value; // Update _selectedDuras
-            });
-          },
-          value: selectedValue,
-          decoration: InputDecoration(
-            hintText: 'Choose $title',
-            border: OutlineInputBorder(),
-          ),
-        ),
+                items: items.map((item) {
+                  return DropdownMenuItem<dynamic>(
+                    value: item,
+                    child: Text(item.nameduration),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  onChanged(value); // Panggil callback onChanged
+                  setState(() {
+                    _selectedDuras = value; // Update _selectedDuras
+                  });
+                },
+                value: selectedValue,
+                decoration: InputDecoration(
+                  hintText: 'Choose $title',
+                  border: OutlineInputBorder(),
+                ),
+              ),
       ],
     );
   }

@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "549508688373",
+    "firebase_url": "https://sedia-567ad-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "sedia-567ad",
+    "storage_bucket": "sedia-567ad.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:549508688373:android:a3ceb31885eb43105998bc",
+        "android_client_info": {
+          "package_name": "com.example.she_vi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADUmm_vIU6g3w_GoLxlr91l8cm_hKsvGE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
