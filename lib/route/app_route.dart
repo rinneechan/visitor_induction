@@ -20,6 +20,7 @@ import 'package:she_vi/screens/page/detailvisit.dart';
 import 'package:she_vi/screens/induction_test/complated_screen.dart';
 import 'package:she_vi/screens/setting/navigator_service.dart';
 import 'package:she_vi/screens/page/visitorrequest_Screen.dart';
+import 'package:she_vi/screens/login/logout_screen.dart';
 
 void main() {
   runApp(App());
@@ -59,6 +60,10 @@ class AppRouter {
       GoRoute(
         path: '/login',
         builder: (context, state) => LoginScreen(),
+      ),// ✅ Tambahkan di sini route logout
+      GoRoute(
+        path: '/logout',
+        builder: (context, state) => LogoutScreen(),
       ),
       GoRoute(
         path: '/create-new-pass/:employeeid/:fullName/:email',
