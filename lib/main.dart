@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -13,6 +12,7 @@ import 'route/app_route.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:she_vi/screens/setting/navigator_service.dart';
 import 'package:she_vi/utils/env_helper.dart'; // Import helper
+import 'package:she_vi/screens/home/custom_drawer.dart';
 
 // Fungsi global untuk menangani notifikasi di background
 Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {

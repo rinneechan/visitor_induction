@@ -81,7 +81,7 @@ class _MainmenuScreenState extends State<MainmenuScreen> {
           backgroundColor: const Color(0xFFFFFFFF),
           elevation: 0,
         ),
-        drawer: CustomDrawer(username: username),
+        drawer: CustomDrawer(username: username ?? "Guest"),
         body: Center(
           child: Container(
             width: MediaQuery.of(context).size.shortestSide,

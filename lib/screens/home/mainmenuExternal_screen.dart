@@ -55,7 +55,8 @@ class _MainmenuExternalScreenScreenState extends State<MainmenuExternalScreen> {
           backgroundColor: const Color(0xFFFFFFFF),
           elevation: 0, // Untuk membuat AppBar tanpa bayangan
         ),
-        drawer: CustomDrawer(username: username),
+        drawer: CustomDrawer(username: username ?? "Guest"),
+
         body: Center(
           child: Container(
             width: MediaQuery.of(context).size.shortestSide,

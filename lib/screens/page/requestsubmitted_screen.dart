@@ -78,7 +78,7 @@ class _RequestSubmittedScreenState extends State<RequestSubmitted> {
         backgroundColor: Color(0xFFFFFFFF),
         elevation: 2,
       ),
-      drawer: CustomDrawer(),
+      drawer: CustomDrawer(username: username ?? "Guest"),
       body: SafeArea(
         child:Stack(
         children: <Widget>[

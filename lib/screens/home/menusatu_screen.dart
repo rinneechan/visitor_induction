@@ -151,7 +151,7 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
             ),
           ],
         ),
-        drawer: CustomDrawer(username: username),
+        drawer: CustomDrawer(username: username ?? "Guest"),
         body: SafeArea(
           child: RefreshIndicator(
             onRefresh: () async {

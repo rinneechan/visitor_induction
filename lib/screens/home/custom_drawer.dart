@@ -1,121 +1,122 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomDrawer extends StatelessWidget {
-  final String? username;
+  final String username;
 
-  const CustomDrawer({Key? key, this.username}) : super(key: key);
+  const CustomDrawer({super.key, required this.username});
 
-  Future<void> logout(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('isLoggedIn');
-    context.go('/login');
+
+  Future<void> _logout(BuildContext context) async {
+    try {
+      // Hapus data auth Firebase
+      await FirebaseAuth.instance.signOut();
+
+      // Hapus data Hive
+      var userBox = await Hive.openBox('userBox');
+      await userBox.clear();
+
+      // Hapus SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+
+      // Arahkan ke login setelah logout
+      if (context.mounted) {
+        context.go('/login');
+      }
+    } catch (e) {
+      debugPrint("❌ Error saat logout: $e");
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Gagal logout: $e")),
+        );
+      }
+    }
+  }
+
+  void _showLogoutConfirmation(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.logout, size: 40, color: Colors.black),
+              const SizedBox(height: 10),
+              const Text(
+                "Konfirmasi Logout",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "Apakah Anda yakin ingin keluar dari aplikasi?",
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Batal"),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context); // Tutup modal
+                        _logout(context); // Lanjut logout
+                      },
+                      child: const Text("Logout"),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: Column(
-        children: <Widget>[
-          // Bagian header
-          DrawerHeader(
-            decoration: const BoxDecoration(
-              color: Color.fromARGB(255, 248, 249, 249),
-            ),
-            child: Center(
-              child: Text(
-                'Sedia',
-                style: const TextStyle(
-                  color: Color(0xFF07840B),
-                  fontFamily: 'Hanken Grotesk',
-                  fontSize: 32.0,
-                  fontWeight: FontWeight.w900,
-                  fontStyle: FontStyle.normal,
-                  height: 1.0,
-                ),
-              ),
+        children: [
+          UserAccountsDrawerHeader(
+            accountName: Text(username),
+            accountEmail: const Text(""),
+            currentAccountPicture: const CircleAvatar(
+              child: Icon(Icons.person),
             ),
           ),
-          // Bagian item menu
-          Expanded(
-            child: ListView(
-              children: [
-                ListTile(
-                  title: Text(username ?? 'Visitor'),
-                  leading: const Icon(Icons.person),
-                  onTap: () {
-                    Navigator.pop(context); // Menutup drawer
-                  },
-                ),
-                ListTile(
-                  title: const Text('Settings'),
-                  leading: const Icon(Icons.settings),
-                  onTap: () {
-                    // Navigasi untuk settings
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
-            ),
+          ListTile(
+            leading: const Icon(Icons.home),
+            title: const Text("Beranda"),
+            onTap: () {
+              context.go('/home');
+            },
           ),
-          // Bagian tombol logout
-          Container(
-            color: Colors.white,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-            child: _buildButtons(context),
+          const Spacer(),
+          ListTile(
+            leading: const Icon(Icons.logout, color: Colors.black),
+            title: const Text("Logout", style: TextStyle(color: Colors.black)),
+            onTap: () => _showLogoutConfirmation(context),
           ),
         ],
-      ),
-    );
-  }
-
-  // Membuat tombol-tombol
-  Widget _buildButtons(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _buildLogOutButton(context),
-      ],
-    );
-  }
-
-  // Tombol logout
-  Widget _buildLogOutButton(BuildContext context) {
-    return Expanded(
-      child: ElevatedButton(
-      onPressed: () => logout(context),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFFDDDDDD), // Warna latar tombol
-        padding: const EdgeInsets.symmetric(vertical: 16.0), // Padding tombol
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0), // Radius border
-          //side: const BorderSide(color: Color(0xFFDDDDDD)), // Border tombol
-        ),
-        alignment: Alignment.centerLeft, // Konten diatur ke kiri
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Icon(
-            Icons.logout, // Ikon logout
-            color: Color(0xFFFFFF), // Warna ikon
-            size: 24.0,
-          ),
-          SizedBox(width: 8), // Jarak antara ikon dan teks
-          Text(
-            'LOGOUT',
-            style: TextStyle(
-              color: Color(0xFF4F4D4D), // Warna teks
-              fontFamily: 'Hanken Grotesk',
-              fontSize: 16.0,
-              fontWeight: FontWeight.w600, // Ketebalan teks
-            ),
-          ),
-        ],
-      ),
       ),
     );
   }

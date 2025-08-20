@@ -141,7 +141,7 @@ class _MenuSatuExternalState extends State<MenuSatuExternalScreen> {
         elevation: 2,
       ),
 
-      drawer: CustomDrawer(username: username),
+      drawer: CustomDrawer(username: username ?? "Guest"),
       body: Center(
         child: Container(
           width: MediaQuery.of(context).size.shortestSide,

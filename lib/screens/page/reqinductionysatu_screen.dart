@@ -298,7 +298,7 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
         backgroundColor: Color(0xFFFFFFFF),
         elevation: 2,
       ),
-      drawer: CustomDrawer(username: username),
+      drawer: CustomDrawer(username: username ?? "Guest"),
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: Center(
