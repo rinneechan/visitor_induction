@@ -1,32 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-// Screens
+// -----------------------
+// SCREENS
+// -----------------------
+
+// Auth & General
 import 'package:she_vi/screens/login/login_screen.dart';
 import 'package:she_vi/screens/login/logout_screen.dart';
 import 'package:she_vi/screens/login/createnewpass_screen.dart';
 import 'package:she_vi/screens/welcome_screen.dart';
 import 'package:she_vi/screens/chooseaccess_screen.dart';
+
+// Home - Internal
 import 'package:she_vi/screens/home/mainmenu_screen.dart';
 import 'package:she_vi/screens/home/menusatu_screen.dart';
+
+// Home - External
 import 'package:she_vi/screens/home/mainmenuExternal_screen.dart';
+import 'package:she_vi/screens/home/external/register_screen.dart';
+import 'package:she_vi/screens/home/external/mainmenu_employee_screen.dart';
+import 'package:she_vi/screens/home/external/request_induction_form_screen.dart';
+
+// Pages
 import 'package:she_vi/screens/page/detailhistory.dart';
 import 'package:she_vi/screens/page/requestsubmitted_screen.dart';
 import 'package:she_vi/screens/page/reqinductionysatu_screen.dart';
 import 'package:she_vi/screens/page/detaiinfo.dart';
 import 'package:she_vi/screens/page/detailvisit.dart';
 import 'package:she_vi/screens/page/visitorrequest_Screen.dart';
+
+// Induction Test
 import 'package:she_vi/screens/induction_test/welcome_testsatu_screen.dart';
 import 'package:she_vi/screens/induction_test/welcome_testdua_screen.dart';
 import 'package:she_vi/screens/induction_test/question_screen.dart';
 import 'package:she_vi/screens/induction_test/test_complated_screen.dart';
 import 'package:she_vi/screens/induction_test/approved_mail_screen.dart';
 import 'package:she_vi/screens/induction_test/complated_screen.dart';
-import 'package:she_vi/screens/setting/navigator_service.dart';
-import 'package:she_vi/screens//home/external/register_screen.dart';
-import 'package:she_vi/screens/home/external/mainmenu_employee_screen.dart';
-import 'package:she_vi/screens/home/external/request_induction_screen.dart';
 
+// Utils / Services
+import 'package:she_vi/screens/setting/navigator_service.dart';
 
 void main() {
   runApp(App());
@@ -54,42 +67,13 @@ class AppRouter {
       /// -----------------------
       /// AUTH & GENERAL ROUTES
       /// -----------------------
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const WelcomeScreen(),
-      ),
-      GoRoute(
-        path: '/welcome',
-        builder: (context, state) => const WelcomeScreen(),
-      ),
-      GoRoute(
-        path: '/choose-access',
-        builder: (context, state) => ChooseAccess(),
-      ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => LoginScreen(),
-      ),
-      GoRoute(
-      path: '/register',
-      builder: (context, state) => const RegisterScreen(),
-    ),
-    // MENU VISITOR
-    GoRoute(
-      path: '/main-menu-ext',
-      builder: (context, state) => const MainmenuExternalScreen(),
-    ),
+      GoRoute(path: '/', builder: (context, state) => const WelcomeScreen()),
+      GoRoute(path: '/welcome', builder: (context, state) => const WelcomeScreen()),
+      GoRoute(path: '/choose-access', builder: (context, state) => ChooseAccess()),
+      GoRoute(path: '/login', builder: (context, state) => LoginScreen()),
+      GoRoute(path: '/register', builder: (context, state) => const RegisterScreen()),
+      GoRoute(path: '/logout', builder: (context, state) => LogoutScreen()),
 
-    // MENU KARYAWAN
-    GoRoute(
-      path: '/main-menu-emp',
-      builder: (context, state) => const MainmenuEmployeeScreen(),
-    ),
-
-      GoRoute(
-        path: '/logout',
-        builder: (context, state) => LogoutScreen(),
-      ),
       GoRoute(
         path: '/create-new-pass/:employeeid/:fullName/:email',
         builder: (context, state) {
@@ -115,10 +99,6 @@ class AppRouter {
             employeeid: extra?['username'] ?? 'defaultID',
           );
         },
-      ),
-      GoRoute(
-        path: '/request-induction',
-        builder: (context, state) => const RequestInductionScreen(),
       ),
       GoRoute(
         path: '/employee/request-induction',
@@ -148,7 +128,7 @@ class AppRouter {
       ),
 
       /// -----------------------
-      /// VISITOR ROUTES (Eksternal)
+      /// VISITOR ROUTES (External)
       /// -----------------------
       GoRoute(
         path: '/visitor/main-menu',
@@ -160,6 +140,10 @@ class AppRouter {
           final idRequest = state.uri.queryParameters['id'] ?? 'defaultID';
           return VisitorRequest(idrequest: idRequest);
         },
+      ),
+      GoRoute(
+        path: '/visitor/request-form',
+        builder: (context, state) => const RequestInductionScreen(),
       ),
       GoRoute(
         path: '/visitor/detail-scan',

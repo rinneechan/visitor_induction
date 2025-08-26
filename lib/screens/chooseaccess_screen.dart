@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
 
 class ChooseAccess extends StatefulWidget {
+  const ChooseAccess({super.key});
+
   @override
   _ChooseAccessScreenState createState() => _ChooseAccessScreenState();
 }
@@ -43,7 +45,7 @@ class _ChooseAccessScreenState extends State<ChooseAccess> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             return Center(
-              child: Container(
+              child: SizedBox(
                 width: MediaQuery.of(context).size.shortestSide,
                 height: screenHeight,
                 child: Stack(
@@ -151,7 +153,7 @@ class _ChooseAccessScreenState extends State<ChooseAccess> {
               title: 'External Visitor',
               subtitle: 'Provide with your details.',
               iconPath: 'assets/images/Right-Scroll.svg',
-              onTap: () => context.push('/main-menu-ext'),
+              onTap: () => context.push('/request-induction'),
               fontSize: fontSize,
               elementSize: elementSize,
             ),

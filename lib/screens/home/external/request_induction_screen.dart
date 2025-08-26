@@ -1,85 +1,81 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:she_vi/screens/home/custom_drawer.dart';
-import 'package:she_vi/screens/home/external/request_induction_form_screen.dart';
 
+class RequestInductionScreen extends StatelessWidget {
+  const RequestInductionScreen({super.key});
 
-class RequestInductionScreen extends StatefulWidget {
-  final String? username;
-  const RequestInductionScreen({super.key, this.username});
-
-  @override
-  State<RequestInductionScreen> createState() => _RequestInductionScreenState();
-}
-
-class _RequestInductionScreenState extends State<RequestInductionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Visitor Induction"),
-      ),
-      drawer: CustomDrawer(username: widget.username ?? "Guest"),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+      appBar: AppBar(title: const Text("Visitor Induction")),
+      drawer: const CustomDrawer(username: "Guest"), // Drawer opsional
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 12),
-            const Center(
-              child: Text(
-                "Click the button below to schedule your visitor induction.",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: Colors.black54),
-              ),
-            ),
-            const SizedBox(height: 20),
+            // Tombol Request New Induction
             Center(
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // TODO: Arahkan ke form request induction
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+              child: ElevatedButton(
+                onPressed: () {
+                  context.push('/request-form'); 
+                  // Pastikan sudah ada GoRoute dengan path: '/request-form'
+                  // dan builder-nya mengarah ke RequestInductionFormScreen
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 16, horizontal: 24),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text(
-                    "REQUEST NEW INDUCTION",
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
-                  ),
+                ),
+                child: const Text(
+                  "REQUEST NEW INDUCTION",
+                  style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
             ),
+
             const SizedBox(height: 28),
+
+            // Header Material
             const Row(
               children: [
                 Icon(Icons.assignment, color: Colors.black54),
                 SizedBox(width: 8),
                 Text(
                   "Induction Material",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 16, 
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
+
             const SizedBox(height: 16),
-            _buildMaterialItem("Material #1"),
-            _buildMaterialItem("Material #2"),
-            _buildMaterialItem("Material #3"),
-            _buildMaterialItem("Material #4"),
+
+            // List Material
+            const _MaterialItem(title: "Material #1"),
+            const _MaterialItem(title: "Material #2"),
+            const _MaterialItem(title: "Material #3"),
+            const _MaterialItem(title: "Material #4"),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildMaterialItem(String title) {
+class _MaterialItem extends StatelessWidget {
+  final String title;
+
+  const _MaterialItem({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -88,10 +84,16 @@ class _RequestInductionScreenState extends State<RequestInductionScreen> {
         trailing: TextButton(
           onPressed: () {
             // TODO: aksi download file
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Download $title belum tersedia")),
+            );
           },
           child: const Text(
             "Download",
-            style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Colors.green, 
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),
