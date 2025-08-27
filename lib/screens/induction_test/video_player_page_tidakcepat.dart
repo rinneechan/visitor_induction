@@ -10,10 +10,10 @@ class VideoPlayerPage extends StatefulWidget {
   final VoidCallback onFinishedWatching;
 
   const VideoPlayerPage({
-    Key? key,
+    super.key,
     required this.videoUrl,
     required this.onFinishedWatching,
-  }) : super(key: key);
+  });
 
   @override
   State<VideoPlayerPage> createState() => _VideoPlayerPageState();

@@ -1,4 +1,3 @@
-ori 
 import 'package:flutter/material.dart';
 import 'custom_drawer.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -7,8 +6,7 @@ import 'package:go_router/go_router.dart';
 
 class MainmenuExsternalScreen extends StatefulWidget {
   final String employeeid;
-  const MainmenuExsternalScreen({Key? key, required this.employeeid})
-      : super(key: key);
+  const MainmenuExsternalScreen({super.key, required this.employeeid});
 
   @override
   _MainmenuScreenState createState() => _MainmenuScreenState();
@@ -78,7 +76,7 @@ class _MainmenuScreenState extends State<MainmenuExsternalScreen> {
         ),
         drawer: CustomDrawer(username: username),
         body: Center(
-          child: Container(
+          child: SizedBox(
             width: MediaQuery.of(context).size.shortestSide,
             child: Stack(
               children: <Widget>[

@@ -17,11 +17,11 @@ class WelcomeTestSatuScreen extends StatefulWidget {
   final String plantName;
 
   const WelcomeTestSatuScreen({
-    Key? key,
+    super.key,
     required this.idrequest,
     required this.plantId,
     required this.plantName,
-  }) : super(key: key);
+  });
 
   @override
   _WelcomeTestSatuScreenState createState() => _WelcomeTestSatuScreenState();
@@ -177,7 +177,7 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
 
   Widget _buildBody() {
     return Center(
-      child: Container(
+      child: SizedBox(
         width: MediaQuery.of(context).size.shortestSide,
         height: MediaQuery.of(context).size.height,
         child: Stack(
@@ -538,10 +538,10 @@ class PDFViewPage extends StatefulWidget {
   final Function() onFinishedReading;
 
   const PDFViewPage({
-    Key? key,
+    super.key,
     required this.filePath,
     required this.onFinishedReading,
-  }) : super(key: key);
+  });
 
   @override
   _PDFViewPageState createState() => _PDFViewPageState();
@@ -581,10 +581,10 @@ class WebPdfViewer extends StatefulWidget {
   final Function() onFinishedReading;
 
   const WebPdfViewer({
-    Key? key,
+    super.key,
     required this.documentUrl,
     required this.onFinishedReading,
-  }) : super(key: key);
+  });
 
   @override
   _WebPdfViewerState createState() => _WebPdfViewerState();

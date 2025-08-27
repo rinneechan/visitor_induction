@@ -8,18 +8,18 @@ class CreateNewPass extends StatefulWidget {
   final String fullName;
   final String email;
 
-  const CreateNewPass({required this.employeeid, required this.fullName, required this.email});
+  const CreateNewPass({super.key, required this.employeeid, required this.fullName, required this.email});
 
   @override
   _CreateNewPassState createState() => _CreateNewPassState();
 }
 
 class _CreateNewPassState extends State<CreateNewPass> {
-  TextEditingController _codeController = TextEditingController();
+  final TextEditingController _codeController = TextEditingController();
 
  // final _passwordController = TextEditingController();
-  bool _isButtonEnabled = false;
-  bool _isPasswordVisible = false;
+  final bool _isButtonEnabled = false;
+  final bool _isPasswordVisible = false;
   bool _isObscured = true;
   bool _isObscuredRe = true;
 
@@ -31,8 +31,8 @@ class _CreateNewPassState extends State<CreateNewPass> {
 
   bool _isPasswordValid = false; // Cek apakah password valid
   bool _isRePasswordValid = false; // Cek apakah re-enter password valid
-  TextEditingController _passwordController = TextEditingController();
-  TextEditingController _rePasswordController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _rePasswordController = TextEditingController();
 
   bool _isValidPassword(String password) {
     // Harus minimal 8 karakter, ada angka, dan ada simbol
@@ -780,6 +780,42 @@ class _CreateNewPassState extends State<CreateNewPass> {
                                         onPressed: () {
                                           context.go('/login');
                                         },
+                                        style: ButtonStyle(
+                                          backgroundColor:
+                                          WidgetStateProperty.resolveWith<Color?>(
+                                                (Set<WidgetState> states) {
+                                              if (states.contains(WidgetState.disabled)) {
+                                                return Color(
+                                                    0xFFA4A4A4); // Warna saat tombol dinonaktifkan
+                                              }
+                                              return Color(
+                                                  0xFF07840B); // Warna saat tombol aktif
+                                            },
+                                          ),
+                                          padding: WidgetStateProperty.all<EdgeInsets>(
+                                            EdgeInsets.symmetric(
+                                                vertical:
+                                                16.0), // Menyesuaikan padding agar tombol lebih tinggi
+                                          ),
+                                          shape: WidgetStateProperty.all<
+                                              RoundedRectangleBorder>(
+                                            RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(
+                                                  8.0), // Sama dengan border-radius: 8px;
+                                            ),
+                                          ),
+                                          foregroundColor:
+                                          WidgetStateProperty.resolveWith<Color?>(
+                                                (Set<WidgetState> states) {
+                                              if (states.contains(WidgetState.disabled)) {
+                                                return Colors
+                                                    .white; // Warna teks saat tombol dinonaktifkan
+                                              }
+                                              return Colors
+                                                  .white; // Warna teks saat tombol aktif
+                                            },
+                                          ),
+                                        ),
                                         child: Row(
                                           mainAxisAlignment: MainAxisAlignment
                                               .center, // Sama dengan justify-content: center;
@@ -802,42 +838,6 @@ class _CreateNewPassState extends State<CreateNewPass> {
                                               ),
                                             ),
                                           ],
-                                        ),
-                                        style: ButtonStyle(
-                                          backgroundColor:
-                                          MaterialStateProperty.resolveWith<Color?>(
-                                                (Set<MaterialState> states) {
-                                              if (states.contains(MaterialState.disabled)) {
-                                                return Color(
-                                                    0xFFA4A4A4); // Warna saat tombol dinonaktifkan
-                                              }
-                                              return Color(
-                                                  0xFF07840B); // Warna saat tombol aktif
-                                            },
-                                          ),
-                                          padding: MaterialStateProperty.all<EdgeInsets>(
-                                            EdgeInsets.symmetric(
-                                                vertical:
-                                                16.0), // Menyesuaikan padding agar tombol lebih tinggi
-                                          ),
-                                          shape: MaterialStateProperty.all<
-                                              RoundedRectangleBorder>(
-                                            RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(
-                                                  8.0), // Sama dengan border-radius: 8px;
-                                            ),
-                                          ),
-                                          foregroundColor:
-                                          MaterialStateProperty.resolveWith<Color?>(
-                                                (Set<MaterialState> states) {
-                                              if (states.contains(MaterialState.disabled)) {
-                                                return Colors
-                                                    .white; // Warna teks saat tombol dinonaktifkan
-                                              }
-                                              return Colors
-                                                  .white; // Warna teks saat tombol aktif
-                                            },
-                                          ),
                                         ),
                                       ),
                                     ),

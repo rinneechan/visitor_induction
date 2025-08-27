@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 
 class DetailHistory extends StatefulWidget {
   final String idrequest;
-  const DetailHistory({Key? key, required this.idrequest}) : super(key: key);
+  const DetailHistory({super.key, required this.idrequest});
 
   @override
   _DetailHistoryState createState() => _DetailHistoryState();
@@ -347,7 +347,7 @@ class _DetailHistoryState extends State<DetailHistory> {
                 //   },
                 // );
                 context.go(
-                  '/welcome-test?idrequest=${datashow!.idrequest ?? ''}&plantId=${datashow!.plantId?.toString() ?? ''}&plantName=${datashow!.plantName ?? ''}',
+                  '/welcome-test?idrequest=${datashow!.idrequest ?? ''}&plantId=${datashow!.plantId.toString() ?? ''}&plantName=${datashow!.plantName ?? ''}',
                 );
 
 

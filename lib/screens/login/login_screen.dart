@@ -14,6 +14,8 @@ import 'dart:html' as html;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -156,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
           await FirebaseNotificationService().initNotifications();
 
           GoRouter.of(context)
-              .go('/request-induction', extra: {'username': username});
+              .go('/employee/request-induction', extra: {'username': username});
         } else {
           _showLoginPassError(
             errorMessage: 'Login gagal. Harap periksa kembali kredensial Anda.',
@@ -342,7 +344,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final bodyWidth = MediaQuery.of(context).size.shortestSide;
     final isMobile = screenWidth < 600;
     final isTablet = screenWidth >= 600 && screenWidth < 1200;
-    final FocusNode _usernameFocusNode = FocusNode();
+    final FocusNode usernameFocusNode = FocusNode();
 
     double fontSize(double mobile, double tablet, double web) => isMobile
         ? mobile
@@ -490,7 +492,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     visible: _isTextFieldVisible,
                                     child: TextField(
                                       controller: _usernameController,
-                                      focusNode: _usernameFocusNode,
+                                      focusNode: usernameFocusNode,
                                       decoration: InputDecoration(
                                         hintText: 'Enter your employee id',
                                         // prefixIcon: Icon(Icons.person),
@@ -524,18 +526,18 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ElevatedButton(
                                           onPressed: _changeEmployeeId,
                                           style: ButtonStyle(
-                                            padding: MaterialStateProperty.all<
+                                            padding: WidgetStateProperty.all<
                                                     EdgeInsets>(
                                                 EdgeInsets.symmetric(
                                                     vertical: 8,
                                                     horizontal: 16)),
-                                            backgroundColor: MaterialStateProperty
+                                            backgroundColor: WidgetStateProperty
                                                 .all<Color>(Color.fromARGB(
                                                     255,
                                                     248,
                                                     250,
                                                     248)), // Warna background
-                                            shape: MaterialStateProperty.all<
+                                            shape: WidgetStateProperty.all<
                                                 RoundedRectangleBorder>(
                                               RoundedRectangleBorder(
                                                 borderRadius:
@@ -549,10 +551,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                               ),
                                             ),
                                             foregroundColor:
-                                                MaterialStateProperty.all<
+                                                WidgetStateProperty.all<
                                                         Color>(
                                                     const Color(0xFF07840B)),
-                                            textStyle: MaterialStateProperty
+                                            textStyle: WidgetStateProperty
                                                 .all<TextStyle>(
                                               TextStyle(
                                                 fontFamily: 'Hanken Grotesk',
@@ -647,6 +649,51 @@ class _LoginScreenState extends State<LoginScreen> {
                                             onPressed: _isButtonEnabled
                                                 ? _login
                                                 : null,
+                                            style: ButtonStyle(
+                                              backgroundColor:
+                                                  WidgetStateProperty
+                                                      .resolveWith<Color?>(
+                                                (Set<WidgetState> states) {
+                                                  if (states.contains(
+                                                      WidgetState.disabled)) {
+                                                    return Color(
+                                                        0xFFA4A4A4); // Warna saat tombol dinonaktifkan
+                                                  }
+                                                  return Color(
+                                                      0xFF07840B); // Warna saat tombol aktif
+                                                },
+                                              ),
+                                              padding: WidgetStateProperty
+                                                  .all<EdgeInsets>(
+                                                EdgeInsets.symmetric(
+                                                    vertical:
+                                                        16.0), // Menyesuaikan padding agar tombol lebih tinggi
+                                              ),
+                                              minimumSize: WidgetStateProperty
+                                                  .all<Size>(
+                                                Size(double.infinity,
+                                                    56), // Ukuran minimum tombol dengan tinggi 56
+                                              ),
+                                              shape: WidgetStateProperty.all<
+                                                  RoundedRectangleBorder>(
+                                                RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          8.0), // Sama dengan border-radius: 8px;
+                                                ),
+                                              ),
+                                              foregroundColor:
+                                                  WidgetStateProperty
+                                                      .resolveWith<Color?>(
+                                                (Set<WidgetState> states) {
+                                                  if (states.contains(
+                                                      WidgetState.disabled)) {
+                                                    return Colors.white;
+                                                  }
+                                                  return Colors.white;
+                                                },
+                                              ),
+                                            ),
                                             child: Row(
                                               mainAxisAlignment: MainAxisAlignment
                                                   .center, // Sama dengan justify-content: center;
@@ -670,51 +717,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   ),
                                                 ),
                                               ],
-                                            ),
-                                            style: ButtonStyle(
-                                              backgroundColor:
-                                                  MaterialStateProperty
-                                                      .resolveWith<Color?>(
-                                                (Set<MaterialState> states) {
-                                                  if (states.contains(
-                                                      MaterialState.disabled)) {
-                                                    return Color(
-                                                        0xFFA4A4A4); // Warna saat tombol dinonaktifkan
-                                                  }
-                                                  return Color(
-                                                      0xFF07840B); // Warna saat tombol aktif
-                                                },
-                                              ),
-                                              padding: MaterialStateProperty
-                                                  .all<EdgeInsets>(
-                                                EdgeInsets.symmetric(
-                                                    vertical:
-                                                        16.0), // Menyesuaikan padding agar tombol lebih tinggi
-                                              ),
-                                              minimumSize: MaterialStateProperty
-                                                  .all<Size>(
-                                                Size(double.infinity,
-                                                    56), // Ukuran minimum tombol dengan tinggi 56
-                                              ),
-                                              shape: MaterialStateProperty.all<
-                                                  RoundedRectangleBorder>(
-                                                RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.0), // Sama dengan border-radius: 8px;
-                                                ),
-                                              ),
-                                              foregroundColor:
-                                                  MaterialStateProperty
-                                                      .resolveWith<Color?>(
-                                                (Set<MaterialState> states) {
-                                                  if (states.contains(
-                                                      MaterialState.disabled)) {
-                                                    return Colors.white;
-                                                  }
-                                                  return Colors.white;
-                                                },
-                                              ),
                                             ),
                                           ),
                                         ),
@@ -753,6 +755,53 @@ class _LoginScreenState extends State<LoginScreen> {
                                                     _loginPass();
                                                   }
                                                 : null,
+                                            style: ButtonStyle(
+                                              backgroundColor:
+                                                  WidgetStateProperty
+                                                      .resolveWith<Color?>(
+                                                (Set<WidgetState> states) {
+                                                  if (states.contains(
+                                                      WidgetState.disabled)) {
+                                                    return Color(
+                                                        0xFFA4A4A4); // Warna saat tombol dinonaktifkan
+                                                  }
+                                                  return Color(
+                                                      0xFF07840B); // Warna saat tombol aktif
+                                                },
+                                              ),
+                                              padding: WidgetStateProperty
+                                                  .all<EdgeInsets>(
+                                                EdgeInsets.symmetric(
+                                                    vertical:
+                                                        16.0), // Menyesuaikan padding agar tombol lebih tinggi
+                                              ),
+                                              minimumSize: WidgetStateProperty
+                                                  .all<Size>(
+                                                Size(double.infinity,
+                                                    56), // Ukuran minimum tombol dengan tinggi 56
+                                              ),
+                                              shape: WidgetStateProperty.all<
+                                                  RoundedRectangleBorder>(
+                                                RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          8.0), // Sama dengan border-radius: 8px;
+                                                ),
+                                              ),
+                                              foregroundColor:
+                                                  WidgetStateProperty
+                                                      .resolveWith<Color?>(
+                                                (Set<WidgetState> states) {
+                                                  if (states.contains(
+                                                      WidgetState.disabled)) {
+                                                    return Colors
+                                                        .white; // Warna teks saat tombol dinonaktifkan
+                                                  }
+                                                  return Colors
+                                                      .white; // Warna teks saat tombol aktif
+                                                },
+                                              ),
+                                            ),
                                             child: Row(
                                               mainAxisAlignment:
                                                   MainAxisAlignment.center,
@@ -774,53 +823,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   ),
                                                 ),
                                               ],
-                                            ),
-                                            style: ButtonStyle(
-                                              backgroundColor:
-                                                  MaterialStateProperty
-                                                      .resolveWith<Color?>(
-                                                (Set<MaterialState> states) {
-                                                  if (states.contains(
-                                                      MaterialState.disabled)) {
-                                                    return Color(
-                                                        0xFFA4A4A4); // Warna saat tombol dinonaktifkan
-                                                  }
-                                                  return Color(
-                                                      0xFF07840B); // Warna saat tombol aktif
-                                                },
-                                              ),
-                                              padding: MaterialStateProperty
-                                                  .all<EdgeInsets>(
-                                                EdgeInsets.symmetric(
-                                                    vertical:
-                                                        16.0), // Menyesuaikan padding agar tombol lebih tinggi
-                                              ),
-                                              minimumSize: MaterialStateProperty
-                                                  .all<Size>(
-                                                Size(double.infinity,
-                                                    56), // Ukuran minimum tombol dengan tinggi 56
-                                              ),
-                                              shape: MaterialStateProperty.all<
-                                                  RoundedRectangleBorder>(
-                                                RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.0), // Sama dengan border-radius: 8px;
-                                                ),
-                                              ),
-                                              foregroundColor:
-                                                  MaterialStateProperty
-                                                      .resolveWith<Color?>(
-                                                (Set<MaterialState> states) {
-                                                  if (states.contains(
-                                                      MaterialState.disabled)) {
-                                                    return Colors
-                                                        .white; // Warna teks saat tombol dinonaktifkan
-                                                  }
-                                                  return Colors
-                                                      .white; // Warna teks saat tombol aktif
-                                                },
-                                              ),
                                             ),
                                           ),
                                         ),

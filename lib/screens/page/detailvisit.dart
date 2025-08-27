@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 
 class DetailVisit extends StatefulWidget {
   final String idrequest;
-  const DetailVisit({Key? key, required this.idrequest}) : super(key: key);
+  const DetailVisit({super.key, required this.idrequest});
 
   @override
   _DetailVisitState createState() => _DetailVisitState();

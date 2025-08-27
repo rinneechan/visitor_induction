@@ -9,6 +9,8 @@ import 'package:go_router/go_router.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 
 class ReqInductionySatu extends StatefulWidget {
+  const ReqInductionySatu({super.key});
+
   @override
   _ReqInductionySatuScreenState createState() =>
       _ReqInductionySatuScreenState();
@@ -198,11 +200,11 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
     }
 
     final String statusid = "0";
-    final String plant_id = _selectedPlant?.id?.toString() ?? '';
+    final String plantId = _selectedPlant?.id.toString() ?? '';
     final String departmentname = _selectedEmplo?.unitname ?? '';
     final String picname = _selectedEmplo?.fullname ?? '';
     final String arrivaldate = _selectedDate?.toIso8601String() ?? '';
-    final String durationid = _selectedDuras?.id?.toString() ?? '';
+    final String durationid = _selectedDuras?.id.toString() ?? '';
     final String reasontovisit = _reasonController.text;
     final String createdby = iduser ?? '';
     final String updatedby = iduser ?? '';
@@ -219,7 +221,7 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
       final result = await apiService.createInductionRequest(
         visitorid,
         statusid,
-        plant_id,
+        plantId,
         departmentname,
         picname,
         arrivaldate,
@@ -302,7 +304,7 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: MediaQuery.of(context).size.shortestSide,
             height: MediaQuery.of(context).size.height,
             child: Stack(
@@ -351,7 +353,7 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
   }
 
   Widget _buildForm(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width, // Card full width
       child: Card(
         elevation: 0,
@@ -559,7 +561,7 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
                 items: items
                     .map((item) => DropdownMenuItem<EmployeeByOu>(
                           value: item,
-                          child: Text(item.fullname + ' - ' + item.unitname),
+                          child: Text('${item.fullname} - ${item.unitname}'),
                         ))
                     .toList(),
                 // items: items
@@ -840,6 +842,20 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
     return Expanded(
       child: ElevatedButton(
         onPressed: _isButtonEnabled ? _next : null,
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+            (Set<WidgetState> states) {
+              if (states.contains(WidgetState.disabled)) {
+                return Color(0xFFA4A4A4);
+              }
+              return Color(0xFF07840B);
+            },
+          ),
+          padding: WidgetStateProperty.all<EdgeInsets>(
+              EdgeInsets.symmetric(vertical: 16.0)),
+          shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0))),
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -853,20 +869,6 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
               ),
             ),
           ],
-        ),
-        style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-            (Set<MaterialState> states) {
-              if (states.contains(MaterialState.disabled)) {
-                return Color(0xFFA4A4A4);
-              }
-              return Color(0xFF07840B);
-            },
-          ),
-          padding: MaterialStateProperty.all<EdgeInsets>(
-              EdgeInsets.symmetric(vertical: 16.0)),
-          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0))),
         ),
       ),
     );

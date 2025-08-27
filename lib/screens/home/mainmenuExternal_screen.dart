@@ -5,13 +5,13 @@ import 'package:hive/hive.dart';
 import 'package:go_router/go_router.dart';
 
 class MainmenuExternalScreen extends StatefulWidget {
-  const MainmenuExternalScreen({Key? key}) : super(key: key);
+  const MainmenuExternalScreen({super.key});
   @override
   _MainmenuExternalScreenScreenState createState() => _MainmenuExternalScreenScreenState();
 }
 
 class _MainmenuExternalScreenScreenState extends State<MainmenuExternalScreen> {
-  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   late Box box; // Definisikan Box untuk Hive
   String? username;
@@ -58,7 +58,7 @@ class _MainmenuExternalScreenScreenState extends State<MainmenuExternalScreen> {
         drawer: CustomDrawer(username: username ?? "Guest"),
 
         body: Center(
-          child: Container(
+          child: SizedBox(
             width: MediaQuery.of(context).size.shortestSide,
             //height: MediaQuery.of(context).size.height,
             child: Stack(

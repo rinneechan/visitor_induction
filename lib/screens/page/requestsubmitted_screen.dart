@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 
 class RequestSubmitted extends StatefulWidget {
   final String username;
-  const RequestSubmitted({Key? key, required this.username}) : super(key: key);
+  const RequestSubmitted({super.key, required this.username});
   @override
   _RequestSubmittedScreenState createState() => _RequestSubmittedScreenState();
 }
@@ -201,6 +201,13 @@ class _RequestSubmittedScreenState extends State<RequestSubmitted> {
                         onPressed: () {
                           GoRouter.of(context).go('/request-induction', extra: {'username': username ?? 'defaultID'});
                         },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF07840B),
+                          padding: const EdgeInsets.symmetric(vertical: 16.0), // Padding vertikal dalam tombol
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -217,13 +224,6 @@ class _RequestSubmittedScreenState extends State<RequestSubmitted> {
                               ),
                             ),
                           ],
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF07840B),
-                          padding: const EdgeInsets.symmetric(vertical: 16.0), // Padding vertikal dalam tombol
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
                         ),
 
                       ),

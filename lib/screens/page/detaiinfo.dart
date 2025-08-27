@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 
 class Detaiinfo extends StatefulWidget {
   final String idrequest;
-  const Detaiinfo({Key? key, required this.idrequest}) : super(key: key);
+  const Detaiinfo({super.key, required this.idrequest});
 
   @override
   _DetaiinfoState createState() => _DetaiinfoState();
@@ -403,7 +403,7 @@ class _DetaiinfoState extends State<Detaiinfo> {
           if (datashow != null) {
             //context.go('/welcome-test?idrequest=${datashow!.idrequest ?? ''}&plantId=${datashow!.plantId?.toString() ?? ''}&plantName=${datashow!.plantName ?? ''}',);
             context.push(
-              '/welcome-test?idrequest=${datashow!.idrequest ?? ''}&plantId=${datashow!.plantId?.toString() ?? ''}&plantName=${datashow!.plantName ?? ''}',
+              '/welcome-test?idrequest=${datashow!.idrequest ?? ''}&plantId=${datashow!.plantId.toString() ?? ''}&plantName=${datashow!.plantName ?? ''}',
             );
           } else {
             // Berikan pesan error jika data null

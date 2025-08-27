@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 
 class SubMissionHistory extends StatefulWidget {
   final String idrequest;
-  const SubMissionHistory({Key? key, required this.idrequest}) : super(key: key);
+  const SubMissionHistory({super.key, required this.idrequest});
 
   @override
   _SubMissionHistoryState createState() => _SubMissionHistoryState();
@@ -104,7 +104,7 @@ class _SubMissionHistoryState extends State<SubMissionHistory> {
         ),
       ),
       body: Center(
-        child: Container(
+        child: SizedBox(
           width: MediaQuery.of(context).size.shortestSide,
           height: MediaQuery.of(context).size.height,
           child: Stack(
@@ -359,7 +359,7 @@ class _SubMissionHistoryState extends State<SubMissionHistory> {
                 //   },
                 // );
                 context.go(
-                  '/welcome-test?idrequest=${datashow!.idrequest ?? ''}&plantId=${datashow!.plantId?.toString() ?? ''}&plantName=${datashow!.plantName ?? ''}',
+                  '/welcome-test?idrequest=${datashow!.idrequest ?? ''}&plantId=${datashow!.plantId.toString() ?? ''}&plantName=${datashow!.plantName ?? ''}',
                 );
 
 

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginNotRegistered extends StatefulWidget {
+  const LoginNotRegistered({super.key});
+
   @override
   _LoginNotRegisteredScreenState createState() =>
       _LoginNotRegisteredScreenState();
@@ -11,7 +13,7 @@ class _LoginNotRegisteredScreenState extends State<LoginNotRegistered> {
   //final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isButtonEnabled = false;
-  bool _isPasswordVisible = false;
+  final bool _isPasswordVisible = false;
 
   void _login() {
     // String username = _usernameController.text;

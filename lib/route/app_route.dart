@@ -19,8 +19,11 @@ import 'package:she_vi/screens/home/menusatu_screen.dart';
 // Home - External
 import 'package:she_vi/screens/home/mainmenuExternal_screen.dart';
 import 'package:she_vi/screens/home/external/register_screen.dart';
-import 'package:she_vi/screens/home/external/mainmenu_employee_screen.dart';
-import 'package:she_vi/screens/home/external/request_induction_form_screen.dart';
+import 'package:she_vi/screens/home/external/request_induction_form_screen.dart'
+    as form;
+import 'package:she_vi/screens/home/external/request_induction_screen.dart'
+    as screen;
+import 'package:she_vi/screens/home/external/request_submitted_screen.dart';
 
 // Pages
 import 'package:she_vi/screens/page/detailhistory.dart';
@@ -46,6 +49,8 @@ void main() {
 }
 
 class App extends StatelessWidget {
+  const App({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
@@ -131,7 +136,7 @@ class AppRouter {
       /// VISITOR ROUTES (External)
       /// -----------------------
       GoRoute(
-        path: '/visitor/main-menu',
+        path: '/main-menu-ext',
         builder: (context, state) => const MainmenuExternalScreen(),
       ),
       GoRoute(
@@ -142,8 +147,19 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/visitor/request-form',
-        builder: (context, state) => const RequestInductionScreen(),
+        path: '/request-induction',
+        builder: (context, state) => const screen.RequestInductionScreen(),
+      ),
+      GoRoute(
+        path: '/request-form',
+        builder: (context, state) => const form.RequestInductionFormScreen(),
+      ),
+      GoRoute(
+      path: '/request-submitted',
+      builder: (context, state) {
+        final email = state.uri.queryParameters['email'] ?? "guest@email.com";
+        return RequestSubmittedScreen(email: email);
+        }
       ),
       GoRoute(
         path: '/visitor/detail-scan',

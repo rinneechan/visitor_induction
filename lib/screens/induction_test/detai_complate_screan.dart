@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 
 class DetailComplatedScreen extends StatefulWidget {
   final String idrequest;
-  const DetailComplatedScreen({Key? key, required this.idrequest}) : super(key: key);
+  const DetailComplatedScreen({super.key, required this.idrequest});
 
   @override
   _DetailComplatedState createState() => _DetailComplatedState();
@@ -347,7 +347,7 @@ class _DetailComplatedState extends State<DetailComplatedScreen> {
               if (datashow != null) {
 
                 context.go(
-                  '/welcome-test?idrequest=${datashow!.idrequest ?? ''}&plantId=${datashow!.plantId?.toString() ?? ''}&plantName=${datashow!.plantName ?? ''}',
+                  '/welcome-test?idrequest=${datashow!.idrequest ?? ''}&plantId=${datashow!.plantId.toString() ?? ''}&plantName=${datashow!.plantName ?? ''}',
                 );
 
 

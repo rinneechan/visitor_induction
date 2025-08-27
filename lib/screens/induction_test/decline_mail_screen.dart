@@ -14,11 +14,11 @@ class TestComplatedScreen extends StatefulWidget {
   final String plantName;
 
   const TestComplatedScreen({
-    Key? key,
+    super.key,
     required this.idrequest,
     required this.plantId,
     required this.plantName,
-  }) : super(key: key);
+  });
 
   @override
   _TestComplatedScreenState createState() => _TestComplatedScreenState();
@@ -122,7 +122,7 @@ class _TestComplatedScreenState extends State<TestComplatedScreen> {
 
   Widget _buildBody() {
     return Center(
-      child: Container(
+      child: SizedBox(
         width: MediaQuery.of(context).size.shortestSide,
         //width: MediaQuery.of(context).size.width, // Memastikan lebar sesuai layar
         height: MediaQuery.of(context).size.height, // Memastikan tinggi sesuai layar
@@ -492,7 +492,7 @@ class PDFViewPage extends StatelessWidget {
   final String filePath;
   final VoidCallback onFinishedReading;
 
-  const PDFViewPage({Key? key, required this.filePath, required this.onFinishedReading}) : super(key: key);
+  const PDFViewPage({super.key, required this.filePath, required this.onFinishedReading});
 
   @override
   Widget build(BuildContext context) {
@@ -516,7 +516,7 @@ class PDFViewPage extends StatelessWidget {
 class PDFViewerPage extends StatelessWidget {
   final String filePath;
 
-  PDFViewerPage({required this.filePath});
+  const PDFViewerPage({super.key, required this.filePath});
 
   @override
   Widget build(BuildContext context) {

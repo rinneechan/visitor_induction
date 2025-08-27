@@ -10,60 +10,98 @@ class RequestInductionScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("Visitor Induction")),
       drawer: const CustomDrawer(username: "Guest"), // Drawer opsional
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Tombol Request New Induction
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  context.push('/request-form'); 
-                  // Pastikan sudah ada GoRoute dengan path: '/request-form'
-                  // dan builder-nya mengarah ke RequestInductionFormScreen
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 16, horizontal: 24),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+      body: Column(
+        children: [
+          // Bagian atas sticky
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            color: Colors.white,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text(
+                  "Click the button below to schedule your visitor induction.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: "HankenGrotesk",
+                    fontSize: 14,
+                    color: Colors.grey,
                   ),
                 ),
-                child: const Text(
-                  "REQUEST NEW INDUCTION",
-                  style: TextStyle(color: Colors.white, fontSize: 16),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 28),
-
-            // Header Material
-            const Row(
-              children: [
-                Icon(Icons.assignment, color: Colors.black54),
-                SizedBox(width: 8),
-                Text(
-                  "Induction Material",
-                  style: TextStyle(
-                    fontSize: 16, 
-                    fontWeight: FontWeight.bold,
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF07840B),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: () {
+                      // Navigasi ke form induction
+                      context.go('/request-form');
+                    },
+                    child: const Text(
+                      "REQUEST NEW INDUCTION",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
+          ),
 
-            const SizedBox(height: 16),
+          // Divider tipis sebagai pemisah
+          const Divider(height: 1, thickness: 0.8),
 
-            // List Material
-            const _MaterialItem(title: "Material #1"),
-            const _MaterialItem(title: "Material #2"),
-            const _MaterialItem(title: "Material #3"),
-            const _MaterialItem(title: "Material #4"),
-          ],
-        ),
+          // Expanded supaya list scrollable
+          Expanded(
+            child: CustomScrollView(
+              slivers: [
+                // Header Material
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    child: Row(
+                      children: const [
+                        Icon(Icons.assignment, color: Colors.black54),
+                        SizedBox(width: 8),
+                        Text(
+                          "Induction Material",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // List Material
+                SliverList(
+                  delegate: SliverChildListDelegate(
+                    const [
+                      _MaterialItem(title: "Material #1"),
+                      _MaterialItem(title: "Material #2"),
+                      _MaterialItem(title: "Material #3"),
+                      _MaterialItem(title: "Material #4"),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -77,21 +115,26 @@ class _MaterialItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: ListTile(
-        title: Text(title),
-        trailing: TextButton(
+        leading: const Icon(Icons.picture_as_pdf, color: Colors.redAccent),
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.w500),
+        ),
+        trailing: TextButton.icon(
           onPressed: () {
             // TODO: aksi download file
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text("Download $title belum tersedia")),
             );
           },
-          child: const Text(
+          icon: const Icon(Icons.download, size: 18, color: Color(0xFF07840B)),
+          label: const Text(
             "Download",
             style: TextStyle(
-              color: Colors.green, 
+              color: Color(0xFF07840B),
               fontWeight: FontWeight.bold,
             ),
           ),

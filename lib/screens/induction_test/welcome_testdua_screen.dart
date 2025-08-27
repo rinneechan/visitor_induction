@@ -9,18 +9,18 @@ class WelcomeTestDuaScreen extends StatefulWidget {
   final String plantName;
 
   const WelcomeTestDuaScreen({
-    Key? key,
+    super.key,
     required this.idrequest,
     required this.plantId,
     required this.plantName,
-  }) : super(key: key);
+  });
 
   @override
   _WelcomeTestDuaScreenState createState() => _WelcomeTestDuaScreenState();
 }
 
 class _WelcomeTestDuaScreenState extends State<WelcomeTestDuaScreen> {
-  GlobalKey<ScaffoldState> _formKey_t2 = GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _formKey_t2 = GlobalKey<ScaffoldState>();
   late Box box;
 
   @override
@@ -73,7 +73,7 @@ class _WelcomeTestDuaScreenState extends State<WelcomeTestDuaScreen> {
         // ),
 
         body: Center(
-          child: Container(
+          child: SizedBox(
             width: MediaQuery.of(context).size.shortestSide,
             height: MediaQuery.of(context).size.height,
             child: SingleChildScrollView(
@@ -196,7 +196,7 @@ class _WelcomeTestDuaScreenState extends State<WelcomeTestDuaScreen> {
         child: InkWell(
           onTap: () {
             context.go(
-              '/question?idrequest=${widget.idrequest ?? ''}&plantId=${widget.plantId?.toString() ?? ''}&plantName=${widget.plantName ?? ''}',
+              '/question?idrequest=${widget.idrequest ?? ''}&plantId=${widget.plantId.toString() ?? ''}&plantName=${widget.plantName ?? ''}',
             );
           },
           child: Container(

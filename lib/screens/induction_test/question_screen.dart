@@ -12,11 +12,11 @@ class QuestionScreen extends StatefulWidget {
   final String plantName;
 
   const QuestionScreen({
-    Key? key,
+    super.key,
     required this.idrequest,
     required this.plantId,
     required this.plantName,
-  }) : super(key: key);
+  });
 
   @override
   _QuestionScreenState createState() => _QuestionScreenState();
@@ -161,14 +161,13 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
       // Kirim data ke API setelah memilih opsi
       final int idrequest = int.parse(widget.idrequest.toString());
-      final int question_id = questionId;
-      final int choice_id = selectedChoiceId;
+      final int choiceId = selectedChoiceId;
 
       try {
         final result = await apiService.createAnswerQuestion(
           idrequest,
-          question_id,
-          choice_id,
+          questionId,
+          choiceId,
         );
         // Cek jika berhasil
         if (result) {
@@ -255,7 +254,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                               currentQuestionIndex++;
                             } else {
                               context.go(
-                                '/test-complated?idrequest=${widget.idrequest ?? ''}&plantId=${widget.plantId?.toString() ?? ''}&plantName=${widget.plantName ?? ''}',
+                                '/test-complated?idrequest=${widget.idrequest ?? ''}&plantId=${widget.plantId.toString() ?? ''}&plantName=${widget.plantName ?? ''}',
                               );
                             }
 

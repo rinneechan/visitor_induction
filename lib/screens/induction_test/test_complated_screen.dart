@@ -12,11 +12,11 @@ class TestComplatedScreen extends StatefulWidget {
   final String plantName;
 
   const TestComplatedScreen({
-    Key? key,
+    super.key,
     required this.idrequest,
     required this.plantId,
     required this.plantName,
-  }) : super(key: key);
+  });
 
   @override
   _TestComplatedScreenState createState() => _TestComplatedScreenState();
@@ -43,7 +43,7 @@ class _TestComplatedScreenState extends State<TestComplatedScreen> {
       if (result.isNotEmpty) {
         // Hapus prefix dari QR Code jika ada
         String? fetchedQRCode = result.first.qr_code;
-        if (fetchedQRCode != null && fetchedQRCode.startsWith('data:image')) {
+        if (fetchedQRCode.startsWith('data:image')) {
           fetchedQRCode = fetchedQRCode.split(',')[1]; // Hapus "data:image/png;base64,"
         }
 
