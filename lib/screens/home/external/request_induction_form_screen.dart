@@ -61,11 +61,30 @@ class _RequestInductionFormScreenState
       ),
       drawer: const CustomDrawer(username: "Guest"),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-          child: Form(
-            key: _formKey,
-            child: _currentPage == 0 ? _buildPage1() : _buildPage2(),
+        child: Center(
+          child: SizedBox(
+            width: MediaQuery.of(context).size.shortestSide,
+            height: MediaQuery.of(context).size.height,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.only(bottom: 40),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height,
+                ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                        child: _currentPage == 0 ? _buildPage1() : _buildPage2(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),

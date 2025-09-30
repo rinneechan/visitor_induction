@@ -31,94 +31,96 @@ class RequestSubmittedScreen extends StatelessWidget {
         ),
       ),
       drawer: CustomDrawer(username: "Guest"),
-body: Padding(
-  padding: const EdgeInsets.all(20.0),
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start, // rata kiri semua
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      // Icon dokumen (rata kiri)
-      Image.asset(
-        "assets/icons/papercheck.png",
-        width: 100,
-        height: 100,
-      ),
-      const SizedBox(height: 30),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // biar center sesuai konten
+            crossAxisAlignment: CrossAxisAlignment.start, // teks & icon rata kiri
+            children: [
+              // Icon dokumen
+              Image.asset(
+                "assets/images/mdi_paper-check-outline.png",
+                width: 100,
+                height: 100,
+              ),
+              const SizedBox(height: 30),
 
-      // Judul
-      Text(
-        "Assessment Request\nSubmitted Successfully",
-        textAlign: TextAlign.start, // rata kiri
-        style: GoogleFonts.hankenGrotesk(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: Colors.black87,
-        ),
-      ),
-      const SizedBox(height: 20),
+              // Judul
+              Text(
+                "Assessment Request\nSubmitted Successfully",
+                style: GoogleFonts.hankenGrotesk(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 20),
 
-      // Deskripsi
-      Text(
-        "Your request has been received. SHE Admin or HR Plant will review it, which may take some time. "
-        "We'll email you with updates. Thank you for your patience.",
-        textAlign: TextAlign.start, // rata kiri
-        style: GoogleFonts.hankenGrotesk(
-          fontSize: 16,
-          color: Colors.black87,
-        ),
-      ),
-      const SizedBox(height: 20),
+              // Deskripsi
+              Text(
+                "Your request has been received. SHE Admin or HR Plant will review it, which may take some time. "
+                "We'll email you with updates. Thank you for your patience.",
+                style: GoogleFonts.hankenGrotesk(
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 20),
 
-      // Email
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start, // biar email juga kiri
-        children: [
-          Text(
-            "Please kindly check your email:",
-            style: GoogleFonts.hankenGrotesk(
-              fontSize: 16,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            email,
-            style: GoogleFonts.hankenGrotesk(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              color: Colors.black,
-            ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 30),
+              // Email
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Please kindly check your email:",
+                    style: GoogleFonts.hankenGrotesk(
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    email,
+                    style: GoogleFonts.hankenGrotesk(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 40),
 
-      // Tombol back tetap full width (biar terlihat rapi)
-      SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green[700],
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 14),
-          ),
-          onPressed: () {
-            context.go("/request-induction");
-          },
-          child: Text(
-            "BACK TO MAIN MENU",
-            style: GoogleFonts.hankenGrotesk(
-              fontSize: 17,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-              color: Colors.white,
+              // Tombol fixed width & center
+              Center(
+                child: SizedBox(
+                  width: 320,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green[700],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    onPressed: () {
+                      context.go("/request-induction");
+                    },
+                    child: Text(
+                      "BACK TO MAIN MENU",
+                      style: GoogleFonts.hankenGrotesk(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

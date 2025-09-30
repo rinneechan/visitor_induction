@@ -19,10 +19,8 @@ import 'package:she_vi/screens/home/menusatu_screen.dart';
 // Home - External
 import 'package:she_vi/screens/home/mainmenuExternal_screen.dart';
 import 'package:she_vi/screens/home/external/register_screen.dart';
-import 'package:she_vi/screens/home/external/request_induction_form_screen.dart'
-    as form;
-import 'package:she_vi/screens/home/external/request_induction_screen.dart'
-    as screen;
+import 'package:she_vi/screens/home/external/request_induction_form_screen.dart' as form;
+import 'package:she_vi/screens/home/external/request_induction_screen.dart' as screen;
 import 'package:she_vi/screens/home/external/request_submitted_screen.dart';
 
 // Pages
@@ -41,11 +39,21 @@ import 'package:she_vi/screens/induction_test/test_complated_screen.dart';
 import 'package:she_vi/screens/induction_test/approved_mail_screen.dart';
 import 'package:she_vi/screens/induction_test/complated_screen.dart';
 
+// CMS Screens
+import 'package:she_vi/screens/cms/cms_induction_screen.dart';
+import 'package:she_vi/screens/cms/multiple_choice_screen.dart';
+import 'package:she_vi/screens/cms/true_false_screen.dart';
+import 'package:she_vi/screens/cms/material_screen.dart';
+import 'package:she_vi/screens/cms/material_list_screen.dart';
+import 'package:she_vi/screens/cms/material_detail_screen.dart';
+import 'package:she_vi/screens/cms/add_multiple_choice_screen.dart';
+import 'package:she_vi/screens/cms/add_truefalse_screen.dart';
+
 // Utils / Services
 import 'package:she_vi/screens/setting/navigator_service.dart';
 
 void main() {
-  runApp(App());
+  runApp(const App());
 }
 
 class App extends StatelessWidget {
@@ -124,7 +132,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/employee/request-new-induction',
+        path: '/request-new-induction',
         builder: (context, state) => ReqInductionySatu(),
       ),
       GoRoute(
@@ -155,11 +163,11 @@ class AppRouter {
         builder: (context, state) => const form.RequestInductionFormScreen(),
       ),
       GoRoute(
-      path: '/request-submitted',
-      builder: (context, state) {
-        final email = state.uri.queryParameters['email'] ?? "guest@email.com";
-        return RequestSubmittedScreen(email: email);
-        }
+        path: '/request-submitted',
+        builder: (context, state) {
+          final email = state.uri.queryParameters['email'] ?? "guest@email.com";
+          return RequestSubmittedScreen(email: email);
+        },
       ),
       GoRoute(
         path: '/visitor/detail-scan',
@@ -230,6 +238,55 @@ class AppRouter {
           return ComplatedScreen(idrequest: idRequest);
         },
       ),
+
+      /// -----------------------
+      /// CMS ROUTES (Material + Others)
+      /// -----------------------
+      GoRoute(
+        path: '/cms',
+        builder: (context, state) => const CmsInductionScreen(),
+      ),
+      GoRoute(
+        path: '/cms/multiplechoice',
+        builder: (context, state) => const MultipleChoiceScreen(),
+      ),
+      GoRoute(
+        path: '/cms/multiplechoice/add',
+        builder: (context, state) => const AddMultipleChoiceScreen(),
+      ),
+      GoRoute(
+        path: '/cms/truefalse',
+        builder: (context, state) => const TrueFalseScreen(),
+      ),
+      GoRoute(
+        path: '/cms/truefalse/add',
+        builder: (context, state) => const AddTrueFalseScreen(),
+      ),
+
+      /// CMS Material Routes
+      GoRoute(
+        path: '/cms/material',
+        builder: (context, state) => const MaterialListScreen(),
+      ),
+      GoRoute(
+        path: '/cms/material/add',
+        builder: (context, state) => const AddMaterialScreen(), // Add Form
+      ),
+      GoRoute(
+        path: '/cms/material/:kode',
+        builder: (context, state) {
+          final kode = state.pathParameters['kode'] ?? '';
+          return MaterialDetailScreen(kode: kode); // Detail Screen
+        },
+      ),
+      GoRoute(
+        path: '/cms/material/edit/:kode',
+        builder: (context, state) {
+          final kode = state.pathParameters['kode'] ?? '';
+          return MaterialDetailScreen(kode: kode); // Edit Form
+        },
+      ),
+
     ],
   );
 }
