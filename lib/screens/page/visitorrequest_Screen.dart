@@ -74,13 +74,14 @@ class _VisitorRequestState extends State<VisitorRequest> {
 
   String formatDate(String dateString) {
     try {
-      final date = DateTime.parse(dateString); // Mengonversi string menjadi DateTime
-      return DateFormat('d MMMM yyyy', 'id_ID').format(date); // Format tanggal: 18 September 2024
+      final date =
+          DateTime.parse(dateString); // Mengonversi string menjadi DateTime
+      return DateFormat('d MMMM yyyy', 'id_ID')
+          .format(date); // Format tanggal: 18 September 2024
     } catch (e) {
       return dateString; // Jika format tanggal gagal, kembalikan string aslinya
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -99,18 +100,21 @@ class _VisitorRequestState extends State<VisitorRequest> {
           },
         ),
       ),
-
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: FutureBuilder<List<InductionRequestId>>(
           future: fetchInductionId, // Future yang mengambil data
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator()); // Tampilkan loading
+              return Center(
+                  child: CircularProgressIndicator()); // Tampilkan loading
             } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}')); // Tampilkan error jika ada
+              return Center(
+                  child: Text(
+                      'Error: ${snapshot.error}')); // Tampilkan error jika ada
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Center(child: Text('No data available')); // Jika tidak ada data
+              return Center(
+                  child: Text('No data available')); // Jika tidak ada data
             } else {
               // Ambil data pertama dari snapshot
               final InductionRequestId data = snapshot.data!.first;
@@ -119,11 +123,13 @@ class _VisitorRequestState extends State<VisitorRequest> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text("[Need Approval] Induction Request - CG Employee",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                   SizedBox(height: 16),
                   Text("Dear $username,"),
                   SizedBox(height: 8),
-                  Text("Please respond to this Induction Request from CG Employee with the following information:",
+                  Text(
+                      "Please respond to this Induction Request from CG Employee with the following information:",
                       textAlign: TextAlign.justify),
                   SizedBox(height: 16),
 
@@ -131,16 +137,21 @@ class _VisitorRequestState extends State<VisitorRequest> {
                   buildSectionHeader("VISITOR PROFILE"),
                   buildDetailRow("Full Name", ": ${data.fullName ?? "N/A"}"),
                   buildDetailRow("Company Name", ": PT. Cemindo Gemilang Tbk."),
-                  buildDetailRow("Job Position", ": ${data.department ?? "N/A"}"),
+                  buildDetailRow(
+                      "Job Position", ": ${data.department ?? "N/A"}"),
                   SizedBox(height: 16),
 
                   buildSectionHeader("INDUCTION REQUEST"),
-                  buildDetailRow("Plant Name",  ": ${data.plantName ?? "N/A"}"),
-                  buildDetailRow("Department Name", ": ${data.departmentName ?? "N/A"}"),
+                  buildDetailRow("Plant Name", ": ${data.plantName ?? "N/A"}"),
+                  buildDetailRow(
+                      "Department Name", ": ${data.departmentName ?? "N/A"}"),
                   buildDetailRow("PIC Name", ": ${data.picName ?? "N/A"}"),
-                  buildDetailRow("Arrival Date", ": ${formatDate(data.arrivalDate ?? "")}"),
-                  buildDetailRow("Visit Duration", ": ${data.visitDuration ?? "N/A"}"),
-                  buildDetailRow("Reason to Visit", ": ${data.reasonToVisit ?? "N/A"}"),
+                  buildDetailRow("Arrival Date",
+                      ": ${formatDate(data.arrivalDate ?? "")}"),
+                  buildDetailRow(
+                      "Visit Duration", ": ${data.visitDuration ?? "N/A"}"),
+                  buildDetailRow(
+                      "Reason to Visit", ": ${data.reasonToVisit ?? "N/A"}"),
                   SizedBox(height: 24),
 
                   buildSectionHeader("Do you approve this request?"),
@@ -152,30 +163,36 @@ class _VisitorRequestState extends State<VisitorRequest> {
                         ElevatedButton(
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF9D3838),  // Equivalent to #9D3838 in CSS
-                            minimumSize: Size(120, 40),           // Adjust width and height
-                            padding: EdgeInsets.all(16),          // Padding
+                            backgroundColor: Color(
+                                0xFF9D3838), // Equivalent to #9D3838 in CSS
+                            minimumSize:
+                                Size(120, 40), // Adjust width and height
+                            padding: EdgeInsets.all(16), // Padding
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),  // Border radius
+                              borderRadius:
+                                  BorderRadius.circular(8), // Border radius
                             ),
                           ),
                           child: Text(
                             'Decline',
-                            style: TextStyle(color: Colors.white),  // Text color
+                            style: TextStyle(color: Colors.white), // Text color
                           ),
                         ),
-
                         SizedBox(width: 8),
                         ElevatedButton(
                           onPressed: () {
-                            context.push('/approved-email?idrequest=${widget.idrequest}');
+                            context.push(
+                                '/approved-email?idrequest=${widget.idrequest}');
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF07840B), // Warna hijau (#07840B)
-                            minimumSize: const Size(120, 40), // Lebar dan tinggi tombol
+                            backgroundColor: const Color(
+                                0xFF07840B), // Warna hijau (#07840B)
+                            minimumSize:
+                                const Size(120, 40), // Lebar dan tinggi tombol
                             padding: EdgeInsets.all(16),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8), // Border radius 8px
+                              borderRadius:
+                                  BorderRadius.circular(8), // Border radius 8px
                             ),
                           ),
                           child: const Text(
@@ -186,7 +203,6 @@ class _VisitorRequestState extends State<VisitorRequest> {
                             ),
                           ),
                         ),
-
                       ],
                     ),
                   ),
@@ -196,10 +212,6 @@ class _VisitorRequestState extends State<VisitorRequest> {
           },
         ),
       ),
-
-
-
-
     );
   }
 
@@ -224,7 +236,8 @@ class _VisitorRequestState extends State<VisitorRequest> {
             child: Text(
               "$label",
               style: TextStyle(fontWeight: FontWeight.bold),
-              overflow: TextOverflow.ellipsis, // Tambahan jika label terlalu panjang
+              overflow:
+                  TextOverflow.ellipsis, // Tambahan jika label terlalu panjang
             ),
           ),
           SizedBox(width: 8),
@@ -236,6 +249,3 @@ class _VisitorRequestState extends State<VisitorRequest> {
     );
   }
 }
-
-
-

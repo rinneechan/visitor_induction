@@ -19,8 +19,10 @@ import 'package:she_vi/screens/home/menusatu_screen.dart';
 // Home - External
 import 'package:she_vi/screens/home/mainmenuExternal_screen.dart';
 import 'package:she_vi/screens/home/external/register_screen.dart';
-import 'package:she_vi/screens/home/external/request_induction_form_screen.dart' as form;
-import 'package:she_vi/screens/home/external/request_induction_screen.dart' as screen;
+import 'package:she_vi/screens/home/external/request_induction_form_screen.dart'
+    as form;
+import 'package:she_vi/screens/home/external/request_induction_screen.dart'
+    as screen;
 import 'package:she_vi/screens/home/external/request_submitted_screen.dart';
 
 // Pages
@@ -76,15 +78,18 @@ class AppRouter {
     navigatorKey: globalNavigatorKey,
     initialLocation: '/',
     routes: [
-
       /// -----------------------
       /// AUTH & GENERAL ROUTES
       /// -----------------------
       GoRoute(path: '/', builder: (context, state) => const WelcomeScreen()),
-      GoRoute(path: '/welcome', builder: (context, state) => const WelcomeScreen()),
-      GoRoute(path: '/choose-access', builder: (context, state) => ChooseAccess()),
+      GoRoute(
+          path: '/welcome', builder: (context, state) => const WelcomeScreen()),
+      GoRoute(
+          path: '/choose-access', builder: (context, state) => ChooseAccess()),
       GoRoute(path: '/login', builder: (context, state) => LoginScreen()),
-      GoRoute(path: '/register', builder: (context, state) => const RegisterScreen()),
+      GoRoute(
+          path: '/register',
+          builder: (context, state) => const RegisterScreen()),
       GoRoute(path: '/logout', builder: (context, state) => LogoutScreen()),
 
       GoRoute(
@@ -146,6 +151,13 @@ class AppRouter {
       GoRoute(
         path: '/main-menu-ext',
         builder: (context, state) => const MainmenuExternalScreen(),
+      ),
+      GoRoute(
+        path: '/visitor/aktif-info',
+        builder: (context, state) {
+          final idRequest = state.uri.queryParameters['id'] ?? 'defaultID';
+          return ComplatedScreen(idrequest: idRequest);
+        },
       ),
       GoRoute(
         path: '/visitor/request',
@@ -286,7 +298,6 @@ class AppRouter {
           return MaterialDetailScreen(kode: kode); // Edit Form
         },
       ),
-
     ],
   );
 }
