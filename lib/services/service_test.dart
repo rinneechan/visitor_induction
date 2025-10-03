@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:she_vi/models/InductionMaterial.dart';
 import 'package:she_vi/models/InductionMaterialById.dart';
 import 'package:she_vi/models/InductionMaterialByPlant.dart';
+import 'package:she_vi/models/Plant.dart';
 import 'package:she_vi/models/Dept.dart';
 import 'package:she_vi/models/Durations.dart';
 import 'package:she_vi/models/InductionRequestHistory.dart';
@@ -13,7 +14,6 @@ import 'package:she_vi/models/InductionRequestProgress.dart';
 import 'package:she_vi/models/InductionRequestId.dart';
 import 'package:she_vi/models/QuestionRequestIdPlant.dart';
 import 'package:she_vi/models/EmployeeByOu.dart';
-import 'package:she_vi/models/plant_model.dart';
 import 'package:she_vi/utils/env_helper.dart';
 //import 'package:flutter_dotenv/flutter_dotenv.dart';
 //import 'package:flutter/foundation.dart';
@@ -508,35 +508,7 @@ class ApiService {
       throw Exception('Failed to load data: $e');
     }
   }
-// Ambil plant khusus CMS
-Future<List<Plant>> fetchPlantsCMS() async {
-  final String apiUrl = EnvHelper.get('API_URL');
-  final String accessHeaderKey = EnvHelper.get('API_HEADERS');
-  final String? accessToken = box.get('token');
 
-  if (accessToken == null || accessToken.isEmpty) {
-    throw Exception('Access token is missing or invalid');
-  }
-
-  final response = await http.get(
-    Uri.parse('$apiUrl/plants'),
-    headers: {
-      accessHeaderKey: accessToken,
-    },
-  );
-
-  if (response.statusCode == 200) {
-    final Map<String, dynamic> responseData = jsonDecode(response.body);
-    if (responseData['data'] != null && responseData['data']['plants'] != null) {
-      List<dynamic> data = responseData['data']['plants'];
-      return data.map((item) => Plant.fromJson(item)).toList();
-    } else {
-      throw Exception('No plant data found for CMS');
-    }
-  } else {
-    throw Exception('Failed to load plants for CMS');
-  }
-}
   Future<List<Dept>> fetchDept(String level) async {
     //final url = 'http://10.10.10.72:3001/plants/get-dep-plant';
     //final url = 'https://cemindo-apps.com/api_visitor_induction/plants/get-dep-plant';
@@ -612,7 +584,6 @@ Future<List<Plant>> fetchPlantsCMS() async {
     final String apiUrl = EnvHelper.get('API_URL');
     final String accessHeaderKey = EnvHelper.get('API_HEADERS');
     if (apiUrl.isEmpty) {
-      //print("Error: API_URL tidak ditemukan di env.json!");
       throw Exception("API_URL tidak ditemukan di env.json!");
     }
     final String url = '$apiUrl/inductionrequest';
@@ -664,6 +635,7 @@ Future<List<Plant>> fetchPlantsCMS() async {
       throw Exception('Failed to load data: $e');
     }
   }
+
   Future<List<Durations>> fetchDuratuion() async {
     final String apiUrl = EnvHelper.get('API_URL');
     final String accessHeaderKey = EnvHelper.get('API_HEADERS');
@@ -720,31 +692,35 @@ Future<List<Plant>> fetchPlantsCMS() async {
       String visitor) async {
     final String apiUrl = EnvHelper.get('API_URL');
     final String accessHeaderKey = EnvHelper.get('API_HEADERS');
+
     if (apiUrl.isEmpty) {
-      //print("Error: API_URL tidak ditemukan di env.json!");
       throw Exception("API_URL tidak ditemukan di env.json!");
     }
+
     final String url =
         '$apiUrl/inductionrequest/get-inductionrequest-user?id=$visitor';
-    //final url = 'http://10.10.10.72:3001/inductionrequest/get-inductionrequest-user?id=$visitor';
     final String? accessToken = box.get('token');
+
     if (accessToken == null || accessToken.isEmpty) {
       throw Exception('Access token is missing or invalid');
     }
+
     try {
       final headers = {
-        //'access_token': accessToken,
         accessHeaderKey: accessToken,
         'Content-Type': 'application/json',
       };
+
       final response = await http.get(
         Uri.parse(url),
         headers: headers,
       );
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
+
         if (responseData['data'] != null) {
-          List<dynamic> data = responseData['data'];
+          final List<dynamic> data = responseData['data'];
           return data
               .map((item) => InductionRequestHistory.fromJson(item))
               .toList();
@@ -1202,6 +1178,6 @@ Future<List<Plant>> fetchPlantsCMS() async {
     } catch (e) {
       print('Error saat membuka file: $e');
       return null;
-    }    
+    }
   }
 }

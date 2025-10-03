@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:she_vi/models/InductionMaterial.dart';
 import 'package:she_vi/models/InductionMaterialById.dart';
 import 'package:she_vi/models/InductionMaterialByPlant.dart';
-import 'package:she_vi/models/Plant.dart';
+import 'package:she_vi/models/plant_model.dart';
 import 'package:she_vi/models/Dept.dart';
 import 'package:she_vi/models/Durations.dart';
 import 'package:she_vi/models/InductionRequestHistory.dart';
@@ -463,7 +463,7 @@ class ApiService {
     }
   }
 
-  Future<List<PlantModel>> fetchPlant() async {
+  Future<List<Plant>> fetchPlant() async {
     final String apiUrl = EnvHelper.get('API_URL');
     final String accessHeaderKey = EnvHelper.get('API_HEADERS');
     if (apiUrl.isEmpty) {
@@ -496,7 +496,7 @@ class ApiService {
         if (responseData['data'] != null &&
             responseData['data']['plants'] != null) {
           List<dynamic> data = responseData['data']['plants'];
-          return data.map((item) => PlantModel.fromJson(item)).toList();
+          return data.map((item) => Plant.fromJson(item)).toList();
         } else {
           throw Exception('No data found');
         }
