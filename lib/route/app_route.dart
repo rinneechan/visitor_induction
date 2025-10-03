@@ -1,3 +1,4 @@
+// lib/route/app_route.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -39,7 +40,7 @@ import 'package:she_vi/screens/induction_test/welcome_testdua_screen.dart';
 import 'package:she_vi/screens/induction_test/question_screen.dart';
 import 'package:she_vi/screens/induction_test/test_complated_screen.dart';
 import 'package:she_vi/screens/induction_test/approved_mail_screen.dart';
-import 'package:she_vi/screens/induction_test/complated_screen.dart';
+import 'package:she_vi/screens/induction_test/completed_screen.dart';
 
 // CMS Screens
 import 'package:she_vi/screens/cms/cms_induction_screen.dart';
@@ -54,28 +55,10 @@ import 'package:she_vi/screens/cms/add_truefalse_screen.dart';
 // Utils / Services
 import 'package:she_vi/screens/setting/navigator_service.dart';
 
-void main() {
-  runApp(const App());
-}
-
-class App extends StatelessWidget {
-  const App({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
-      ),
-      routerConfig: AppRouter.router,
-    );
-  }
-}
-
+// ✅ HANYA KELAS AppRouter — TANPA main() atau runApp()
 class AppRouter {
   static final GoRouter router = GoRouter(
-    navigatorKey: globalNavigatorKey,
+    navigatorKey: globalNavigatorKey, // ✅ Ini benar!
     initialLocation: '/',
     routes: [
       /// -----------------------
@@ -156,7 +139,7 @@ class AppRouter {
         path: '/visitor/aktif-info',
         builder: (context, state) {
           final idRequest = state.uri.queryParameters['id'] ?? 'defaultID';
-          return ComplatedScreen(idrequest: idRequest);
+          return CompletedScreen(idrequest: idRequest);
         },
       ),
       GoRoute(
@@ -247,7 +230,7 @@ class AppRouter {
         path: '/induction/active-info',
         builder: (context, state) {
           final idRequest = state.uri.queryParameters['id'] ?? 'defaultID';
-          return ComplatedScreen(idrequest: idRequest);
+          return CompletedScreen(idrequest: idRequest);
         },
       ),
 
@@ -282,20 +265,21 @@ class AppRouter {
       ),
       GoRoute(
         path: '/cms/material/add',
-        builder: (context, state) => const AddMaterialScreen(), // Add Form
+        builder: (context, state) =>
+            const AddMaterialScreen(), // Pastikan ini ada
       ),
       GoRoute(
         path: '/cms/material/:kode',
         builder: (context, state) {
           final kode = state.pathParameters['kode'] ?? '';
-          return MaterialDetailScreen(kode: kode); // Detail Screen
+          return MaterialDetailScreen(kode: kode);
         },
       ),
       GoRoute(
         path: '/cms/material/edit/:kode',
         builder: (context, state) {
           final kode = state.pathParameters['kode'] ?? '';
-          return MaterialDetailScreen(kode: kode); // Edit Form
+          return MaterialDetailScreen(kode: kode);
         },
       ),
     ],

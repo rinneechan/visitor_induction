@@ -369,47 +369,6 @@ class ApiService {
   }
 
   //induction material By plant
-  // Future<List<InductionMaterialByPlant>> materiByPlant(String byplant) async {
-  //   //final url = 'http://10.10.10.72:3001/materials/materialplant/$byplant';
-  //   //final url = 'https://cemindo-apps.com/api_visitor_induction/materials/materialplant/$byplant';
-  //   final String apiUrl = EnvHelper.get('API_URL');
-  //   final accessHeader = EnvHelper.get('API_HEADERS_DEV');
-  //   if (apiUrl.isEmpty) {
-  //     //print("Error: API_URL tidak ditemukan di env.json!");
-  //     throw Exception("API_URL tidak ditemukan di env.json!");
-  //   }
-  //   final String url = '$apiUrl/materials/materialplant/$byplant';
-  //   final String? accessToken = box.get('token');
-
-  //   if (accessToken == null || accessToken.isEmpty) {
-  //     throw Exception('Access token is missing or invalid');
-  //   }
-
-  //   try {
-  //     final headers = {
-  //       '$accessHeader': accessToken,
-  //     };
-  //     final response = await http.get(Uri.parse(url), headers: headers);
-
-  //     if (response.statusCode == 200) {
-  //       final Map<String, dynamic> responseData = json.decode(response.body);
-
-  //       if (responseData['data'] != null) {
-  //         final data = responseData['data'];
-  //         // Cetak hasil untuk debugging
-  //         print('respon data: $data');
-  //         return [InductionMaterialByPlant.fromJson(data)];
-  //       } else {
-  //         throw Exception('No data found');
-  //       }
-  //     } else {
-  //       throw Exception('Failed to load data: ${response.statusCode}');
-  //     }
-  //   } catch (e) {
-  //     print('Error occurred: $e');
-  //     throw Exception('Failed to load data: $e');
-  //   }
-  // }
 
   Future<List<InductionMaterialByPlant>> materiByPlant(String byPlant) async {
     final String apiUrl = EnvHelper.get('API_URL');
@@ -426,7 +385,7 @@ class ApiService {
       throw Exception('Access token is missing or invalid');
     }
 
-    final String url = '$apiUrl/materials/materialplant/$byPlant';
+    final String url = '$apiUrl/materials/$byPlant';
 
     try {
       final headers = {

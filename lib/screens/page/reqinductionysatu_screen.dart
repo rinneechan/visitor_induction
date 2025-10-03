@@ -153,12 +153,21 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
     }
   }
 
+  // void _updateNextButtonState() {
+  //   setState(() {
+  //     _isButtonEnabled = _selectedPlant != null &&
+  //         _selectedEmplo != null &&
+  //         _selectedDate != null &&
+  //         _reasonController.text.isNotEmpty;
+  //   });
+  // }
   void _updateNextButtonState() {
     setState(() {
       _isButtonEnabled = _selectedPlant != null &&
           _selectedEmplo != null &&
           _selectedDate != null &&
-          _reasonController.text.isNotEmpty;
+          _selectedDuras != null && // Tambahkan ini!
+          _reasonController.text.trim().isNotEmpty;
     });
   }
 
@@ -524,9 +533,103 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
     );
   }
 
-  Widget _buildDropdownEmplo(String title, List<EmployeeByOu> items,
-      EmployeeByOu? selectedValue, Function(EmployeeByOu?) onChanged) {
-    TextEditingController searchController = TextEditingController();
+  // Widget _buildDropdownEmplo(String title, List<EmployeeByOu> items,
+  //     EmployeeByOu? selectedValue, Function(EmployeeByOu?) onChanged) {
+  //   TextEditingController searchController = TextEditingController();
+
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Text(
+  //         title,
+  //         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+  //       ),
+  //       SizedBox(height: 8),
+  //       items.isEmpty
+  //           ? DropdownButton2<String>(
+  //               isExpanded: true,
+  //               hint: Text('Choose $title'),
+  //               items: [
+  //                 DropdownMenuItem<String>(
+  //                   value: '',
+  //                   child: Text('Choose Department destination'),
+  //                 ),
+  //               ],
+  //               onChanged: null,
+  //               value: '',
+  //               buttonStyleData: ButtonStyleData(
+  //                 decoration: BoxDecoration(
+  //                   border: Border.all(color: Colors.grey),
+  //                   //borderRadius: BorderRadius.circular(8),
+  //                 ),
+  //               ),
+  //             )
+  //           : DropdownButton2<EmployeeByOu>(
+  //               isExpanded: true,
+  //               hint: Text('Choose $title'),
+  //               items: items
+  //                   .map((item) => DropdownMenuItem<EmployeeByOu>(
+  //                         value: item,
+  //                         child: Text('${item.fullname} - ${item.unitname}'),
+  //                       ))
+  //                   .toList(),
+  //               // items: items
+  //               //     .take(5) // hanya ambil 5 item pertama
+  //               //     .map((item) => DropdownMenuItem<EmployeeByOu>(
+  //               //   value: item,
+  //               //   child: Text('${item.fullname} - ${item.unitname}'),
+  //               // ))
+  //               //     .toList(),
+
+  //               onChanged: (value) {
+  //                 onChanged(value);
+  //                 setState(() {
+  //                   _selectedEmplo = value;
+  //                 });
+  //               },
+  //               value: selectedValue,
+  //               buttonStyleData: ButtonStyleData(
+  //                 decoration: BoxDecoration(
+  //                   border: Border.all(color: Colors.grey),
+  //                   borderRadius: BorderRadius.circular(8),
+  //                 ),
+  //               ),
+  //               dropdownSearchData: DropdownSearchData(
+  //                 searchController: searchController,
+  //                 searchInnerWidgetHeight: 50,
+  //                 searchInnerWidget: Padding(
+  //                   padding: const EdgeInsets.all(8),
+  //                   child: TextField(
+  //                     controller: searchController,
+  //                     decoration: InputDecoration(
+  //                       hintText: 'Search...',
+  //                       border: OutlineInputBorder(),
+  //                     ),
+  //                     onChanged: (value) {
+  //                       setState(() {}); // Perbarui tampilan setelah pencarian
+  //                     },
+  //                   ),
+  //                 ),
+  //                 searchMatchFn: (item, searchValue) {
+  //                   final query = searchValue.toLowerCase();
+  //                   final fullname = item.value!.fullname.toLowerCase();
+  //                   final unitname = item.value!.unitname.toLowerCase();
+  //                   return fullname.contains(query) || unitname.contains(query);
+  //                   //return item.value!.fullname.toLowerCase().contains(searchValue.toLowerCase());
+  //                 },
+  //               ),
+  //             ),
+  //     ],
+  //   );
+  // }
+
+  Widget _buildDropdownEmplo(
+    String title,
+    List<EmployeeByOu> items,
+    EmployeeByOu? selectedValue,
+    Function(EmployeeByOu?) onChanged,
+  ) {
+    final TextEditingController searchController = TextEditingController();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -536,80 +639,111 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         SizedBox(height: 8),
-        items.isEmpty
-            ? DropdownButton2<String>(
-                isExpanded: true,
-                hint: Text('Choose $title'),
-                items: [
-                  DropdownMenuItem<String>(
-                    value: '',
-                    child: Text('Choose Department destination'),
-                  ),
-                ],
-                onChanged: null,
-                value: '',
-                buttonStyleData: ButtonStyleData(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    //borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              )
-            : DropdownButton2<EmployeeByOu>(
-                isExpanded: true,
-                hint: Text('Choose $title'),
-                items: items
-                    .map((item) => DropdownMenuItem<EmployeeByOu>(
-                          value: item,
-                          child: Text('${item.fullname} - ${item.unitname}'),
-                        ))
-                    .toList(),
-                // items: items
-                //     .take(5) // hanya ambil 5 item pertama
-                //     .map((item) => DropdownMenuItem<EmployeeByOu>(
-                //   value: item,
-                //   child: Text('${item.fullname} - ${item.unitname}'),
-                // ))
-                //     .toList(),
-
-                onChanged: (value) {
-                  onChanged(value);
-                  setState(() {
-                    _selectedEmplo = value;
-                  });
-                },
-                value: selectedValue,
-                buttonStyleData: ButtonStyleData(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                dropdownSearchData: DropdownSearchData(
-                  searchController: searchController,
-                  searchInnerWidgetHeight: 50,
-                  searchInnerWidget: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: TextField(
-                      controller: searchController,
-                      decoration: InputDecoration(
-                        hintText: 'Search...',
-                        border: OutlineInputBorder(),
-                      ),
-                      onChanged: (value) {
-                        setState(() {}); // Perbarui tampilan setelah pencarian
-                      },
+        if (_isLoading && items.isEmpty)
+          Container(
+            height: 56,
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(8),
+              color: Colors.white,
+            ),
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          )
+        else if (items.isEmpty)
+          Container(
+            height: 56,
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(8),
+              color: Colors.white,
+            ),
+            child: Center(
+              child: Text(
+                'No PIC available',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+          )
+        else
+          DropdownButton2<EmployeeByOu>(
+            isExpanded: true,
+            hint: Text('Choose $title'),
+            value: selectedValue,
+            items: items
+                .map((item) => DropdownMenuItem<EmployeeByOu>(
+                      value: item,
+                      child: Text('${item.fullname} - ${item.unitname}'),
+                    ))
+                .toList(),
+            onChanged: (value) {
+              onChanged(value);
+              setState(() {
+                _selectedEmplo = value;
+                _updateNextButtonState();
+              });
+            },
+            // 🔥 INI YANG PENTING: Hilangkan semua garis bawah
+            buttonStyleData: ButtonStyleData(
+              height: 56,
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.white,
+              ),
+              // Pastikan tidak ada underline
+              elevation: 0,
+            ),
+            // 🔥 Juga pastikan dropdown-nya tidak punya garis bawah
+            dropdownStyleData: DropdownStyleData(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.white,
+              ),
+              elevation: 4,
+              offset: const Offset(0, 4),
+            ),
+            menuItemStyleData: MenuItemStyleData(
+              height: 50,
+              padding: EdgeInsets.symmetric(horizontal: 16),
+            ),
+            dropdownSearchData: DropdownSearchData<EmployeeByOu>(
+              searchController: searchController,
+              searchInnerWidgetHeight: 50,
+              searchInnerWidget: Container(
+                height: 50,
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search PIC or department...',
+                    hintStyle: TextStyle(fontSize: 14),
+                    // 🔥 Hilangkan border bawah di TextField pencarian
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey),
                     ),
                   ),
-                  searchMatchFn: (item, searchValue) {
-                    final query = searchValue.toLowerCase();
-                    final fullname = item.value!.fullname.toLowerCase();
-                    final unitname = item.value!.unitname.toLowerCase();
-                    return fullname.contains(query) || unitname.contains(query);
-                    //return item.value!.fullname.toLowerCase().contains(searchValue.toLowerCase());
-                  },
                 ),
               ),
+              searchMatchFn: (item, searchValue) {
+                final query = searchValue.toLowerCase();
+                final fullname = item.value!.fullname.toLowerCase();
+                final unitname = item.value!.unitname.toLowerCase();
+                return fullname.contains(query) || unitname.contains(query);
+              },
+            ),
+          ),
       ],
     );
   }
@@ -883,34 +1017,81 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
     );
   }
 
-  Widget _buildDropdownVisit(String title, List<dynamic> items,
-      dynamic selectedValue, Function(dynamic) onChanged) {
+  // Widget _buildDropdownVisit(String title, List<dynamic> items,
+  //     dynamic selectedValue, Function(dynamic) onChanged) {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Text(title, style: _sectionTextStyle),
+  //       SizedBox(height: 8),
+  //       items.isEmpty
+  //           ? Center(
+  //               child: Text('No items available'),
+  //             )
+  //           : DropdownButtonFormField<dynamic>(
+  //               items: items.map((item) {
+  //                 return DropdownMenuItem<dynamic>(
+  //                   value: item,
+  //                   child: Text(item.nameduration),
+  //                 );
+  //               }).toList(),
+  //               onChanged: (value) {
+  //                 onChanged(value); // Panggil callback onChanged
+  //                 setState(() {
+  //                   _selectedDuras = value; // Update _selectedDuras
+  //                 });
+  //               },
+  //               value: selectedValue,
+  //               decoration: InputDecoration(
+  //                 hintText: 'Choose $title',
+  //                 border: OutlineInputBorder(),
+  //               ),
+  //             ),
+  //     ],
+  //   );
+  // }
+  Widget _buildDropdownVisit(
+      String title,
+      List<customDurations.Durations> items,
+      customDurations.Durations? selectedValue,
+      Function(dynamic) onChanged) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(title, style: _sectionTextStyle),
         SizedBox(height: 8),
         items.isEmpty
-            ? Center(
-                child: Text('No items available'),
+            ? Container(
+                height: 56,
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.white,
+                ),
+                child: Center(child: Text('No durations available')),
               )
-            : DropdownButtonFormField<dynamic>(
+            : DropdownButtonFormField<customDurations.Durations>(
                 items: items.map((item) {
-                  return DropdownMenuItem<dynamic>(
+                  return DropdownMenuItem<customDurations.Durations>(
                     value: item,
                     child: Text(item.nameduration),
                   );
                 }).toList(),
                 onChanged: (value) {
-                  onChanged(value); // Panggil callback onChanged
+                  onChanged(value);
                   setState(() {
-                    _selectedDuras = value; // Update _selectedDuras
+                    _selectedDuras = value;
+                    _updateNextButtonState(); // <-- Tambahkan ini
                   });
                 },
                 value: selectedValue,
                 decoration: InputDecoration(
                   hintText: 'Choose $title',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
                 ),
               ),
       ],

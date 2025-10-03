@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 
 class RequestSubmitted extends StatefulWidget {
   final String username;
+
   const RequestSubmitted({super.key, required this.username});
+
   @override
-  _RequestSubmittedScreenState createState() => _RequestSubmittedScreenState();
+  State<RequestSubmitted> createState() => _RequestSubmittedScreenState();
 }
 
 class _RequestSubmittedScreenState extends State<RequestSubmitted> {
@@ -16,13 +18,6 @@ class _RequestSubmittedScreenState extends State<RequestSubmitted> {
   String? visitorid;
   String? emailuser;
 
-  final _emailController = TextEditingController();
-  final _companynameController = TextEditingController();
-  final _jobpositionController = TextEditingController();
-  //bool _isEmailValid = true;
-  //bool _isButtonNextEnabled = true;
-  //bool _isLoading = false;
-
   @override
   void initState() {
     super.initState();
@@ -30,211 +25,151 @@ class _RequestSubmittedScreenState extends State<RequestSubmitted> {
   }
 
   Future<void> _openBox() async {
-    box = await Hive.openBox('userBox'); // Buka box 'userBox'
+    box = await Hive.openBox('userBox');
     setState(() {
       username = box.get('username');
       visitorid = box.get('visitorid');
       emailuser = box.get('email');
-      String? token = box.get('token');
-      // Jika token tidak ada, navigasi ke halaman login
+      final String? token = box.get('token');
+
       if (token == null || token.isEmpty) {
-        Navigator.pushReplacementNamed(context,
-            '/chooseaccess'); // Ganti '/login' dengan nama route halaman login
-      } else {
-        // Jika token ada, setState untuk memperbarui UI
-        setState(() {
-          //_loadData();
-        });
+        context.go('/choose-access');
       }
     });
   }
 
   @override
-  void dispose() {
-    _emailController.dispose();
-    _companynameController.dispose();
-    _jobpositionController.dispose();
-    super.dispose();
-  }
-
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //extendBodyBehindAppBar: true,
-      resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Visitor Induction',
           style: TextStyle(
-            color: Color(0xFF343434), // Warna teks sesuai dengan #343434
-            fontFamily: 'Hanken Grotesk', // Nama font
-            fontSize: 20.0, // Ukuran font
-            fontWeight: FontWeight.w700, // Tebal font (700)
-            fontStyle: FontStyle.normal, // Gaya font normal
-            height: 1.0, // Line-height (100%)
+            color: Color(0xFF343434),
+            fontFamily: 'Hanken Grotesk',
+            fontSize: 20.0,
+            fontWeight: FontWeight.w700,
+            height: 1.0,
           ),
         ),
-        backgroundColor: Color(0xFFFFFFFF),
+        backgroundColor: Colors.white,
         elevation: 2,
       ),
       drawer: CustomDrawer(username: username ?? "Guest"),
       body: SafeArea(
-        child:Stack(
-        children: <Widget>[
-          Positioned.fill(
-            child: Container(
-              color: Colors.white,
+        child: Stack(
+          children: [
+            // Background
+            Positioned.fill(
+              child: Container(color: Colors.white),
             ),
-          ),
-          SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.only(
-                  bottom: 100.0), // Jaga jarak dari tombol bawah
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 0), // Posisi card di bagian atas
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Card(
-                      elevation: 0,
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Container(
-                                  child: IconButton(
-                                    icon: Image.asset(
-                                      'assets/images/mdi_paper-check-outline.png',
-                                      width: 50.0,
-                                      height: 50.0,
-                                    ),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
 
-                            SizedBox(height: 16),
-                            Text(
-                              'Assessment Request Submitted Successfully',
-                              style: TextStyle(
-                                color: Color(0xFF343434),
-                                fontFamily: 'Hanken Grotesk',
-                                fontSize: 24.0,
-                                fontWeight: FontWeight.w700,
-                                fontStyle: FontStyle.normal,
-                                height: 1.0,
-                              ),
-                            ),
-                            SizedBox(height: 16),
-                            Text(
-                              'Your request has been received. SHE Admin or HR Plant will review it, which may take some time. We ll email you with updates. Thank you for your patience.',
-                              style: TextStyle(
-                                color: Color(0x75757575),
-                                fontFamily: 'Hanken Grotesk',
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.w400,
-                                fontStyle: FontStyle.normal,
-                                height: 1.0,
-                              ),
-                            ),
-                            SizedBox(height: 16),
-                            Text(
-                              'Please kindly check your email:',
-                              style: TextStyle(
-                                color: Color(0x75757575),
-                                fontFamily: 'Hanken Grotesk',
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.w400,
-                                fontStyle: FontStyle.normal,
-                                height: 1.0,
-                              ),
-                            ),
-                            SizedBox(height: 16),
-                            Text(
-                              '$emailuser',
-                              style: TextStyle(
-                                color: Color(0x75757575),
-                                fontFamily: 'Hanken Grotesk',
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.w400,
-                                fontStyle: FontStyle.normal,
-                                height: 1.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              color: Colors.white, // Latar belakang putih
+            // Konten utama
+            SingleChildScrollView(
+              padding: const EdgeInsets.only(bottom: 80.0),
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-
-                    // Next button
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          GoRouter.of(context).go('/request-induction', extra: {'username': username ?? 'defaultID'});
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF07840B),
-                          padding: const EdgeInsets.symmetric(vertical: 16.0), // Padding vertikal dalam tombol
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Card(
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: IconButton(
+                            icon: Image.asset(
+                              'assets/images/mdi_paper-check-outline.png',
+                              width: 50.0,
+                              height: 50.0,
+                            ),
+                            onPressed: () => context.pop(),
                           ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(width: 10),
-                            Text('Back to Main Menu',
-                              style: TextStyle(
-                                color: const Color.fromARGB(255, 79, 77, 77),
-                                fontFamily: 'Hanken Grotesk', // Gunakan font yang sesuai
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.w700, // Bold style
-                                letterSpacing: 1.28, // Set letter spacing
-                                textBaseline: TextBaseline.alphabetic, // Text edge cap
-                               // textTransform: TextTransform.uppercase, // Text transform untuk uppercase
-                              ),
-                            ),
-                          ],
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Assessment Request Submitted Successfully',
+                          style: TextStyle(
+                            color: Color(0xFF343434),
+                            fontFamily: 'Hanken Grotesk',
+                            fontSize: 24.0,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-
-                      ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Your request has been received. SHE Admin or HR Plant will review it, which may take some time. We\'ll email you with updates. Thank you for your patience.',
+                          style: TextStyle(
+                            color: Color(0x75757575),
+                            fontFamily: 'Hanken Grotesk',
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Please kindly check your email:',
+                          style: TextStyle(
+                            color: Color(0x75757575),
+                            fontFamily: 'Hanken Grotesk',
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          emailuser ?? '—',
+                          style: const TextStyle(
+                            color: Color(0x75757575),
+                            fontFamily: 'Hanken Grotesk',
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
+
+            // Tombol di bawah
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                color: Colors.white,
+                padding: const EdgeInsets.all(16.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    context.go('/employee/request-induction',
+                        extra: {'username': username ?? 'defaultID'});
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF07840B),
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    minimumSize: const Size.fromHeight(56),
+                  ),
+                  child: const Text(
+                    'Back to Main Menu',
+                    style: TextStyle(
+                      color: Colors.white, // ✅ Putih, bukan abu-abu
+                      fontFamily: 'Hanken Grotesk',
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
