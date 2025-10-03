@@ -3,7 +3,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:go_router/go_router.dart';
 
 class AddMaterialScreen extends StatefulWidget {
-  const AddMaterialScreen({super.key});
+  final String plantId;
+  const AddMaterialScreen({Key? key, required this.plantId}) : super(key: key);
 
   @override
   State<AddMaterialScreen> createState() => _AddMaterialScreenState();
@@ -22,6 +23,29 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
     "Cemindo Medan Plant",
     "Cemindo Pontianak Plant",
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // otomatis pilih plant sesuai plantId
+    selectedPlant = _getPlantNameById(widget.plantId);
+  }
+
+  String? _getPlantNameById(String plantId) {
+    // Contoh mapping, sesuaikan dengan logic ID-Plant
+    switch (plantId) {
+      case 'bayah':
+        return 'Cemindo Bayah Plant';
+      case 'ciwandan':
+        return 'Cemindo Ciwandan Plant';
+      case 'medan':
+        return 'Cemindo Medan Plant';
+      case 'pontianak':
+        return 'Cemindo Pontianak Plant';
+      default:
+        return null;
+    }
+  }
 
   Future<void> pickFile() async {
     final result = await FilePicker.platform.pickFiles(
@@ -62,7 +86,7 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text("Material added successfully")),
               );
-              context.go('/cms');
+              context.go('/cms/material/$widget.plantId');
             },
             child: const Text(
               "Yes",
@@ -121,8 +145,6 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
         child: TextFormField(
           controller: controller,
           maxLines: maxLines,
-          validator: (val) =>
-              (val == null || val.isEmpty) ? "$label cannot be empty" : null,
           decoration: InputDecoration(
             hintText: label,
             border: InputBorder.none,
@@ -223,7 +245,7 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
             _buildSectionHeader("Deskripsi Material", "Enter a short description"),
             _buildInputCard("Deskripsi Material", descriptionController, maxLines: 2),
             const SizedBox(height: 20),
-            _buildSectionHeader("Plant", "Choose the related plant"),
+            _buildSectionHeader("Plant", "Chosen plant: ${selectedPlant ?? '-'}"),
             _buildDropdownCard(),
             const SizedBox(height: 20),
             _buildSectionHeader(
@@ -237,21 +259,16 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         child: Row(
           children: [
-            // Back button
-            MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: ElevatedButton(
-                onPressed: () => context.go('/cms'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[400],
-                  shape: const CircleBorder(),
-                  padding: const EdgeInsets.all(14),
-                ),
-                child: const Icon(Icons.arrow_back, color: Colors.white),
+            ElevatedButton(
+              onPressed: () => context.go('/cms/material/${widget.plantId}'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey[400],
+                shape: const CircleBorder(),
+                padding: const EdgeInsets.all(14),
               ),
+              child: const Icon(Icons.arrow_back, color: Colors.white),
             ),
             const SizedBox(width: 12),
-            // Add Material button
             Expanded(
               child: ElevatedButton(
                 onPressed: () {

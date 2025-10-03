@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../home/custom_drawer.dart';
 import 'package:she_vi/services/api_service.dart';
 import 'package:she_vi/models/EmployeeByOu.dart';
-import 'package:she_vi/models/Plant.dart';
+import 'package:she_vi/models/plant_model.dart';
 import 'package:she_vi/models/Durations.dart' as customDurations;
 import 'package:hive/hive.dart';
 import 'package:go_router/go_router.dart';
@@ -21,8 +21,8 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
   bool _isButtonEnabled = false;
   ApiService apiService = ApiService();
 
-  PlantModel? _selectedPlant;
-  List<PlantModel> plantlist = [];
+  Plant? _selectedPlant;
+  List<Plant> plantlist = [];
   DateTime? _selectedDate;
 
   // Dept? _selectedDept;
@@ -174,7 +174,7 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
   void _updateButtonState() {
     if (_selectedPlant != null) {
       setState(() {
-        final String idplant = _selectedPlant!.codeplant;
+        final String idplant = _selectedPlant!.plantCode;
         //_loadDept(idplant);
         _loadEmplo(idplant);
         _updateNextButtonState();
@@ -497,8 +497,8 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
     );
   }
 
-  Widget _buildDropdownSection(String title, List<PlantModel> items,
-      PlantModel? selectedValue, Function(PlantModel?) onChanged) {
+  Widget _buildDropdownSection(String title, List<Plant> items,
+      Plant? selectedValue, Function(Plant?) onChanged) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -509,11 +509,11 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
             ? Center(
                 // child:CircularProgressIndicator()
                 )
-            : DropdownButtonFormField<PlantModel>(
+            : DropdownButtonFormField<Plant>(
                 items: items.map((item) {
-                  return DropdownMenuItem<PlantModel>(
+                  return DropdownMenuItem<Plant>(
                     value: item,
-                    child: Text(item.nameplants), // Nama Plant yang ditampilkan
+                    child: Text(item.plantName), // Nama Plant yang ditampilkan
                   );
                 }).toList(),
                 onChanged: (value) {

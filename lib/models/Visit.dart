@@ -2,21 +2,21 @@
 
 class Visit {
   final int id;
-  final String nameplants;
-  final String codeplant;
+  final String plantName;
+  final String plantCode;
 
   Visit({
     required this.id,
-    required this.nameplants,
-    required this.codeplant,
+    required this.plantName,
+    required this.plantCode,
   });
 
   // Method untuk parsing dari JSON
   factory Visit.fromJson(Map<String, dynamic> json) {
     return Visit(
       id: json['id'],
-      nameplants: json['name_plants'],
-      codeplant: json['code_plant'],
+      plantName: json['name_plants'],
+      plantCode: json['code_plant'],
     );
   }
 }
