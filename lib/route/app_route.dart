@@ -20,8 +20,10 @@ import 'package:she_vi/screens/home/menusatu_screen.dart';
 // Home - External
 import 'package:she_vi/screens/home/mainmenuExternal_screen.dart';
 import 'package:she_vi/screens/home/external/register_screen.dart';
-import 'package:she_vi/screens/home/external/request_induction_form_screen.dart' as form;
-import 'package:she_vi/screens/home/external/request_induction_screen.dart' as screen;
+import 'package:she_vi/screens/home/external/request_induction_form_screen.dart'
+    as form;
+import 'package:she_vi/screens/home/external/request_induction_screen.dart'
+    as screen;
 import 'package:she_vi/screens/home/external/request_submitted_screen.dart';
 
 // Pages
@@ -59,22 +61,25 @@ class AppRouter {
     navigatorKey: globalNavigatorKey, // ✅ Ini benar!
     initialLocation: '/',
     routes: [
-
       /// -----------------------
       /// AUTH & GENERAL ROUTES
       /// -----------------------
       GoRoute(path: '/', builder: (context, state) => const WelcomeScreen()),
-      GoRoute(path: '/welcome', builder: (context, state) => const WelcomeScreen()),
-      GoRoute(path: '/choose-access', builder: (context, state) => ChooseAccess()),
+      GoRoute(
+          path: '/welcome', builder: (context, state) => const WelcomeScreen()),
+      GoRoute(
+          path: '/choose-access', builder: (context, state) => ChooseAccess()),
       GoRoute(path: '/login', builder: (context, state) => LoginScreen()),
-      GoRoute(path: '/register', builder: (context, state) => const RegisterScreen()),
+      GoRoute(
+          path: '/register',
+          builder: (context, state) => const RegisterScreen()),
       GoRoute(path: '/logout', builder: (context, state) => LogoutScreen()),
       GoRoute(
         path: '/create-new-pass/:employeeid/:fullName/:email',
         builder: (context, state) {
           final employeeid = state.pathParameters['employeeid'] ?? '';
-          final fullName   = state.pathParameters['fullName'] ?? '';
-          final email      = state.pathParameters['email'] ?? '';
+          final fullName = state.pathParameters['fullName'] ?? '';
+          final email = state.pathParameters['email'] ?? '';
           return CreateNewPass(
             employeeid: employeeid,
             fullName: fullName,
@@ -111,7 +116,9 @@ class AppRouter {
           return DetailHistory(idrequest: idRequest);
         },
       ),
-      GoRoute(path: '/request-new-induction', builder: (context, state) => ReqInductionySatu()),
+      GoRoute(
+          path: '/request-new-induction',
+          builder: (context, state) => ReqInductionySatu()),
       GoRoute(
         path: '/employee/request-submitted',
         builder: (context, state) => RequestSubmitted(username: 'defaultID'),
@@ -120,7 +127,9 @@ class AppRouter {
       /// -----------------------
       /// VISITOR ROUTES (External)
       /// -----------------------
-      GoRoute(path: '/main-menu-ext', builder: (context, state) => const MainmenuExternalScreen()),
+      GoRoute(
+          path: '/main-menu-ext',
+          builder: (context, state) => const MainmenuExternalScreen()),
       GoRoute(
         path: '/visitor/aktif-info',
         builder: (context, state) {
@@ -135,8 +144,12 @@ class AppRouter {
           return VisitorRequest(idrequest: idRequest);
         },
       ),
-      GoRoute(path: '/request-induction', builder: (context, state) => const screen.RequestInductionScreen()),
-      GoRoute(path: '/request-form', builder: (context, state) => const form.RequestInductionFormScreen()),
+      GoRoute(
+          path: '/request-induction',
+          builder: (context, state) => const screen.RequestInductionScreen()),
+      GoRoute(
+          path: '/request-form',
+          builder: (context, state) => const form.RequestInductionFormScreen()),
       GoRoute(
         path: '/request-submitted',
         builder: (context, state) {
@@ -217,40 +230,39 @@ class AppRouter {
       /// -----------------------
       /// CMS ROUTES
       /// -----------------------
-      GoRoute(path: '/cms', builder: (context, state) => const CmsInductionScreen()),
       GoRoute(
-      path: '/cms/multiplechoice',
-      builder: (context, state) {
-        final plantId = state.extra as String?;
-        return MultipleChoiceScreen(plantId: plantId ?? '');
+          path: '/cms',
+          builder: (context, state) => const CmsInductionScreen()),
+      GoRoute(
+        path: '/cms/multiplechoice',
+        builder: (context, state) {
+          final plantId = state.extra as String?;
+          return MultipleChoiceScreen(plantId: plantId ?? '');
         },
       ),
-      GoRoute(path: '/cms/multiplechoice/add', builder: (context, state) => const AddMultipleChoiceScreen()),
       GoRoute(
-      path: '/cms/truefalse',
-      builder: (context, state) {
-        final plantId = state.extra as String?;
-        return TrueFalseScreen(plantId: plantId ?? '');
+          path: '/cms/multiplechoice/add',
+          builder: (context, state) => const AddMultipleChoiceScreen()),
+      GoRoute(
+        path: '/cms/truefalse',
+        builder: (context, state) {
+          final plantId = state.extra as String?;
+          return TrueFalseScreen(plantId: plantId ?? '');
         },
       ),
-      GoRoute(path: '/cms/truefalse/add', builder: (context, state) => const AddTrueFalseScreen()),
+      GoRoute(
+          path: '/cms/truefalse/add',
+          builder: (context, state) => const AddTrueFalseScreen()),
       GoRoute(
         path: '/cms/material',
-<<<<<<< HEAD
-        builder: (context, state) => const MaterialListScreen(),
-      ),
-      GoRoute(
-        path: '/cms/material/add',
-        builder: (context, state) =>
-            const AddMaterialScreen(), // Pastikan ini ada
-=======
         builder: (context, state) {
           final plantId = state.extra as String? ?? '';
           return AddMaterialScreen(plantId: plantId);
         },
->>>>>>> 2d4ea03fad1f6f6fb038a03cbe060906a6c456a0
       ),
-      GoRoute(path: '/cms/material/add', builder: (context, state) => const AddMaterialScreen(plantId: '')),
+      GoRoute(
+          path: '/cms/material/add',
+          builder: (context, state) => const AddMaterialScreen(plantId: '')),
       GoRoute(
         path: '/cms/material/:kode',
         builder: (context, state) {

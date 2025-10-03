@@ -75,79 +75,101 @@ class _DetaiinfoState extends State<Detaiinfo> {
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 600),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSectionCard(
-                    title: 'Induction Request',
-                    child: FutureBuilder<List<InductionRequestId>>(
-                      future: _fetchInductionId,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
-                        if (snapshot.hasError) {
-                          return _errorMessage(
-                              'Gagal memuat data: ${snapshot.error}');
-                        }
-                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return _errorMessage('Data tidak ditemukan');
-                        }
-
-                        final data = snapshot.data!.first;
-                        datashow = data;
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildInfoRow(Icons.check_circle_outline, 'Status',
-                                data.status),
-                            _buildInfoRow(Icons.location_on_outlined,
-                                'Plant Name', data.plantName),
-                            _buildInfoRow(Icons.business,
-                                'Department Destination', data.department),
-                            _buildInfoRow(
-                                Icons.person_outline, 'PIC Name', data.picName),
-                            _buildInfoRow(Icons.calendar_today_outlined,
-                                'Arrival Date', _formatDate(data.arrivalDate)),
-                            _buildInfoRow(Icons.access_time_outlined,
-                                'Visit Duration', data.visitDuration),
-                            _buildInfoRow(Icons.description_outlined,
-                                'Reason to Visit', data.reasonToVisit),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  _buildSectionCard(
-                    title: 'Visitor Profile',
+        child: Column(
+          children: [
+            // Bagian konten yang bisa di-scroll
+            Expanded(
+              child: SingleChildScrollView(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 600),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildInfoRow(
-                            Icons.person, 'Full Name', username ?? '-'),
-                        _buildInfoRow(
-                            Icons.business, 'Company Name', compname ?? '-'),
-                        _buildInfoRow(
-                            Icons.work_outline, 'Job Position', jobposs ?? '-'),
+                        _buildSectionCard(
+                          title: 'Induction Request',
+                          child: FutureBuilder<List<InductionRequestId>>(
+                            future: _fetchInductionId,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              }
+                              if (snapshot.hasError) {
+                                return _errorMessage(
+                                    'Gagal memuat data: ${snapshot.error}');
+                              }
+                              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                return _errorMessage('Data tidak ditemukan');
+                              }
+
+                              final data = snapshot.data!.first;
+                              datashow = data;
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildInfoRow(Icons.check_circle_outline,
+                                      'Status', data.status),
+                                  _buildInfoRow(Icons.location_on_outlined,
+                                      'Plant Name', data.plantName),
+                                  _buildInfoRow(
+                                      Icons.business,
+                                      'Department Destination',
+                                      data.department),
+                                  _buildInfoRow(Icons.person_outline,
+                                      'PIC Name', data.picName),
+                                  _buildInfoRow(
+                                      Icons.calendar_today_outlined,
+                                      'Arrival Date',
+                                      _formatDate(data.arrivalDate)),
+                                  _buildInfoRow(Icons.access_time_outlined,
+                                      'Visit Duration', data.visitDuration),
+                                  _buildInfoRow(Icons.description_outlined,
+                                      'Reason to Visit', data.reasonToVisit),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        _buildSectionCard(
+                          title: 'Visitor Profile',
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildInfoRow(
+                                  Icons.person, 'Full Name', username ?? '-'),
+                              _buildInfoRow(Icons.business, 'Company Name',
+                                  compname ?? '-'),
+                              _buildInfoRow(Icons.work_outline, 'Job Position',
+                                  jobposs ?? '-'),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  // ✅ TOMBOL DI DALAM COLUMN — TIDAK PAKAI STACK
-                  _buildBottomButton(),
-                ],
+                ),
               ),
             ),
-          ),
+            // Jarak kecil di atas tombol
+            const SizedBox(height: 12),
+            // Tombol tetap di bawah, lebar selaras
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: _buildBottomButton(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12), // jarak bawah opsional
+          ],
         ),
       ),
     );
@@ -225,10 +247,8 @@ class _DetaiinfoState extends State<Detaiinfo> {
     );
   }
 
-// Ubah _buildBottomButton() menjadi widget biasa (bukan Positioned)
   Widget _buildBottomButton() {
     return SizedBox(
-      width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: () {
           if (datashow?.idrequest != null) {
@@ -253,8 +273,12 @@ class _DetaiinfoState extends State<Detaiinfo> {
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF07840B),
           foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(
+              vertical: 16, horizontal: 24), // tambah horizontal
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          minimumSize: const Size.fromHeight(
+              56), // 👈 tinggi minimal 56 (rekomendasi Material)
+          visualDensity: VisualDensity.standard, // hindari compact
         ),
       ),
     );

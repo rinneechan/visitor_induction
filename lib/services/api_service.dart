@@ -385,7 +385,7 @@ class ApiService {
       throw Exception('Access token is missing or invalid');
     }
 
-    final String url = '$apiUrl/materials/$byPlant';
+    final String url = '$apiUrl/materials/materialplant/$byPlant';
 
     try {
       final headers = {
@@ -467,35 +467,38 @@ class ApiService {
       throw Exception('Failed to load data: $e');
     }
   }
+
 // Ambil plant khusus CMS
-Future<List<Plant>> fetchPlantsCMS() async {
-  final String apiUrl = EnvHelper.get('API_URL');
-  final String accessHeaderKey = EnvHelper.get('API_HEADERS');
-  final String? accessToken = box.get('token');
+  Future<List<Plant>> fetchPlantsCMS() async {
+    final String apiUrl = EnvHelper.get('API_URL');
+    final String accessHeaderKey = EnvHelper.get('API_HEADERS');
+    final String? accessToken = box.get('token');
 
-  if (accessToken == null || accessToken.isEmpty) {
-    throw Exception('Access token is missing or invalid');
-  }
-
-  final response = await http.get(
-    Uri.parse('$apiUrl/plants'),
-    headers: {
-      accessHeaderKey: accessToken,
-    },
-  );
-
-  if (response.statusCode == 200) {
-    final Map<String, dynamic> responseData = jsonDecode(response.body);
-    if (responseData['data'] != null && responseData['data']['plants'] != null) {
-      List<dynamic> data = responseData['data']['plants'];
-      return data.map((item) => Plant.fromJson(item)).toList();
-    } else {
-      throw Exception('No plant data found for CMS');
+    if (accessToken == null || accessToken.isEmpty) {
+      throw Exception('Access token is missing or invalid');
     }
-  } else {
-    throw Exception('Failed to load plants for CMS');
+
+    final response = await http.get(
+      Uri.parse('$apiUrl/plants'),
+      headers: {
+        accessHeaderKey: accessToken,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      if (responseData['data'] != null &&
+          responseData['data']['plants'] != null) {
+        List<dynamic> data = responseData['data']['plants'];
+        return data.map((item) => Plant.fromJson(item)).toList();
+      } else {
+        throw Exception('No plant data found for CMS');
+      }
+    } else {
+      throw Exception('Failed to load plants for CMS');
+    }
   }
-}
+
   Future<List<Dept>> fetchDept(String level) async {
     //final url = 'http://10.10.10.72:3001/plants/get-dep-plant';
     //final url = 'https://cemindo-apps.com/api_visitor_induction/plants/get-dep-plant';
@@ -623,6 +626,7 @@ Future<List<Plant>> fetchPlantsCMS() async {
       throw Exception('Failed to load data: $e');
     }
   }
+
   Future<List<Durations>> fetchDuratuion() async {
     final String apiUrl = EnvHelper.get('API_URL');
     final String accessHeaderKey = EnvHelper.get('API_HEADERS');
@@ -1161,6 +1165,6 @@ Future<List<Plant>> fetchPlantsCMS() async {
     } catch (e) {
       print('Error saat membuka file: $e');
       return null;
-    }    
+    }
   }
 }

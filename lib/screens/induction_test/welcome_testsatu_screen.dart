@@ -236,7 +236,7 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
         onPressed: isDocumentRead
             ? () {
                 context.push(
-                  '/welcome-test-intructions',
+                  '/induction/welcome-test-instructions',
                   extra: {
                     'idrequest': widget.idrequest,
                     'plantId': widget.plantId,
