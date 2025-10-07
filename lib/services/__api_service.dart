@@ -463,51 +463,61 @@ class ApiService {
     }
   }
 
-  Future<List<Plant>> fetchPlant() async {
-    final String apiUrl = EnvHelper.get('API_URL');
-    final String accessHeaderKey = EnvHelper.get('API_HEADERS');
-    if (apiUrl.isEmpty) {
-      throw Exception("API_URL tidak ditemukan di env.json!");
-    }
-    final String url = '$apiUrl/plants';
-    final String? accessToken = box.get('token');
-    if (accessToken == null || accessToken.isEmpty) {
-      throw Exception('Access token is missing or invalid');
-    }
-    try {
-      // Header untuk autentikasi
-      final headers = {
-        //'access_token': accessToken,
-        accessHeaderKey: accessToken,
-      };
+  Future<List<Plant>> fetchPlant({bool isCMS = false}) async {
+  final String apiUrl = EnvHelper.get('API_URL');
+  final String accessHeaderKey = EnvHelper.get('API_HEADERS');
+  final String? accessToken = box.get('token');
 
-      // Melakukan HTTP GET
-      final response = await http.get(
-        Uri.parse(url),
-        headers: headers,
-      );
-      // Menyimpan status kode respons
-      lastResponseStatusCode = response.statusCode;
-
-      if (response.statusCode == 200) {
-        // Parsing JSON response
-        final Map<String, dynamic> responseData = json.decode(response.body);
-        // Validasi data dan parsing menjadi list
-        if (responseData['data'] != null &&
-            responseData['data']['plants'] != null) {
-          List<dynamic> data = responseData['data']['plants'];
-          return data.map((item) => Plant.fromJson(item)).toList();
-        } else {
-          throw Exception('No data found');
-        }
-      } else {
-        throw Exception('Failed to load data: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error occurred: $e');
-      throw Exception('Failed to load data: $e');
-    }
+  if (apiUrl.isEmpty) {
+    throw Exception("API_URL tidak ditemukan di env.json!");
   }
+
+  if (accessToken == null || accessToken.isEmpty) {
+    throw Exception('Access token is missing or invalid');
+  }
+
+  // Tentukan endpoint berdasarkan mode CMS atau tidak
+  final String url = isCMS ? '$apiUrl/plants/cms' : '$apiUrl/plants';
+
+  try {
+    final headers = {
+      accessHeaderKey: accessToken,
+      'Content-Type': 'application/json',
+    };
+
+    final response = await http.get(Uri.parse(url), headers: headers);
+
+    lastResponseStatusCode = response.statusCode;
+
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
+
+      // Handle berbagai kemungkinan format respons
+      if (body is List) {
+        // Jika API langsung return list
+        return body.map((e) => Plant.fromJson(e)).toList();
+      } else if (body is Map<String, dynamic>) {
+        // Jika API return object yang berisi data
+        if (body.containsKey('data')) {
+          final data = body['data'];
+          if (data is List) {
+            return data.map((e) => Plant.fromJson(e)).toList();
+          } else if (data is Map && data.containsKey('plants')) {
+            final plants = data['plants'] as List;
+            return plants.map((e) => Plant.fromJson(e)).toList();
+          }
+        }
+      }
+
+      throw Exception('Format respons tidak dikenali');
+    } else {
+      throw Exception('Gagal memuat data plant (${response.statusCode})');
+    }
+  } catch (e) {
+    print('Error fetchPlant: $e');
+    throw Exception('Terjadi kesalahan saat mengambil data plant: $e');
+  }
+}
 
   Future<List<Dept>> fetchDept(String level) async {
     //final url = 'http://10.10.10.72:3001/plants/get-dep-plant';

@@ -463,7 +463,7 @@ class ApiService {
     }
   }
 
-  Future<List<Plant>> fetchPlant() async {
+  Future<List<Plant>> fetchPlantsCMS() async {
     final String apiUrl = EnvHelper.get('API_URL');
     final String accessHeaderKey = EnvHelper.get('API_HEADERS');
     if (apiUrl.isEmpty) {

@@ -41,13 +41,8 @@ import 'package:she_vi/screens/induction_test/complated_screen.dart';
 
 // CMS Screens
 import 'package:she_vi/screens/cms/cms_induction_screen.dart';
-import 'package:she_vi/screens/cms/multiple_choice_screen.dart';
-import 'package:she_vi/screens/cms/true_false_screen.dart';
+import 'package:she_vi/screens/cms/cms_question_screen.dart';
 import 'package:she_vi/screens/cms/material_screen.dart';
-import 'package:she_vi/screens/cms/material_list_screen.dart';
-import 'package:she_vi/screens/cms/material_detail_screen.dart';
-import 'package:she_vi/screens/cms/add_multiple_choice_screen.dart';
-import 'package:she_vi/screens/cms/add_truefalse_screen.dart';
 
 // Utils / Services
 import 'package:she_vi/screens/setting/navigator_service.dart';
@@ -231,48 +226,36 @@ class AppRouter {
         },
       ),
 
-      /// -----------------------
-      /// CMS ROUTES
-      /// -----------------------
-      GoRoute(path: '/cms', builder: (context, state) => const CmsInductionScreen()),
-      GoRoute(
-      path: '/cms/multiplechoice',
-      builder: (context, state) {
-        final plantId = state.extra as String?;
-        return MultipleChoiceScreen(plantId: plantId ?? '');
-        },
-      ),
-      GoRoute(path: '/cms/multiplechoice/add', builder: (context, state) => const AddMultipleChoiceScreen()),
-      GoRoute(
-      path: '/cms/truefalse',
-      builder: (context, state) {
-        final plantId = state.extra as String?;
-        return TrueFalseScreen(plantId: plantId ?? '');
-        },
-      ),
-      GoRoute(path: '/cms/truefalse/add', builder: (context, state) => const AddTrueFalseScreen()),
-      GoRoute(
-        path: '/cms/material',
-        builder: (context, state) {
-          final plantId = state.extra as String? ?? '';
-          return AddMaterialScreen(plantId: plantId);
-        },
-      ),
-      GoRoute(path: '/cms/material/add', builder: (context, state) => const AddMaterialScreen(plantId: '')),
-      GoRoute(
-        path: '/cms/material/:kode',
-        builder: (context, state) {
-          final kode = state.pathParameters['kode'] ?? '';
-          return MaterialDetailScreen(kode: kode);
-        },
-      ),
-      GoRoute(
-        path: '/cms/material/edit/:kode',
-        builder: (context, state) {
-          final kode = state.pathParameters['kode'] ?? '';
-          return MaterialDetailScreen(kode: kode);
-        },
-      ),
-    ],
-  );
+   /// -----------------------
+/// CMS ROUTES
+/// -----------------------
+GoRoute(
+  path: '/cms',
+  builder: (context, state) {
+    final extra = state.extra as Map<String, String>?;
+    final plantId = extra?['plantId'] ?? '';
+    return CmsInductionScreen(plantId: plantId);
+  },
+),
+
+GoRoute(
+  path: '/cms/questions',
+  builder: (context, state) {
+    final extra = state.extra as Map<String, String>?;
+    final plantId = extra?['plantId'] ?? '';
+    return CmsQuestionScreen(plantId: plantId);
+  },
+),
+
+// ADD MATERIAL
+GoRoute(
+  path: '/cms/material/add',
+  builder: (context, state) {
+    final extra = state.extra as Map<String, String>?;
+    final plantId = extra?['plantId'] ?? '';
+    return AddMaterialScreen(plantId: plantId);
+  },
+),
+  ],
+ );
 }
