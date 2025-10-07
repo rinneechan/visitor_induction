@@ -2,13 +2,13 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:she_vi/screens/setting/navigator_service.dart';
 import 'package:flutter/foundation.dart';
 
-
 class FirebaseNotificationService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   Future<void> initNotifications() async {
     try {
-      NotificationSettings settings = await _firebaseMessaging.requestPermission(
+      NotificationSettings settings =
+          await _firebaseMessaging.requestPermission(
         alert: true,
         badge: true,
         sound: true,
@@ -38,7 +38,8 @@ class FirebaseNotificationService {
 
       // Background notification (App dibuka melalui notifikasi)
       FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-        debugPrint("🔔 Background Message opened: ${message.notification?.title}");
+        debugPrint(
+            "🔔 Background Message opened: ${message.notification?.title}");
         NavigatorService.navigateTo('/yourRoute');
       });
 
@@ -49,6 +50,7 @@ class FirebaseNotificationService {
   }
 
   static Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
-    debugPrint("🔔 Background message received: ${message.notification?.title}");
+    debugPrint(
+        "🔔 Background message received: ${message.notification?.title}");
   }
 }

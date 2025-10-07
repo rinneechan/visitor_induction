@@ -20,7 +20,6 @@ class WelcomeTestDuaScreen extends StatefulWidget {
 }
 
 class _WelcomeTestDuaScreenState extends State<WelcomeTestDuaScreen> {
-  final GlobalKey<ScaffoldState> _formKey_t2 = GlobalKey<ScaffoldState>();
   late Box box;
 
   @override
@@ -31,58 +30,35 @@ class _WelcomeTestDuaScreenState extends State<WelcomeTestDuaScreen> {
 
   Future<void> _openBox() async {
     box = await Hive.openBox('userBox');
-    setState(() {
-      String? token = box.get('token');
-      if (token == null || token.isEmpty) {
-        Navigator.pushReplacementNamed(context, '/chooseaccess');
-      }
-    });
+    final token = box.get('token');
+    if (token == null || token.isEmpty) {
+      context.go('/choose-access');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        // Prevent the user from navigating back
-        return false;
-      },
-      child: Scaffold(
-        key: _formKey_t2,
-        // appBar: AppBar(
-        //   title: const Text('INSTRUCTIONS',
-        //     style: TextStyle(
-        //       color: Color(0xFF07840B),
-        //       fontFamily: 'Hanken Grotesk',
-        //       fontSize: 24.0,
-        //       fontWeight: FontWeight.w700,
-        //       fontStyle: FontStyle.normal,
-        //       height: 1.0,
-        //       textBaseline: TextBaseline.alphabetic,
-        //       letterSpacing: 0.0,
-        //       decoration: TextDecoration.none,
-        //     ),
-        //     textAlign: TextAlign.center, // Teks rata tengah
-        //     textScaleFactor: 1.0, // Untuk memastikan ukuran tetap konsisten
-
-        //   ),
-        //   backgroundColor: Colors.white,
-        //   elevation: 2,
-        //   centerTitle: true,
-        //   automaticallyImplyLeading: false,
-
-        // ),
-
-        body: Center(
-          child: SizedBox(
-            width: MediaQuery.of(context).size.shortestSide,
-            height: MediaQuery.of(context).size.height,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('INSTRUCTIONS'),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF07840B),
+        elevation: 1,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHeader(),
-                  const SizedBox(height: 32),
                   _buildInstructionCard(
                     iconPath: 'assets/images/heart.svg',
                     text: 'You start with 3 hearts.',
@@ -112,57 +88,30 @@ class _WelcomeTestDuaScreenState extends State<WelcomeTestDuaScreen> {
     );
   }
 
-  Widget _buildHeader() {
-    return AppBar(
-      title: const Text(
-        'INSTRUCTIONS',
-        style: TextStyle(
-          color: Color(0xFF07840B),
-          fontFamily: 'Hanken Grotesk',
-          fontSize: 24.0,
-          fontWeight: FontWeight.w700,
-        ),
-        textAlign: TextAlign.center,
-      ),
-      backgroundColor: Colors.white,
-      elevation: 2,
-      centerTitle: true, // Memastikan judul berada di tengah
-      automaticallyImplyLeading: false, // Menghilangkan tombol back default
-    );
-  }
-
   Widget _buildInstructionCard({
     required String iconPath,
     required String text,
   }) {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
-        constraints: BoxConstraints(
-          minHeight: 24, // Tentukan tinggi minimal Card
-        ),
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(16.0),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              height: 58, // Sesuaikan ukuran sesuai kebutuhan
-              width: 48,
+              height: 50,
+              width: 50,
               decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.grey, // Warna border
-                  width: 2.0, // Ketebalan border
-                ),
-                borderRadius: BorderRadius.circular(8), // Radius border
+                border: Border.all(color: Colors.grey, width: 2.0),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(4.0), // Spasi dalam border
+                padding: const EdgeInsets.all(6.0),
                 child: SvgPicture.asset(
                   iconPath,
-                  height: 40,
-                  width: 40,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
@@ -185,38 +134,26 @@ class _WelcomeTestDuaScreenState extends State<WelcomeTestDuaScreen> {
   }
 
   Widget _buildStartButton() {
-    return Card(
-      elevation: 0,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: InkWell(
-          onTap: () {
-            context.go(
-              '/question?idrequest=${widget.idrequest ?? ''}&plantId=${widget.plantId.toString() ?? ''}&plantName=${widget.plantName ?? ''}',
-            );
-          },
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20.0),
-            decoration: BoxDecoration(
-              color: const Color(0xFF07840B),
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: const Center(
-              child: Text(
-                'Start Induction Test',
-                style: TextStyle(
-                  fontFamily: 'Hanken Grotesk',
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
-            ),
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: () {
+          context.go(
+            '/induction/question?idrequest=${widget.idrequest}&plantId=${widget.plantId}&plantName=${Uri.encodeComponent(widget.plantName)}',
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF07840B),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        child: const Text(
+          'Start Induction Test',
+          style: TextStyle(
+            fontFamily: 'Hanken Grotesk',
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
           ),
         ),
       ),

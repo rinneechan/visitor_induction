@@ -372,47 +372,6 @@ class ApiService {
   }
 
   //induction material By plant
-  // Future<List<InductionMaterialByPlant>> materiByPlant(String byplant) async {
-  //   //final url = 'http://10.10.10.72:3001/materials/materialplant/$byplant';
-  //   //final url = 'https://cemindo-apps.com/api_visitor_induction/materials/materialplant/$byplant';
-  //   final String apiUrl = EnvHelper.get('API_URL');
-  //   final accessHeader = EnvHelper.get('API_HEADERS_DEV');
-  //   if (apiUrl.isEmpty) {
-  //     //print("Error: API_URL tidak ditemukan di env.json!");
-  //     throw Exception("API_URL tidak ditemukan di env.json!");
-  //   }
-  //   final String url = '$apiUrl/materials/materialplant/$byplant';
-  //   final String? accessToken = box.get('token');
-
-  //   if (accessToken == null || accessToken.isEmpty) {
-  //     throw Exception('Access token is missing or invalid');
-  //   }
-
-  //   try {
-  //     final headers = {
-  //       '$accessHeader': accessToken,
-  //     };
-  //     final response = await http.get(Uri.parse(url), headers: headers);
-
-  //     if (response.statusCode == 200) {
-  //       final Map<String, dynamic> responseData = json.decode(response.body);
-
-  //       if (responseData['data'] != null) {
-  //         final data = responseData['data'];
-  //         // Cetak hasil untuk debugging
-  //         print('respon data: $data');
-  //         return [InductionMaterialByPlant.fromJson(data)];
-  //       } else {
-  //         throw Exception('No data found');
-  //       }
-  //     } else {
-  //       throw Exception('Failed to load data: ${response.statusCode}');
-  //     }
-  //   } catch (e) {
-  //     print('Error occurred: $e');
-  //     throw Exception('Failed to load data: $e');
-  //   }
-  // }
 
   Future<List<InductionMaterialByPlant>> materiByPlant(String byPlant) async {
     final String apiUrl = EnvHelper.get('API_URL');
@@ -468,6 +427,60 @@ class ApiService {
 
 
 
+<<<<<<< HEAD
+=======
+      if (response.statusCode == 200) {
+        // Parsing JSON response
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        // Validasi data dan parsing menjadi list
+        if (responseData['data'] != null &&
+            responseData['data']['plants'] != null) {
+          List<dynamic> data = responseData['data']['plants'];
+          return data.map((item) => Plant.fromJson(item)).toList();
+        } else {
+          throw Exception('No data found');
+        }
+      } else {
+        throw Exception('Failed to load data: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
+      throw Exception('Failed to load data: $e');
+    }
+  }
+
+// Ambil plant khusus CMS
+  Future<List<Plant>> fetchPlantsCMS() async {
+    final String apiUrl = EnvHelper.get('API_URL');
+    final String accessHeaderKey = EnvHelper.get('API_HEADERS');
+    final String? accessToken = box.get('token');
+
+    if (accessToken == null || accessToken.isEmpty) {
+      throw Exception('Access token is missing or invalid');
+    }
+
+    final response = await http.get(
+      Uri.parse('$apiUrl/plants'),
+      headers: {
+        accessHeaderKey: accessToken,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      if (responseData['data'] != null &&
+          responseData['data']['plants'] != null) {
+        List<dynamic> data = responseData['data']['plants'];
+        return data.map((item) => Plant.fromJson(item)).toList();
+      } else {
+        throw Exception('No plant data found for CMS');
+      }
+    } else {
+      throw Exception('Failed to load plants for CMS');
+    }
+  }
+
+>>>>>>> f6b7740dd86560b384cd317e8b0ac69b5212825c
   Future<List<Dept>> fetchDept(String level) async {
     //final url = 'http://10.10.10.72:3001/plants/get-dep-plant';
     //final url = 'https://cemindo-apps.com/api_visitor_induction/plants/get-dep-plant';
@@ -595,6 +608,7 @@ class ApiService {
       throw Exception('Failed to load data: $e');
     }
   }
+
   Future<List<Durations>> fetchDuratuion() async {
     final String apiUrl = EnvHelper.get('API_URL');
     final String accessHeaderKey = EnvHelper.get('API_HEADERS');
@@ -1133,8 +1147,9 @@ class ApiService {
     } catch (e) {
       print('Error saat membuka file: $e');
       return null;
-    }    
+    }
   }
+<<<<<<< HEAD
   // ---------------------------
 // ✅ Ambil daftar plant untuk dashboard / request induction
 // ---------------------------
@@ -1263,3 +1278,6 @@ Future<List<Plant>> fetchPlantsCMS() async {
     }
   }
 }
+=======
+}
+>>>>>>> f6b7740dd86560b384cd317e8b0ac69b5212825c

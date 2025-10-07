@@ -38,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _isTextFieldVisible = true;
 
-  void _login() async {
+  void OK_login() async {
     String username = _usernameController.text;
     if (username.isNotEmpty) {
       setState(() {
@@ -68,6 +68,52 @@ class _LoginScreenState extends State<LoginScreen> {
           });
         } else if (_apiService.lastResponseStatusCode == 400) {
           // Jika status 400, arahkan ke CreateNewPass
+          context.go(
+            '/create-new-pass/${userData['employee_id']}/${userData['full_name']}/${userData['email']}',
+          );
+        }
+      }
+    } else {
+      _showLoginError();
+    }
+  }
+
+  void _login() async {
+    String username = _usernameController.text;
+    if (username.isNotEmpty) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      Map<String, dynamic>? userData = await _apiService.loginNik(username);
+
+      // ✅ Tambahkan ini
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      debugPrint("Response userData: ${userData.toString()}");
+
+      if (userData == null) {
+        print('Status Code: ${_apiService.lastResponseStatusCode}');
+        if (_apiService.lastResponseStatusCode == 401) {
+          _showLoginError();
+        } else if (_apiService.lastResponseStatusCode == 404) {
+          _showLoginError();
+        } else {
+          _showConnectionError();
+        }
+      } else {
+        if (_apiService.lastResponseStatusCode == 200) {
+          // ✅ Tambahkan ini
+          if (!mounted) return;
+
+          setState(() {
+            _isTextFieldVisible = !_isTextFieldVisible;
+          });
+        } else if (_apiService.lastResponseStatusCode == 400) {
           context.go(
             '/create-new-pass/${userData['employee_id']}/${userData['full_name']}/${userData['email']}',
           );
@@ -108,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _loginPass() async {
+  void OK_loginPass() async {
     String username = _usernameController.text.trim();
     String password = _passwordController.text.trim();
 
@@ -171,6 +217,90 @@ class _LoginScreenState extends State<LoginScreen> {
         debugPrint("❌ Tidak ada koneksi internet.");
         _showConnectionError();
       } catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
+        debugPrint("❌ Error saat login: $e");
+        _showLoginPassError(errorMessage: e.toString());
+      }
+    } else {
+      _showLoginPassError(
+        errorMessage: 'Username dan password tidak boleh kosong.',
+      );
+    }
+  }
+
+  void _loginPass() async {
+    String username = _usernameController.text.trim();
+    String password = _passwordController.text.trim();
+    if (username.isNotEmpty && password.isNotEmpty) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        final connectivityResult = await Connectivity().checkConnectivity();
+        if (connectivityResult == ConnectivityResult.none) {
+          setState(() {
+            _isLoading = false;
+          });
+          _showConnectionError();
+          return;
+        }
+
+        String? fcmToken;
+
+        if (kIsWeb) {
+          fcmToken = 'shevi'; // Tandai bahwa aplikasi dijalankan di web
+        } else {
+          FirebaseMessaging messaging = FirebaseMessaging.instance;
+          fcmToken = await messaging.getToken();
+
+          if (fcmToken == null) {
+            debugPrint('❌ Gagal mendapatkan FCM token.');
+          }
+        }
+
+        bool isLoginSuccessful =
+            await _apiService.loginNikPass(username, password, fcmToken ?? '');
+
+        // ✅ Tambahkan ini sebelum setState
+        if (!mounted) return;
+
+        setState(() {
+          _isLoading = false;
+        });
+
+        if (isLoginSuccessful) {
+          // Simpan data
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('isLoggedIn', true);
+          await prefs.setString('username', username);
+
+          // Inisialisasi notifikasi — ini bisa memicu setState setelah navigasi
+          await FirebaseNotificationService().initNotifications();
+
+          // Navigasi — setelah ini, LoginScreen akan di-unmount
+          GoRouter.of(context)
+              .go('/employee/request-induction', extra: {'username': username});
+        } else {
+          _showLoginPassError(
+            errorMessage: 'Login gagal. Harap periksa kembali kredensial Anda.',
+          );
+        }
+      } on SocketException {
+        // ✅ Tambahkan ini juga
+        if (!mounted) return;
+
+        setState(() {
+          _isLoading = false;
+        });
+        debugPrint("❌ Tidak ada koneksi internet.");
+        _showConnectionError();
+      } catch (e) {
+        // ✅ Tambahkan ini juga
+        if (!mounted) return;
+
         setState(() {
           _isLoading = false;
         });
@@ -250,20 +380,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _openBox() async {
     box = await Hive.openBox('userBox');
-
-    if (!mounted) return;
+    if (!mounted) return; // ✅ Tambahkan ini
 
     final String? token = box.get('token');
     final String? username = box.get('username');
     final String? visitorid = box.get('visitorid');
     final String? email = box.get('email');
 
-    // Jika semua data tidak null dan token tidak kosong
     if (token != null &&
         token.isNotEmpty &&
         username != null &&
         visitorid != null &&
         email != null) {
+      // ✅ Tambahkan ini
       if (!mounted) return;
 
       setState(() {
@@ -275,48 +404,7 @@ class _LoginScreenState extends State<LoginScreen> {
       GoRouter.of(context)
           .go('/request-induction', extra: {'username': username});
     }
-    // Jika salah satu data tidak valid, tidak melakukan navigasi
   }
-
-  // Future<void> _openBox() async {
-  //   box = await Hive.openBox('userBox');
-  //   if (!mounted) return;
-
-  //   final String? token = box.get('token');
-  //   final String? username = box.get('username');
-  //   final String? visitorid = box.get('visitorid');
-  //   final String? email = box.get('email');
-
-  //   if (token == null ||
-  //       token.isEmpty ||
-  //       username == null ||
-  //       visitorid == null ||
-  //       email == null) {
-  //     if (!mounted) return;
-  //     //Navigator.pushReplacementNamed(context, '/');
-  //     //GoRouter.of(context).go('/');
-  //     return;
-  //   }
-
-  //   if (!mounted) return;
-  //   setState(() {
-  //     this.username = username;
-  //     this.visitorid = visitorid;
-  //     this.email = email;
-  //   });
-  // }
-
-  // Future<void> _checkLoginStatus() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-
-  //   if (isLoggedIn) {
-  //     //Navigator.pushReplacementNamed(context, '/main-menu');
-  //     //context.go('/main-menu');
-  //     GoRouter.of(context).go('/request-induction',
-  //         extra: {'username': username ?? 'defaultID'});
-  //   }
-  // }
 
   @override
   void dispose() {
@@ -551,11 +639,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                               ),
                                             ),
                                             foregroundColor:
-                                                WidgetStateProperty.all<
-                                                        Color>(
+                                                WidgetStateProperty.all<Color>(
                                                     const Color(0xFF07840B)),
-                                            textStyle: WidgetStateProperty
-                                                .all<TextStyle>(
+                                            textStyle: WidgetStateProperty.all<
+                                                TextStyle>(
                                               TextStyle(
                                                 fontFamily: 'Hanken Grotesk',
                                                 fontSize: 16,
@@ -663,14 +750,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                                       0xFF07840B); // Warna saat tombol aktif
                                                 },
                                               ),
-                                              padding: WidgetStateProperty
-                                                  .all<EdgeInsets>(
+                                              padding: WidgetStateProperty.all<
+                                                  EdgeInsets>(
                                                 EdgeInsets.symmetric(
                                                     vertical:
                                                         16.0), // Menyesuaikan padding agar tombol lebih tinggi
                                               ),
-                                              minimumSize: WidgetStateProperty
-                                                  .all<Size>(
+                                              minimumSize:
+                                                  WidgetStateProperty.all<Size>(
                                                 Size(double.infinity,
                                                     56), // Ukuran minimum tombol dengan tinggi 56
                                               ),
@@ -769,14 +856,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                                       0xFF07840B); // Warna saat tombol aktif
                                                 },
                                               ),
-                                              padding: WidgetStateProperty
-                                                  .all<EdgeInsets>(
+                                              padding: WidgetStateProperty.all<
+                                                  EdgeInsets>(
                                                 EdgeInsets.symmetric(
                                                     vertical:
                                                         16.0), // Menyesuaikan padding agar tombol lebih tinggi
                                               ),
-                                              minimumSize: WidgetStateProperty
-                                                  .all<Size>(
+                                              minimumSize:
+                                                  WidgetStateProperty.all<Size>(
                                                 Size(double.infinity,
                                                     56), // Ukuran minimum tombol dengan tinggi 56
                                               ),

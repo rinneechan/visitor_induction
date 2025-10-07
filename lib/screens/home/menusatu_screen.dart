@@ -171,33 +171,30 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                             elevation: 0,
                             color: Colors.white,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(
+                                  12), // sedikit lebih lembut
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.all(16.0),
+                              padding: const EdgeInsets.all(20.0), // lebih lega
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Center(
-                                    child: Container(
-                                      width: 230,
-                                      child: Text(
-                                        'Click the button below to schedule your visitor induction.',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: Color(0xFF757575),
-                                          fontFamily: 'Hanken Grotesk',
-                                          fontSize: 14.0,
-                                          fontWeight: FontWeight.w400,
-                                          height: 1.0,
-                                        ),
-                                      ),
+                                  Text(
+                                    'Click the button below to schedule your visitor induction.',
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2, // batasi maksimal 2 baris
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: Color(0xFF757575),
+                                      fontFamily: 'Hanken Grotesk',
+                                      fontSize: 15.0,
+                                      fontWeight: FontWeight.w400,
+                                      height: 1.3, // sedikit jarak antar baris
                                     ),
                                   ),
-                                  SizedBox(height: 16),
-                                  Padding(
-                                    padding: const EdgeInsets.all(
-                                        16.0), // Padding di semua sisi (top, bottom, left, right)
+                                  const SizedBox(height: 20),
+                                  SizedBox(
+                                    width: double.infinity,
                                     child: ElevatedButton(
                                       onPressed: () {
                                         context.push('/request-new-induction');
@@ -206,36 +203,29 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                         backgroundColor:
                                             const Color(0xFF07840B),
                                         padding: const EdgeInsets.symmetric(
-                                            vertical:
-                                                16.0), // Padding vertikal dalam tombol
+                                            vertical: 16.0),
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(8.0),
                                         ),
                                       ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: const [
-                                          Text(
-                                            'Request New Induction',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontFamily: 'Hanken Grotesk',
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                        ],
+                                      child: Text(
+                                        'Request New Induction',
+                                        style: const TextStyle(
+                                          color: Colors.white, // ✅ tetap putih
+                                          fontFamily: 'Hanken Grotesk',
+                                          fontSize: 16.0,
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                       ),
                                     ),
-                                  )
+                                  ),
                                 ],
                               ),
                             ),
                           ),
-                          // SizedBox(height: 8),
 
+                          // SizedBox(height: 8),
                           Card(
                             elevation: 0,
                             color: Colors.white,
@@ -307,7 +297,7 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                                                 .statusId ==
                                                             1) {
                                                           context.push(
-                                                              '/detail-info?id=${progresson.idrequest}');
+                                                              '/employee/detail-info?id=${progresson.idrequest}');
                                                         } else if (progresson
                                                                 .statusId ==
                                                             3) {
@@ -718,8 +708,7 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                               return InkWell(
                                                 onTap: () {
                                                   context.push(
-                                                      '/detail-history?id=${history.idrequest}');
-                                                  //context.push('/visitor-request?id=${history.idrequest}');
+                                                      '/employee/detail-history?id=${history.idrequest}');
                                                 },
                                                 child: Container(
                                                   decoration: BoxDecoration(

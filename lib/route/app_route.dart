@@ -1,3 +1,4 @@
+// lib/route/app_route.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -19,8 +20,10 @@ import 'package:she_vi/screens/home/menusatu_screen.dart';
 // Home - External
 import 'package:she_vi/screens/home/mainmenuExternal_screen.dart';
 import 'package:she_vi/screens/home/external/register_screen.dart';
-import 'package:she_vi/screens/home/external/request_induction_form_screen.dart' as form;
-import 'package:she_vi/screens/home/external/request_induction_screen.dart' as screen;
+import 'package:she_vi/screens/home/external/request_induction_form_screen.dart'
+    as form;
+import 'package:she_vi/screens/home/external/request_induction_screen.dart'
+    as screen;
 import 'package:she_vi/screens/home/external/request_submitted_screen.dart';
 
 // Pages
@@ -37,7 +40,7 @@ import 'package:she_vi/screens/induction_test/welcome_testdua_screen.dart';
 import 'package:she_vi/screens/induction_test/question_screen.dart';
 import 'package:she_vi/screens/induction_test/test_complated_screen.dart';
 import 'package:she_vi/screens/induction_test/approved_mail_screen.dart';
-import 'package:she_vi/screens/induction_test/complated_screen.dart';
+import 'package:she_vi/screens/induction_test/completed_screen.dart';
 
 // CMS Screens
 import 'package:she_vi/screens/cms/cms_induction_screen.dart';
@@ -47,46 +50,31 @@ import 'package:she_vi/screens/cms/material_screen.dart';
 // Utils / Services
 import 'package:she_vi/screens/setting/navigator_service.dart';
 
-void main() {
-  runApp(const App());
-}
-
-class App extends StatelessWidget {
-  const App({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
-      ),
-      routerConfig: AppRouter.router,
-    );
-  }
-}
-
+// ✅ HANYA KELAS AppRouter — TANPA main() atau runApp()
 class AppRouter {
   static final GoRouter router = GoRouter(
-    navigatorKey: globalNavigatorKey,
+    navigatorKey: globalNavigatorKey, // ✅ Ini benar!
     initialLocation: '/',
     routes: [
-
       /// -----------------------
       /// AUTH & GENERAL ROUTES
       /// -----------------------
       GoRoute(path: '/', builder: (context, state) => const WelcomeScreen()),
-      GoRoute(path: '/welcome', builder: (context, state) => const WelcomeScreen()),
-      GoRoute(path: '/choose-access', builder: (context, state) => ChooseAccess()),
+      GoRoute(
+          path: '/welcome', builder: (context, state) => const WelcomeScreen()),
+      GoRoute(
+          path: '/choose-access', builder: (context, state) => ChooseAccess()),
       GoRoute(path: '/login', builder: (context, state) => LoginScreen()),
-      GoRoute(path: '/register', builder: (context, state) => const RegisterScreen()),
+      GoRoute(
+          path: '/register',
+          builder: (context, state) => const RegisterScreen()),
       GoRoute(path: '/logout', builder: (context, state) => LogoutScreen()),
       GoRoute(
         path: '/create-new-pass/:employeeid/:fullName/:email',
         builder: (context, state) {
           final employeeid = state.pathParameters['employeeid'] ?? '';
-          final fullName   = state.pathParameters['fullName'] ?? '';
-          final email      = state.pathParameters['email'] ?? '';
+          final fullName = state.pathParameters['fullName'] ?? '';
+          final email = state.pathParameters['email'] ?? '';
           return CreateNewPass(
             employeeid: employeeid,
             fullName: fullName,
@@ -123,7 +111,9 @@ class AppRouter {
           return DetailHistory(idrequest: idRequest);
         },
       ),
-      GoRoute(path: '/request-new-induction', builder: (context, state) => ReqInductionySatu()),
+      GoRoute(
+          path: '/request-new-induction',
+          builder: (context, state) => ReqInductionySatu()),
       GoRoute(
         path: '/employee/request-submitted',
         builder: (context, state) => RequestSubmitted(username: 'defaultID'),
@@ -132,12 +122,14 @@ class AppRouter {
       /// -----------------------
       /// VISITOR ROUTES (External)
       /// -----------------------
-      GoRoute(path: '/main-menu-ext', builder: (context, state) => const MainmenuExternalScreen()),
+      GoRoute(
+          path: '/main-menu-ext',
+          builder: (context, state) => const MainmenuExternalScreen()),
       GoRoute(
         path: '/visitor/aktif-info',
         builder: (context, state) {
           final idRequest = state.uri.queryParameters['id'] ?? 'defaultID';
-          return ComplatedScreen(idrequest: idRequest);
+          return CompletedScreen(idrequest: idRequest);
         },
       ),
       GoRoute(
@@ -147,8 +139,12 @@ class AppRouter {
           return VisitorRequest(idrequest: idRequest);
         },
       ),
-      GoRoute(path: '/request-induction', builder: (context, state) => const screen.RequestInductionScreen()),
-      GoRoute(path: '/request-form', builder: (context, state) => const form.RequestInductionFormScreen()),
+      GoRoute(
+          path: '/request-induction',
+          builder: (context, state) => const screen.RequestInductionScreen()),
+      GoRoute(
+          path: '/request-form',
+          builder: (context, state) => const form.RequestInductionFormScreen()),
       GoRoute(
         path: '/request-submitted',
         builder: (context, state) {
@@ -222,10 +218,11 @@ class AppRouter {
         path: '/induction/active-info',
         builder: (context, state) {
           final idRequest = state.uri.queryParameters['id'] ?? 'defaultID';
-          return ComplatedScreen(idrequest: idRequest);
+          return CompletedScreen(idrequest: idRequest);
         },
       ),
 
+<<<<<<< HEAD
    /// -----------------------
 /// CMS ROUTES
 /// -----------------------
@@ -258,4 +255,58 @@ GoRoute(
 ),
   ],
  );
+=======
+      /// -----------------------
+      /// CMS ROUTES
+      /// -----------------------
+      GoRoute(
+          path: '/cms',
+          builder: (context, state) => const CmsInductionScreen()),
+      GoRoute(
+        path: '/cms/multiplechoice',
+        builder: (context, state) {
+          final plantId = state.extra as String?;
+          return MultipleChoiceScreen(plantId: plantId ?? '');
+        },
+      ),
+      GoRoute(
+          path: '/cms/multiplechoice/add',
+          builder: (context, state) => const AddMultipleChoiceScreen()),
+      GoRoute(
+        path: '/cms/truefalse',
+        builder: (context, state) {
+          final plantId = state.extra as String?;
+          return TrueFalseScreen(plantId: plantId ?? '');
+        },
+      ),
+      GoRoute(
+          path: '/cms/truefalse/add',
+          builder: (context, state) => const AddTrueFalseScreen()),
+      GoRoute(
+        path: '/cms/material',
+        builder: (context, state) {
+          final plantId = state.extra as String? ?? '';
+          return AddMaterialScreen(plantId: plantId);
+        },
+      ),
+      GoRoute(
+          path: '/cms/material/add',
+          builder: (context, state) => const AddMaterialScreen(plantId: '')),
+      GoRoute(
+        path: '/cms/material/:kode',
+        builder: (context, state) {
+          final kode = state.pathParameters['kode'] ?? '';
+          return MaterialDetailScreen(kode: kode);
+        },
+      ),
+      GoRoute(
+        path: '/cms/material/edit/:kode',
+        builder: (context, state) {
+          final kode = state.pathParameters['kode'] ?? '';
+          return MaterialDetailScreen(kode: kode);
+        },
+      ),
+    ],
+  );
+>>>>>>> f6b7740dd86560b384cd317e8b0ac69b5212825c
 }

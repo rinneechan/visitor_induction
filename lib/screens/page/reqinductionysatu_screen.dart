@@ -132,12 +132,21 @@ Future<void> _loadPlants() async {
     }
   }
 
+  // void _updateNextButtonState() {
+  //   setState(() {
+  //     _isButtonEnabled = _selectedPlant != null &&
+  //         _selectedEmplo != null &&
+  //         _selectedDate != null &&
+  //         _reasonController.text.isNotEmpty;
+  //   });
+  // }
   void _updateNextButtonState() {
     setState(() {
       _isButtonEnabled = _selectedPlant != null &&
           _selectedEmplo != null &&
           _selectedDate != null &&
-          _reasonController.text.isNotEmpty;
+          _selectedDuras != null && // Tambahkan ini!
+          _reasonController.text.trim().isNotEmpty;
     });
   }
 
@@ -340,6 +349,520 @@ Future<void> _loadPlants() async {
     );
   }
 
+<<<<<<< HEAD
+=======
+  Widget _buildForm(BuildContext context) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width, // Card full width
+      child: Card(
+        elevation: 0,
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Form(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('Request Induction Form'),
+                SizedBox(height: 2),
+                _buildSubtitle('Fill in the required information.'),
+                SizedBox(height: 24),
+                _buildDropdownSection(
+                    'Plant Destination', plantlist, _selectedPlant, (value) {
+                  setState(() {
+                    _selectedPlant = value;
+                  });
+                }),
+                SizedBox(height: 24),
+                _buildDropdownEmplo(
+                    'PIC Name & Department', emplolist, _selectedEmplo,
+                    (value) {
+                  setState(() {
+                    _selectedEmplo = value;
+                  });
+                }),
+                // _buildDropdownDept('PIC Name & Department', deptlist, _selectedDept, (value) {
+                //   setState(() { _selectedDept = value; });
+                // }),
+
+                SizedBox(height: 24),
+                _buildDateSection(),
+                SizedBox(height: 24),
+                _buildDropdownVisit(
+                    'Visit Duration', duraslist, _selectedDuras, (value) {}),
+                SizedBox(height: 24),
+                Text(
+                  'Reason to Visit',
+                  style: TextStyle(
+                    color: Color(0xFF343434),
+                    fontFamily: 'Hanken Grotesk',
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w700,
+                    fontStyle: FontStyle.normal,
+                    height: 1.0,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Container(
+                  height: 120,
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(
+                      color: _isReasonValid ? Color(0xFFD1D1D1) : Colors.red,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: TextField(
+                    controller: _reasonController,
+                    onChanged: (value) {
+                      setState(() {
+                        _validateReason();
+                        // _updateButtonState();
+                      });
+                    },
+                    maxLines: null,
+                    expands: true,
+                    decoration: InputDecoration(
+                      hintText: 'Specify reason for visit',
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+                if (!_isReasonValid)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      'Reason is required',
+                      style: TextStyle(color: Colors.red, fontSize: 12.0),
+                    ),
+                  ),
+                SizedBox(height: 24),
+                _buildFootertitle(
+                    'By submitting this form, I declare that all provided details are true and correct.'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: TextStyle(
+        color: Color(0xFF343434),
+        fontFamily: 'Hanken Grotesk',
+        fontSize: 24.0,
+        fontWeight: FontWeight.w700,
+      ),
+    );
+  }
+
+  Widget _buildSubtitle(String subtitle) {
+    return Text(
+      subtitle,
+      style: TextStyle(
+        color: Color(0xFF757575),
+        fontFamily: 'Hanken Grotesk',
+        fontSize: 16.0,
+        fontWeight: FontWeight.w400,
+      ),
+    );
+  }
+
+  Widget _buildFootertitle(String subtitle) {
+    return Text(
+      subtitle,
+      style: TextStyle(
+        color: Color.fromARGB(255, 95, 95, 95),
+        fontFamily: 'Hanken Grotesk',
+        fontSize: 16.0,
+        fontWeight: FontWeight.w400,
+      ),
+    );
+  }
+
+  Widget _buildDropdownSection(String title, List<Plant> items,
+      Plant? selectedValue, Function(Plant?) onChanged) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        SizedBox(height: 8),
+        items.isEmpty
+            ? Center(
+                // child:CircularProgressIndicator()
+                )
+            : DropdownButtonFormField<Plant>(
+                items: items.map((item) {
+                  return DropdownMenuItem<Plant>(
+                    value: item,
+                    child: Text(item.plantName), // Nama Plant yang ditampilkan
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  onChanged(value);
+                  setState(() {
+                    _selectedPlant = value;
+                    _updateButtonState(); // Perbarui Dept sesuai Plant
+                  });
+                },
+                value: selectedValue,
+                decoration: InputDecoration(
+                  hintText: 'Choose $title',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+      ],
+    );
+  }
+
+  // Widget _buildDropdownEmplo(String title, List<EmployeeByOu> items,
+  //     EmployeeByOu? selectedValue, Function(EmployeeByOu?) onChanged) {
+  //   TextEditingController searchController = TextEditingController();
+
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Text(
+  //         title,
+  //         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+  //       ),
+  //       SizedBox(height: 8),
+  //       items.isEmpty
+  //           ? DropdownButton2<String>(
+  //               isExpanded: true,
+  //               hint: Text('Choose $title'),
+  //               items: [
+  //                 DropdownMenuItem<String>(
+  //                   value: '',
+  //                   child: Text('Choose Department destination'),
+  //                 ),
+  //               ],
+  //               onChanged: null,
+  //               value: '',
+  //               buttonStyleData: ButtonStyleData(
+  //                 decoration: BoxDecoration(
+  //                   border: Border.all(color: Colors.grey),
+  //                   //borderRadius: BorderRadius.circular(8),
+  //                 ),
+  //               ),
+  //             )
+  //           : DropdownButton2<EmployeeByOu>(
+  //               isExpanded: true,
+  //               hint: Text('Choose $title'),
+  //               items: items
+  //                   .map((item) => DropdownMenuItem<EmployeeByOu>(
+  //                         value: item,
+  //                         child: Text('${item.fullname} - ${item.unitname}'),
+  //                       ))
+  //                   .toList(),
+  //               // items: items
+  //               //     .take(5) // hanya ambil 5 item pertama
+  //               //     .map((item) => DropdownMenuItem<EmployeeByOu>(
+  //               //   value: item,
+  //               //   child: Text('${item.fullname} - ${item.unitname}'),
+  //               // ))
+  //               //     .toList(),
+
+  //               onChanged: (value) {
+  //                 onChanged(value);
+  //                 setState(() {
+  //                   _selectedEmplo = value;
+  //                 });
+  //               },
+  //               value: selectedValue,
+  //               buttonStyleData: ButtonStyleData(
+  //                 decoration: BoxDecoration(
+  //                   border: Border.all(color: Colors.grey),
+  //                   borderRadius: BorderRadius.circular(8),
+  //                 ),
+  //               ),
+  //               dropdownSearchData: DropdownSearchData(
+  //                 searchController: searchController,
+  //                 searchInnerWidgetHeight: 50,
+  //                 searchInnerWidget: Padding(
+  //                   padding: const EdgeInsets.all(8),
+  //                   child: TextField(
+  //                     controller: searchController,
+  //                     decoration: InputDecoration(
+  //                       hintText: 'Search...',
+  //                       border: OutlineInputBorder(),
+  //                     ),
+  //                     onChanged: (value) {
+  //                       setState(() {}); // Perbarui tampilan setelah pencarian
+  //                     },
+  //                   ),
+  //                 ),
+  //                 searchMatchFn: (item, searchValue) {
+  //                   final query = searchValue.toLowerCase();
+  //                   final fullname = item.value!.fullname.toLowerCase();
+  //                   final unitname = item.value!.unitname.toLowerCase();
+  //                   return fullname.contains(query) || unitname.contains(query);
+  //                   //return item.value!.fullname.toLowerCase().contains(searchValue.toLowerCase());
+  //                 },
+  //               ),
+  //             ),
+  //     ],
+  //   );
+  // }
+
+  Widget _buildDropdownEmplo(
+    String title,
+    List<EmployeeByOu> items,
+    EmployeeByOu? selectedValue,
+    Function(EmployeeByOu?) onChanged,
+  ) {
+    final TextEditingController searchController = TextEditingController();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 8),
+        if (_isLoading && items.isEmpty)
+          Container(
+            height: 56,
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(8),
+              color: Colors.white,
+            ),
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          )
+        else if (items.isEmpty)
+          Container(
+            height: 56,
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(8),
+              color: Colors.white,
+            ),
+            child: Center(
+              child: Text(
+                'No PIC available',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+          )
+        else
+          DropdownButton2<EmployeeByOu>(
+            isExpanded: true,
+            hint: Text('Choose $title'),
+            value: selectedValue,
+            items: items
+                .map((item) => DropdownMenuItem<EmployeeByOu>(
+                      value: item,
+                      child: Text('${item.fullname} - ${item.unitname}'),
+                    ))
+                .toList(),
+            onChanged: (value) {
+              onChanged(value);
+              setState(() {
+                _selectedEmplo = value;
+                _updateNextButtonState();
+              });
+            },
+            // 🔥 INI YANG PENTING: Hilangkan semua garis bawah
+            buttonStyleData: ButtonStyleData(
+              height: 56,
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.white,
+              ),
+              // Pastikan tidak ada underline
+              elevation: 0,
+            ),
+            // 🔥 Juga pastikan dropdown-nya tidak punya garis bawah
+            dropdownStyleData: DropdownStyleData(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.white,
+              ),
+              elevation: 4,
+              offset: const Offset(0, 4),
+            ),
+            menuItemStyleData: MenuItemStyleData(
+              height: 50,
+              padding: EdgeInsets.symmetric(horizontal: 16),
+            ),
+            dropdownSearchData: DropdownSearchData<EmployeeByOu>(
+              searchController: searchController,
+              searchInnerWidgetHeight: 50,
+              searchInnerWidget: Container(
+                height: 50,
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search PIC or department...',
+                    hintStyle: TextStyle(fontSize: 14),
+                    // 🔥 Hilangkan border bawah di TextField pencarian
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                  ),
+                ),
+              ),
+              searchMatchFn: (item, searchValue) {
+                final query = searchValue.toLowerCase();
+                final fullname = item.value!.fullname.toLowerCase();
+                final unitname = item.value!.unitname.toLowerCase();
+                return fullname.contains(query) || unitname.contains(query);
+              },
+            ),
+          ),
+      ],
+    );
+  }
+
+  // Widget _buildDropdownDept(String title, List<Dept> items, Dept? selectedValue, Function(Dept?) onChanged) {
+  //   TextEditingController searchController = TextEditingController();
+  //
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Text(title,
+  //         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+  //       ),
+  //       SizedBox(height: 8),
+  //       items.isEmpty? DropdownButton2<String>(
+  //         isExpanded: true,
+  //         hint: Text('Choose $title'),
+  //         items: [
+  //           DropdownMenuItem<String>(
+  //             value: 'No Select Plant',
+  //             child: Text('Choose Department destination'),
+  //           ),
+  //         ],
+  //         onChanged: null,
+  //         value: 'No Select Plant',
+  //         underline: SizedBox(),
+  //         buttonStyleData: ButtonStyleData(
+  //           decoration: BoxDecoration(
+  //             border: Border.all(color: Colors.grey),
+  //             borderRadius: BorderRadius.circular(8),
+  //           ),
+  //         ),
+  //       )
+  //           : DropdownButton2<Dept>(
+  //         isExpanded: true,
+  //         hint: Text('Choose $title'),
+  //         items: items
+  //             .map((item) => DropdownMenuItem<Dept>(
+  //           value: item,
+  //           child: Text(item.namedept),
+  //         ))
+  //             .toList(),
+  //         onChanged: (value) {
+  //           onChanged(value);
+  //           setState(() {
+  //             _selectedDept = value;
+  //           });
+  //         },
+  //         value: selectedValue,
+  //         buttonStyleData: ButtonStyleData(
+  //           decoration: BoxDecoration(
+  //             border: Border.all(color: Colors.grey),
+  //             borderRadius: BorderRadius.circular(8),
+  //           ),
+  //         ),
+  //         dropdownSearchData: DropdownSearchData(
+  //           searchController: searchController,
+  //           searchInnerWidgetHeight: 50,
+  //           searchInnerWidget: Padding(
+  //             padding: const EdgeInsets.all(8),
+  //             child: TextField(
+  //               controller: searchController,
+  //               decoration: InputDecoration(
+  //                 hintText: 'Search...',
+  //                 border: OutlineInputBorder(),
+  //               ),
+  //               onChanged: (value) {
+  //                 setState(() {}); // Perbarui tampilan setelah pencarian
+  //               },
+  //             ),
+  //           ),
+  //           searchMatchFn: (item, searchValue) {
+  //             return item.value!.namedept.toLowerCase().contains(searchValue.toLowerCase());
+  //           },
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
+
+  // Widget _buildDropdownDept__(String title, List<Dept> items, Dept? selectedValue,
+  //     Function(Dept?) onChanged) {
+  //       return Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           Text(
+  //             title,
+  //             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+  //           ),
+  //           SizedBox(height: 8),
+  //           items.isEmpty
+  //               ? DropdownButtonFormField<String>(
+  //             items: [
+  //               DropdownMenuItem<String>(
+  //                 value: 'No Select Plant',
+  //                 child: Text('Select Plant'),
+  //               ),
+  //             ],
+  //             onChanged: null, // Tidak ada interaksi karena Dept kosong
+  //             value: 'No Select Plant',
+  //             decoration: InputDecoration(
+  //               hintText: 'Choose $title',
+  //               border: OutlineInputBorder(),
+  //             ),
+  //           )
+  //               : DropdownButtonFormField<Dept>(
+  //             items: items.map((item) {
+  //               return DropdownMenuItem<Dept>(
+  //                 value: item,
+  //                 child: Text(item.namedept),
+  //               );
+  //             }).toList(),
+  //             onChanged: (value) {
+  //               onChanged(value);
+  //               setState(() {
+  //                 _selectedDept = value;
+  //               });
+  //             },
+  //             value: selectedValue,
+  //             decoration: InputDecoration(
+  //               hintText: 'Choose $title',
+  //               border: OutlineInputBorder(),
+  //             ),
+  //           ),
+  //         ],
+  //       );
+  // }
+
+>>>>>>> f6b7740dd86560b384cd317e8b0ac69b5212825c
   Widget _buildDateSection() {
     return GestureDetector(
       onTap: () => _selectDate(context),
@@ -383,4 +906,149 @@ Future<void> _loadPlants() async {
       ),
     );
   }
+<<<<<<< HEAD
+=======
+
+  Widget _buildBackButton(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey, width: 2.0),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: IconButton(
+        icon: Icon(Icons.arrow_back),
+        onPressed: () {
+          Navigator.pop(context);
+        },
+      ),
+    );
+  }
+
+  Widget _buildNextButton() {
+    return Expanded(
+      child: ElevatedButton(
+        onPressed: _isButtonEnabled ? _next : null,
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+            (Set<WidgetState> states) {
+              if (states.contains(WidgetState.disabled)) {
+                return Color(0xFFA4A4A4);
+              }
+              return Color(0xFF07840B);
+            },
+          ),
+          padding: WidgetStateProperty.all<EdgeInsets>(
+              EdgeInsets.symmetric(vertical: 16.0)),
+          shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0))),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(width: 10),
+            Text(
+              'Next',
+              style: TextStyle(
+                color: Color(0xFF4F4D4D),
+                fontFamily: 'Hanken Grotesk',
+                fontSize: 16.0,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  TextStyle get _sectionTextStyle {
+    return TextStyle(
+      color: Color(0xFF343434),
+      fontFamily: 'Hanken Grotesk',
+      fontSize: 16.0,
+      fontWeight: FontWeight.w700,
+    );
+  }
+
+  // Widget _buildDropdownVisit(String title, List<dynamic> items,
+  //     dynamic selectedValue, Function(dynamic) onChanged) {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Text(title, style: _sectionTextStyle),
+  //       SizedBox(height: 8),
+  //       items.isEmpty
+  //           ? Center(
+  //               child: Text('No items available'),
+  //             )
+  //           : DropdownButtonFormField<dynamic>(
+  //               items: items.map((item) {
+  //                 return DropdownMenuItem<dynamic>(
+  //                   value: item,
+  //                   child: Text(item.nameduration),
+  //                 );
+  //               }).toList(),
+  //               onChanged: (value) {
+  //                 onChanged(value); // Panggil callback onChanged
+  //                 setState(() {
+  //                   _selectedDuras = value; // Update _selectedDuras
+  //                 });
+  //               },
+  //               value: selectedValue,
+  //               decoration: InputDecoration(
+  //                 hintText: 'Choose $title',
+  //                 border: OutlineInputBorder(),
+  //               ),
+  //             ),
+  //     ],
+  //   );
+  // }
+  Widget _buildDropdownVisit(
+      String title,
+      List<customDurations.Durations> items,
+      customDurations.Durations? selectedValue,
+      Function(dynamic) onChanged) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: _sectionTextStyle),
+        SizedBox(height: 8),
+        items.isEmpty
+            ? Container(
+                height: 56,
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.white,
+                ),
+                child: Center(child: Text('No durations available')),
+              )
+            : DropdownButtonFormField<customDurations.Durations>(
+                items: items.map((item) {
+                  return DropdownMenuItem<customDurations.Durations>(
+                    value: item,
+                    child: Text(item.nameduration),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  onChanged(value);
+                  setState(() {
+                    _selectedDuras = value;
+                    _updateNextButtonState(); // <-- Tambahkan ini
+                  });
+                },
+                value: selectedValue,
+                decoration: InputDecoration(
+                  hintText: 'Choose $title',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                ),
+              ),
+      ],
+    );
+  }
+>>>>>>> f6b7740dd86560b384cd317e8b0ac69b5212825c
 }
