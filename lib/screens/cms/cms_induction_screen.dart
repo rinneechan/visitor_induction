@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:she_vi/models/plant_model.dart';
 import 'package:she_vi/models/mc_question.dart';
 import 'package:she_vi/services/api_service.dart';
+import 'package:she_vi/screens/home/custom_drawer.dart';
 
 class CmsInductionScreen extends StatefulWidget {
   final String? plantId;
@@ -78,26 +79,26 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
   }
 
   // ROUTE TAMBAH MATERI
-  void _goToAddMaterial() {
-    if (selectedPlant == null) return;
-    // Kirim plantId sebagai string
-    context.push('/cms/material/add', extra: selectedPlant!.id.toString());
-  }
+ void _goToAddMaterial() {
+  if (selectedPlant == null) return;
+  context.push('/cms/material/add', extra: {'plantId': selectedPlant!.id.toString()});
+}
 
   // ROUTE TAMBAH SOAL
   void _goToCmsQuestionScreen() {
-    if (selectedPlant == null) return;
-    context.push('/cms/questions', extra: selectedPlant!.id.toString());
-  }
+  if (selectedPlant == null) return;
+  context.push('/cms/questions', extra: {'plantId': selectedPlant!.id.toString()});
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      drawer: const CustomDrawer(username: "Admin CMS"), // ✅ Sidebar Drawer CMS
       appBar: AppBar(
         title: Text("CMS Induction", style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.bold)),
         backgroundColor: const Color(0xFF2E7D32),
       ),
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: isLoadingPlants
@@ -261,7 +262,8 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
             ],
             const SizedBox(height: 8),
             Text("Jawaban Benar: ${question.correctAnswer ?? '-'}",
-                style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.bold, color: const Color(0xFF2E7D32))),
+                style: GoogleFonts.hankenGrotesk(
+                    fontWeight: FontWeight.bold, color: const Color(0xFF2E7D32))),
           ],
         ),
         actions: [

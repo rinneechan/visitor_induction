@@ -11,11 +11,9 @@ import 'package:go_router/go_router.dart';
 import 'route/app_route.dart'; // Pastikan file ini TIDAK punya main()
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:she_vi/screens/setting/navigator_service.dart';
-<<<<<<< HEAD
-import 'package:she_vi/utils/env_helper.dart'; // Import helper
-=======
+
 import 'package:she_vi/utils/env_helper.dart';
->>>>>>> f6b7740dd86560b384cd317e8b0ac69b5212825c
+
 
 // =============== HANDLER NOTIFIKASI ===============
 
