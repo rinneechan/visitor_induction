@@ -221,16 +221,14 @@ class AppRouter {
           return CompletedScreen(idrequest: idRequest);
         },
       ),
-
-<<<<<<< HEAD
+   
    /// -----------------------
 /// CMS ROUTES
 /// -----------------------
 GoRoute(
   path: '/cms',
   builder: (context, state) {
-    final extra = state.extra as Map<String, String>?;
-    final plantId = extra?['plantId'] ?? '';
+    final plantId = state.extra as String? ?? ''; 
     return CmsInductionScreen(plantId: plantId);
   },
 ),
@@ -238,75 +236,34 @@ GoRoute(
 GoRoute(
   path: '/cms/questions',
   builder: (context, state) {
-    final extra = state.extra as Map<String, String>?;
-    final plantId = extra?['plantId'] ?? '';
+    print("EXTRA VALUE TYPE: ${state.extra.runtimeType}");
+    // state.extra sekarang bisa berupa Map<String, String>
+    String plantId = '';
+    if (state.extra is Map<String, String>) {
+      plantId = (state.extra as Map<String, String>)['plantId'] ?? '';
+    } else if (state.extra is String) {
+      plantId = state.extra as String;
+    }
+
     return CmsQuestionScreen(plantId: plantId);
   },
 ),
 
-// ADD MATERIAL
 GoRoute(
   path: '/cms/material/add',
   builder: (context, state) {
-    final extra = state.extra as Map<String, String>?;
-    final plantId = extra?['plantId'] ?? '';
+    print("EXTRA VALUE TYPE: ${state.extra.runtimeType}");
+    String plantId = '';
+    if (state.extra is Map<String, String>) {
+      plantId = (state.extra as Map<String, String>)['plantId'] ?? '';
+    } else if (state.extra is String) {
+      plantId = state.extra as String;
+    }
+
     return AddMaterialScreen(plantId: plantId);
   },
 ),
   ],
  );
-=======
-      /// -----------------------
-      /// CMS ROUTES
-      /// -----------------------
-      GoRoute(
-          path: '/cms',
-          builder: (context, state) => const CmsInductionScreen()),
-      GoRoute(
-        path: '/cms/multiplechoice',
-        builder: (context, state) {
-          final plantId = state.extra as String?;
-          return MultipleChoiceScreen(plantId: plantId ?? '');
-        },
-      ),
-      GoRoute(
-          path: '/cms/multiplechoice/add',
-          builder: (context, state) => const AddMultipleChoiceScreen()),
-      GoRoute(
-        path: '/cms/truefalse',
-        builder: (context, state) {
-          final plantId = state.extra as String?;
-          return TrueFalseScreen(plantId: plantId ?? '');
-        },
-      ),
-      GoRoute(
-          path: '/cms/truefalse/add',
-          builder: (context, state) => const AddTrueFalseScreen()),
-      GoRoute(
-        path: '/cms/material',
-        builder: (context, state) {
-          final plantId = state.extra as String? ?? '';
-          return AddMaterialScreen(plantId: plantId);
-        },
-      ),
-      GoRoute(
-          path: '/cms/material/add',
-          builder: (context, state) => const AddMaterialScreen(plantId: '')),
-      GoRoute(
-        path: '/cms/material/:kode',
-        builder: (context, state) {
-          final kode = state.pathParameters['kode'] ?? '';
-          return MaterialDetailScreen(kode: kode);
-        },
-      ),
-      GoRoute(
-        path: '/cms/material/edit/:kode',
-        builder: (context, state) {
-          final kode = state.pathParameters['kode'] ?? '';
-          return MaterialDetailScreen(kode: kode);
-        },
-      ),
-    ],
-  );
->>>>>>> f6b7740dd86560b384cd317e8b0ac69b5212825c
+
 }
