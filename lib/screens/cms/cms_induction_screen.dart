@@ -78,24 +78,28 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
     _loadQuestions();
   }
 
-  // ROUTE TAMBAH MATERI
- void _goToAddMaterial() {
-  if (selectedPlant == null) return;
-  context.push('/cms/material/add', extra: {'plantId': selectedPlant!.id.toString()});
-}
+  void _goToAddMaterial() {
+    if (selectedPlant == null) return;
+    context.push('/cms/material/add', extra: {'plantId': selectedPlant!.id.toString()});
+  }
 
-  // ROUTE TAMBAH SOAL
   void _goToCmsQuestionScreen() {
-  if (selectedPlant == null) return;
-  context.push('/cms/questions', extra: {'plantId': selectedPlant!.id.toString()});
-}
+    if (selectedPlant == null) return;
+    context.push('/cms/questions', extra: {'plantId': selectedPlant!.id.toString()});
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const CustomDrawer(username: "Admin CMS"), // ✅ Sidebar Drawer CMS
       appBar: AppBar(
-        title: Text("CMS Induction", style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.bold)),
+        title: Text(
+          "CMS Induction",
+          style: GoogleFonts.hankenGrotesk(
+            fontWeight: FontWeight.bold,
+            color: Colors.white, // ✅ Warna teks title diubah jadi putih
+          ),
+        ),
         backgroundColor: const Color(0xFF2E7D32),
       ),
       backgroundColor: Colors.white,
@@ -110,22 +114,67 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Pilih Plant:",
-                          style: GoogleFonts.hankenGrotesk(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
-                      DropdownButton<Plant>(
-                        value: selectedPlant,
-                        hint: Text("Pilih Plant", style: GoogleFonts.hankenGrotesk()),
-                        items: plants
-                            .map((p) => DropdownMenuItem(
-                                  value: p,
-                                  child: Text(p.name, style: GoogleFonts.hankenGrotesk()),
-                                ))
-                            .toList(),
-                        onChanged: _onPlantChanged,
+                      Text(
+                        "Pilih Plant:",
+                        style: GoogleFonts.hankenGrotesk(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.only(left: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 6,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                            border: Border.all(color: Colors.grey.shade300, width: 1),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<Plant>(
+                              isExpanded: true,
+                              borderRadius: BorderRadius.circular(12),
+                              dropdownColor: Colors.white,
+                              icon: Icon(Icons.keyboard_arrow_down_rounded, color: Colors.green[700]),
+                              value: selectedPlant,
+                              hint: Text(
+                                "Pilih Plant",
+                                style: GoogleFonts.hankenGrotesk(
+                                  color: Colors.grey[600],
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              items: plants
+                                  .map(
+                                    (p) => DropdownMenuItem<Plant>(
+                                      value: p,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 8),
+                                        child: Text(
+                                          p.name,
+                                          style: GoogleFonts.hankenGrotesk(
+                                            fontSize: 16,
+                                            color: Colors.green[900],
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: _onPlantChanged,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 20),
 
                   // List Soal
@@ -133,14 +182,12 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text("Daftar Soal",
-                          style: GoogleFonts.hankenGrotesk(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
+                          style: GoogleFonts.hankenGrotesk(fontSize: 18, fontWeight: FontWeight.bold)),
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E7D32)),
                         onPressed: _goToCmsQuestionScreen,
                         icon: const Icon(Icons.add, color: Colors.white),
-                        label: Text("Tambah Soal",
-                            style: GoogleFonts.hankenGrotesk(color: Colors.white)),
+                        label: Text("Tambah Soal", style: GoogleFonts.hankenGrotesk(color: Colors.white)),
                       ),
                     ],
                   ),
@@ -171,9 +218,10 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
                                         borderRadius: BorderRadius.circular(12),
                                         boxShadow: [
                                           BoxShadow(
-                                              color: Colors.grey.withOpacity(0.2),
-                                              blurRadius: 5,
-                                              offset: const Offset(0, 3))
+                                            color: Colors.grey.withOpacity(0.2),
+                                            blurRadius: 5,
+                                            offset: const Offset(0, 3),
+                                          )
                                         ],
                                       ),
                                       child: Text("${index + 1}. ${q.question}",
@@ -192,14 +240,12 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text("Daftar Materi",
-                          style: GoogleFonts.hankenGrotesk(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
+                          style: GoogleFonts.hankenGrotesk(fontSize: 18, fontWeight: FontWeight.bold)),
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E7D32)),
                         onPressed: _goToAddMaterial,
                         icon: const Icon(Icons.add, color: Colors.white),
-                        label: Text("Tambah Materi",
-                            style: GoogleFonts.hankenGrotesk(color: Colors.white)),
+                        label: Text("Tambah Materi", style: GoogleFonts.hankenGrotesk(color: Colors.white)),
                       ),
                     ],
                   ),
@@ -223,12 +269,10 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
                             ],
                           ),
                           child: ListTile(
-                            leading:
-                                const Icon(Icons.picture_as_pdf, color: Color(0xFF2E7D32)),
+                            leading: const Icon(Icons.picture_as_pdf, color: Color(0xFF2E7D32)),
                             title: Text(mat["title"] ?? '',
                                 style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.w600)),
-                            subtitle: Text(mat["file"] ?? '',
-                                style: GoogleFonts.hankenGrotesk()),
+                            subtitle: Text(mat["file"] ?? '', style: GoogleFonts.hankenGrotesk()),
                           ),
                         );
                       },
