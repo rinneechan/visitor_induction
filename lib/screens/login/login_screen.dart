@@ -154,81 +154,81 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void OK_loginPass() async {
-    String username = _usernameController.text.trim();
-    String password = _passwordController.text.trim();
+  // void OK_loginPass() async {
+  //   String username = _usernameController.text.trim();
+  //   String password = _passwordController.text.trim();
 
-    if (username.isNotEmpty && password.isNotEmpty) {
-      setState(() {
-        _isLoading = true;
-      });
+  //   if (username.isNotEmpty && password.isNotEmpty) {
+  //     setState(() {
+  //       _isLoading = true;
+  //     });
 
-      try {
-        // Periksa koneksi internet sebelum login
-        final connectivityResult = await Connectivity().checkConnectivity();
-        if (connectivityResult == ConnectivityResult.none) {
-          setState(() {
-            _isLoading = false;
-          });
-          _showConnectionError();
-          return;
-        }
+  //     try {
+  //       // Periksa koneksi internet sebelum login
+  //       final connectivityResult = await Connectivity().checkConnectivity();
+  //       if (connectivityResult == ConnectivityResult.none) {
+  //         setState(() {
+  //           _isLoading = false;
+  //         });
+  //         _showConnectionError();
+  //         return;
+  //       }
 
-        String? fcmToken;
+  //       String? fcmToken;
 
-        if (kIsWeb) {
-          fcmToken = 'shevi'; // Tandai bahwa aplikasi dijalankan di web
-        } else {
-          FirebaseMessaging messaging = FirebaseMessaging.instance;
-          fcmToken = await messaging.getToken();
+  //       if (kIsWeb) {
+  //         fcmToken = 'shevi'; // Tandai bahwa aplikasi dijalankan di web
+  //       } else {
+  //         FirebaseMessaging messaging = FirebaseMessaging.instance;
+  //         fcmToken = await messaging.getToken();
 
-          if (fcmToken == null) {
-            debugPrint('❌ Gagal mendapatkan FCM token.');
-          }
-        }
+  //         if (fcmToken == null) {
+  //           debugPrint('❌ Gagal mendapatkan FCM token.');
+  //         }
+  //       }
 
-        bool isLoginSuccessful =
-            await _apiService.loginNikPass(username, password, fcmToken ?? '');
+  //       bool isLoginSuccessful =
+  //           await _apiService.loginNikPass(username, password, fcmToken ?? '');
 
-        setState(() {
-          _isLoading = false;
-        });
+  //       setState(() {
+  //         _isLoading = false;
+  //       });
 
-        if (isLoginSuccessful) {
-          // Simpan status login
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setBool('isLoggedIn', true);
-          await prefs.setString('username', username);
+  //       if (isLoginSuccessful) {
+  //         // Simpan status login
+  //         final prefs = await SharedPreferences.getInstance();
+  //         await prefs.setBool('isLoggedIn', true);
+  //         await prefs.setString('username', username);
 
-          // Inisialisasi notifikasi setelah login berhasil
-          await FirebaseNotificationService().initNotifications();
+  //         // Inisialisasi notifikasi setelah login berhasil
+  //         await FirebaseNotificationService().initNotifications();
 
-          GoRouter.of(context)
-              .go('/employee/request-induction', extra: {'username': username});
-        } else {
-          _showLoginPassError(
-            errorMessage: 'Login gagal. Harap periksa kembali kredensial Anda.',
-          );
-        }
-      } on SocketException {
-        setState(() {
-          _isLoading = false;
-        });
-        debugPrint("❌ Tidak ada koneksi internet.");
-        _showConnectionError();
-      } catch (e) {
-        setState(() {
-          _isLoading = false;
-        });
-        debugPrint("❌ Error saat login: $e");
-        _showLoginPassError(errorMessage: e.toString());
-      }
-    } else {
-      _showLoginPassError(
-        errorMessage: 'Username dan password tidak boleh kosong.',
-      );
-    }
-  }
+  //         GoRouter.of(context)
+  //             .go('/employee/request-induction', extra: {'username': username});
+  //       } else {
+  //         _showLoginPassError(
+  //           errorMessage: 'Login gagal. Harap periksa kembali kredensial Anda.',
+  //         );
+  //       }
+  //     } on SocketException {
+  //       setState(() {
+  //         _isLoading = false;
+  //       });
+  //       debugPrint("❌ Tidak ada koneksi internet.");
+  //       _showConnectionError();
+  //     } catch (e) {
+  //       setState(() {
+  //         _isLoading = false;
+  //       });
+  //       debugPrint("❌ Error saat login: $e");
+  //       _showLoginPassError(errorMessage: e.toString());
+  //     }
+  //   } else {
+  //     _showLoginPassError(
+  //       errorMessage: 'Username dan password tidak boleh kosong.',
+  //     );
+  //   }
+  // }
 
   void _loginPass() async {
     String username = _usernameController.text.trim();
@@ -402,7 +402,7 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       GoRouter.of(context)
-          .go('/request-induction', extra: {'username': username});
+          .go('/employee/request-induction', extra: {'username': username});
     }
   }
 

@@ -1,17 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive/hive.dart';
 
-class CustomDrawer extends StatelessWidget {
+class CustomDrawer extends StatefulWidget {
   final String? username;
 
   const CustomDrawer({Key? key, this.username}) : super(key: key);
+
+  @override
+  State<CustomDrawer> createState() => _CustomDrawerState();
+}
+
+class _CustomDrawerState extends State<CustomDrawer> {
+  String? nameRole;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserRole();
+  }
+
+  Future<void> _loadUserRole() async {
+    final box = await Hive.openBox('userBox');
+    setState(() {
+      nameRole = box.get('name_role', defaultValue: 'Visitor');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: Column(
         children: <Widget>[
-          // Bagian header
+          // Header
           const DrawerHeader(
             decoration: BoxDecoration(
               color: Color.fromARGB(255, 248, 249, 249),
@@ -24,55 +45,65 @@ class CustomDrawer extends StatelessWidget {
                   fontFamily: 'Hanken Grotesk',
                   fontSize: 32.0,
                   fontWeight: FontWeight.w900,
-                  fontStyle: FontStyle.normal,
                   height: 1.0,
                 ),
               ),
             ),
           ),
-          // Bagian item menu
+
+          // Daftar menu
           Expanded(
             child: ListView(
               children: [
+                // Username
                 ListTile(
-                  title: Text(username ?? 'Visitor'),
+                  title: Text(widget.username ?? 'Visitor'),
                   leading: const Icon(Icons.person),
                   onTap: () {
                     Navigator.pop(context);
                   },
                 ),
+
+                // Role
                 ListTile(
-                  title: const Text('Settings'),
-                  leading: const Icon(Icons.settings),
+                  title: Text(nameRole ?? '-'),
+                  leading: const Icon(Icons.badge),
                   onTap: () {
                     Navigator.pop(context);
                   },
                 ),
+
                 const Divider(),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Text(
-                    "CMS Menu",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold, 
-                      fontSize: 14,
+
+                // Hanya tampil jika bukan Visitor
+                if (nameRole != null && nameRole != 'visitorr') ...[
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Text(
+                      "CMS Menu",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.dashboard_customize),
-                  title: const Text("CMS - Induction"),
-                  onTap: () {
-                    context.go('/cms'); // cuma redirect ke dashboard CMS
-                  },
-                ),
+                  ListTile(
+                    leading: const Icon(Icons.dashboard_customize),
+                    title: const Text("CMS - Induction"),
+                    onTap: () {
+                      context.go('/cms');
+                    },
+                  ),
+                ],
               ],
             ),
           ),
-          // Bagian tombol logout
+
+          // Tombol Logout
           Container(
             color: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
             child: _buildButtons(context),
           ),
         ],
@@ -80,7 +111,6 @@ class CustomDrawer extends StatelessWidget {
     );
   }
 
-  // Membuat tombol-tombol
   Widget _buildButtons(BuildContext context) {
     return Row(
       children: [
@@ -89,7 +119,6 @@ class CustomDrawer extends StatelessWidget {
     );
   }
 
-  // Tombol logout redirect ke logout_screen.dart
   Widget _buildLogOutButton(BuildContext context) {
     return ElevatedButton(
       onPressed: () {

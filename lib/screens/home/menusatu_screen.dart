@@ -210,7 +210,7 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                         ),
                                       ),
                                       child: Text(
-                                        'Request New Induction',
+                                        'Request New Inductionn',
                                         style: const TextStyle(
                                           color: Colors.white, // ✅ tetap putih
                                           fontFamily: 'Hanken Grotesk',
