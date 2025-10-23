@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:she_vi/models/mc_question.dart';
 import 'package:she_vi/services/api_service.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:she_vi/screens/home/custom_drawer.dart';
 
 class CmsQuestionScreen extends StatefulWidget {
   final String plantId;
@@ -12,12 +14,12 @@ class CmsQuestionScreen extends StatefulWidget {
 
 class _CmsQuestionScreenState extends State<CmsQuestionScreen> {
   final ApiService api = ApiService();
-
-  String questionType = "Multiple Choice";
   final TextEditingController _questionController = TextEditingController();
+  final TextEditingController _explanationController = TextEditingController();
   final List<TextEditingController> _optionControllers =
       List.generate(4, (_) => TextEditingController());
   int _correctIndex = 0;
+  String questionType = "Multiple Choice";
   String _trueFalseAnswer = "True";
   List<MCQuestion> questions = [];
 
@@ -27,17 +29,37 @@ class _CmsQuestionScreenState extends State<CmsQuestionScreen> {
     _loadQuestionsFromBackend();
   }
 
+  @override
+  void dispose() {
+    _questionController.dispose();
+    _explanationController.dispose();
+    for (var c in _optionControllers) c.dispose();
+    super.dispose();
+  }
+
+  void _showSnack(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void _clearForm() {
+    _questionController.clear();
+    _explanationController.clear();
+    for (var c in _optionControllers) c.clear();
+    setState(() {
+      _correctIndex = 0;
+      questionType = "Multiple Choice";
+      _trueFalseAnswer = "True";
+    });
+  }
+
   Future<void> _loadQuestionsFromBackend() async {
     if (widget.plantId.isEmpty) return;
     try {
-      final data = await api.fetchQuestionsByPlant(
-        int.tryParse(widget.plantId) ?? 0,
-      );
+      final data =
+          await api.fetchQuestionsByPlant(int.tryParse(widget.plantId) ?? 0);
       setState(() => questions = data);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Gagal memuat soal: $e")),
-      );
+      _showSnack("Gagal memuat soal: $e");
     }
   }
 
@@ -53,102 +75,116 @@ class _CmsQuestionScreenState extends State<CmsQuestionScreen> {
       return;
     }
 
-    final newQuestion = MCQuestion(
-      id: questions.length + 1,
-      plantId: int.tryParse(widget.plantId) ?? 0,
-      question: _questionController.text.trim(),
-      type: questionType,
-      optionA: questionType == "Multiple Choice"
-          ? _optionControllers[0].text.trim()
-          : "True",
-      optionB: questionType == "Multiple Choice"
-          ? _optionControllers[1].text.trim()
-          : "False",
-      optionC: questionType == "Multiple Choice"
-          ? _optionControllers[2].text.trim()
-          : null,
-      optionD: questionType == "Multiple Choice"
-          ? _optionControllers[3].text.trim()
-          : null,
-      correctAnswer: questionType == "Multiple Choice"
-          ? String.fromCharCode(65 + _correctIndex)
-          : _trueFalseAnswer,
-      isSelected: false,
-    );
+    final questionText = _questionController.text.trim();
+    final explanation = _explanationController.text.trim().isEmpty
+        ? "Tidak ada penjelasan tambahan."
+        : _explanationController.text.trim();
+    final isMultipleChoice = questionType == "Multiple Choice";
+    final plantId = int.tryParse(widget.plantId) ?? 0;
 
-    setState(() => questions.add(newQuestion));
-    _showSnack("Soal berhasil ditambahkan (lokal).");
-    _clearForm();
-  }
+    final choices = isMultipleChoice
+        ? List.generate(4, (i) => {
+              "choice_text": _optionControllers[i].text.trim(),
+              "is_correct": i == _correctIndex,
+            })
+        : [
+            {"choice_text": "True", "is_correct": _trueFalseAnswer == "True"},
+            {"choice_text": "False", "is_correct": _trueFalseAnswer == "False"},
+          ];
 
-  void _clearForm() {
-    _questionController.clear();
-    for (var c in _optionControllers) c.clear();
-    _correctIndex = 0;
-    _trueFalseAnswer = "True";
-  }
+    try {
+      final success = await api.createQuestionPlant(
+        questionText: questionText,
+        questionType: isMultipleChoice ? "multiple_choice" : "true_false",
+        explanation: explanation,
+        plantIds: [plantId],
+        choices: choices,
+      );
 
-  void _showSnack(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      if (success) {
+        _showSnack("✅ Soal berhasil ditambahkan ke server.");
+        _clearForm();
+        _loadQuestionsFromBackend();
+      } else {
+        _showSnack("❌ Gagal menambahkan soal ke server.");
+      }
+    } catch (e) {
+      _showSnack("⚠️ Terjadi kesalahan: $e");
+    }
   }
 
   void _deleteSelected() {
-    setState(() {
-      questions.removeWhere((q) => q.isSelected);
-    });
+    setState(() => questions.removeWhere((q) => q.isSelected));
   }
 
   int get selectedCount => questions.where((q) => q.isSelected).length;
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade100,
-      appBar: AppBar(
-        title: const Text(
-          "Add New Question",
-          style: TextStyle(fontFamily: "HankenGrotesk"),
-        ),
-        backgroundColor: const Color(0xFF07840B),
-        centerTitle: true,
-        actions: [
-          if (selectedCount > 0)
-            IconButton(
-              icon: const Icon(Icons.delete, color: Colors.redAccent),
-              onPressed: _deleteSelected,
-            ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildHeaderCard(),
-            const SizedBox(height: 16),
-            _buildQuestionForm(),
-            const SizedBox(height: 20),
-            _buildSubmitButton(),
-            const SizedBox(height: 24),
-            const Divider(),
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Daftar Soal",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: "HankenGrotesk",
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            _buildQuestionList(),
-          ],
-        ),
-      ),
-    );
+  String get plantName {
+    switch (widget.plantId) {
+      case "1":
+        return "Plant Bayah";
+      case "2":
+        return "Plant Ciwandan";
+      default:
+        return "Plant Tidak Dikenal";
+    }
   }
 
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    drawer: const CustomDrawer(username: "Admin CMS"),
+    backgroundColor: Colors.grey.shade100,
+    appBar: AppBar(
+      title: Text(
+        "Add New Question",
+        style: GoogleFonts.hankenGrotesk(
+          fontWeight: FontWeight.bold,
+          color: Colors.white, // ✅ warna putih
+        ),
+      ),
+      backgroundColor: const Color(0xFF07840B),
+      centerTitle: true,
+      actions: [
+        if (selectedCount > 0)
+          IconButton(
+            icon: const Icon(
+              Icons.delete,
+              color: Colors.redAccent,
+            ),
+            onPressed: _deleteSelected,
+          ),
+      ],
+    ),
+    body: SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          _buildHeaderCard(),
+          const SizedBox(height: 16),
+          _buildQuestionForm(),
+          const SizedBox(height: 20),
+          _buildSubmitButton(),
+          const SizedBox(height: 24),
+          const Divider(),
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              "Daftar Soal",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                fontFamily: "HankenGrotesk",
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          _buildQuestionList(),
+        ],
+      ),
+    ),
+  );
+}
   Widget _buildHeaderCard() {
     return Card(
       color: Colors.white,
@@ -170,8 +206,8 @@ class _CmsQuestionScreenState extends State<CmsQuestionScreen> {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
+                children: [
+                  const Text(
                     "Form Tambah Soal",
                     style: TextStyle(
                       fontFamily: "HankenGrotesk",
@@ -179,12 +215,21 @@ class _CmsQuestionScreenState extends State<CmsQuestionScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 4),
-                  Text(
+                  const SizedBox(height: 4),
+                  const Text(
                     "Isi form di bawah untuk menambahkan pertanyaan baru.",
                     style: TextStyle(
                       fontFamily: "HankenGrotesk",
                       color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "📍 Plant aktif: $plantName",
+                    style: const TextStyle(
+                      fontFamily: "HankenGrotesk",
+                      color: Colors.black87,
+                      fontStyle: FontStyle.italic,
                     ),
                   ),
                 ],
@@ -214,38 +259,65 @@ class _CmsQuestionScreenState extends State<CmsQuestionScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              value: questionType,
-              items: const [
-                DropdownMenuItem(
-                    value: "Multiple Choice", child: Text("Multiple Choice")),
-                DropdownMenuItem(
-                    value: "True False", child: Text("True / False")),
-              ],
-              onChanged: (val) => setState(() => questionType = val!),
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
+
+            // 🌿 Tampilan dropdown yang diperindah
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: const Color(0xFF07840B), width: 1.3),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.2),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: questionType,
+                    icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF07840B)),
+                    items: const [
+                      DropdownMenuItem(
+                          value: "Multiple Choice",
+                          child: Text("Multiple Choice")),
+                      DropdownMenuItem(
+                          value: "True False", child: Text("True / False")),
+                    ],
+                    onChanged: (val) => setState(() => questionType = val!),
+                    dropdownColor: Colors.white,
+                    style: const TextStyle(
+                      fontFamily: "HankenGrotesk",
+                      color: Colors.black87,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
               ),
             ),
+
             const SizedBox(height: 16),
             if (questionType == "Multiple Choice")
               _buildMultipleChoiceFields()
             else
               _buildTrueFalseFields(),
+            const SizedBox(height: 16),
+            _buildExplanationField(),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildMultipleChoiceFields() {
+Widget _buildMultipleChoiceFields() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Pertanyaan",
-          style: TextStyle(fontFamily: "HankenGrotesk"),
-        ),
+        const Text("Pertanyaan",
+            style: TextStyle(fontFamily: "HankenGrotesk")),
         const SizedBox(height: 8),
         TextField(
           controller: _questionController,
@@ -295,10 +367,8 @@ class _CmsQuestionScreenState extends State<CmsQuestionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Pernyataan",
-          style: TextStyle(fontFamily: "HankenGrotesk"),
-        ),
+        const Text("Pernyataan",
+            style: TextStyle(fontFamily: "HankenGrotesk")),
         const SizedBox(height: 8),
         TextField(
           controller: _questionController,
@@ -324,6 +394,25 @@ class _CmsQuestionScreenState extends State<CmsQuestionScreen> {
     );
   }
 
+  Widget _buildExplanationField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text("Penjelasan (Opsional)",
+            style: TextStyle(fontFamily: "HankenGrotesk")),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _explanationController,
+          decoration: const InputDecoration(
+            labelText: "Masukkan penjelasan untuk jawaban benar",
+            border: OutlineInputBorder(),
+          ),
+          maxLines: 2,
+        ),
+      ],
+    );
+  }
+
   Widget _buildSubmitButton() {
     return SizedBox(
       width: double.infinity,
@@ -341,8 +430,7 @@ class _CmsQuestionScreenState extends State<CmsQuestionScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF07840B),
           padding: const EdgeInsets.symmetric(vertical: 16),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       ),
     );

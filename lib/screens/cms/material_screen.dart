@@ -27,12 +27,10 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
   @override
   void initState() {
     super.initState();
-    // otomatis pilih plant sesuai plantId
     selectedPlant = _getPlantNameById(widget.plantId);
   }
 
   String? _getPlantNameById(String plantId) {
-    // Contoh mapping, sesuaikan dengan logic ID-Plant
     switch (plantId) {
       case 'bayah':
         return 'Cemindo Bayah Plant';
@@ -86,7 +84,7 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text("Material added successfully")),
               );
-              context.go('/cms/material/$widget.plantId');
+              context.go('/cms/material/${widget.plantId}');
             },
             child: const Text(
               "Yes",
@@ -108,118 +106,143 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String title, String subtitle) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontFamily: 'Hanken Grotesk',
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          subtitle,
-          style: const TextStyle(
-            fontFamily: 'Hanken Grotesk',
-            fontSize: 13,
-            color: Colors.grey,
-          ),
-        ),
-        const SizedBox(height: 12),
-      ],
+  // ---------- UI building helpers (style aligned with CmsQuestionScreen) ----------
+  Widget _sectionCard({required Widget child}) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: Colors.white,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Padding(padding: const EdgeInsets.all(14), child: child),
     );
   }
 
-  Widget _buildInputCard(String label, TextEditingController controller,
-      {int maxLines = 1}) {
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        child: TextFormField(
-          controller: controller,
-          maxLines: maxLines,
-          decoration: InputDecoration(
-            hintText: label,
-            border: InputBorder.none,
-            hintStyle: const TextStyle(
-              fontFamily: 'Hanken Grotesk',
-              color: Colors.grey,
-            ),
-          ),
+  Widget _label(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontFamily: 'Hanken Grotesk',
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
         ),
       ),
     );
   }
 
-  Widget _buildDropdownCard() {
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        child: DropdownButtonFormField<String>(
-          value: selectedPlant,
-          decoration: const InputDecoration(
-            border: InputBorder.none,
-            hintText: "Choose Plant",
-          ),
-          items: plantList
-              .map((plant) =>
-                  DropdownMenuItem(value: plant, child: Text(plant)))
-              .toList(),
-          onChanged: (val) {
-            setState(() {
-              selectedPlant = val;
-            });
-          },
-        ),
+  InputDecoration _outlineInputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(
+        fontFamily: 'Hanken Grotesk',
+        color: Colors.grey,
       ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Color(0xFF6A1B9A), width: 1.6),
+      ),
+      fillColor: Colors.white,
+      filled: true,
     );
   }
 
-  Widget _buildUploadCard() {
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: pickFile,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          child: Row(
-            children: [
-              Icon(fileIcon, color: const Color(0xFF07840B)),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  uploadedFile ?? "Upload PDF, PPT, or MP4",
-                  style: const TextStyle(
-                    fontFamily: 'Hanken Grotesk',
-                    color: Colors.black87,
+  Widget _styledDropdown() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFF07840B), width: 1.2),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 6)
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: selectedPlant,
+            isExpanded: true,
+            icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF07840B)),
+            items: plantList
+                .map(
+                  (p) => DropdownMenuItem<String>(
+                    value: p,
+                    child: Text(
+                      p,
+                      style: const TextStyle(
+                          fontFamily: 'Hanken Grotesk',
+                          color: Color(0xFF07840B),
+                          fontWeight: FontWeight.w600),
+                    ),
                   ),
+                )
+                .toList(),
+            onChanged: (val) => setState(() => selectedPlant = val),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _styledTextField(
+    TextEditingController controller, {
+    required String hint,
+    int maxLines = 1,
+  }) {
+    return TextFormField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: _outlineInputDecoration(hint),
+    );
+  }
+
+  Widget _uploadCard() {
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: pickFile,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey.shade200),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 6)],
+        ),
+        child: Row(
+          children: [
+            Icon(fileIcon, color: const Color(0xFF07840B)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                uploadedFile ?? "Upload PDF, PPT, or MP4",
+                style: const TextStyle(
+                  fontFamily: 'Hanken Grotesk',
+                  color: Colors.black87,
                 ),
               ),
-              if (uploadedFile != null)
-                const Icon(Icons.check_circle, color: Colors.green),
-            ],
-          ),
+            ),
+            if (uploadedFile != null) const Icon(Icons.check_circle, color: Colors.green),
+          ],
         ),
       ),
     );
   }
 
+  // ---------- Build ----------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
         backgroundColor: const Color(0xFF07840B),
         elevation: 0,
@@ -233,28 +256,74 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
         ),
         centerTitle: true,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: ListView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionHeader(
-                "Material Details", "Fill in the information below"),
-            _buildSectionHeader("Title", "Enter the material title"),
-            _buildInputCard("Title Name", titleController),
-            const SizedBox(height: 12),
-            _buildSectionHeader("Deskripsi Material", "Enter a short description"),
-            _buildInputCard("Deskripsi Material", descriptionController, maxLines: 2),
+            // Header card (mirroring CMSQuestionScreen style)
+            _sectionCard(
+              child: Row(
+                children: [
+                  Container(
+                    width: 6,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF07840B),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          "Form Tambah Materi",
+                          style: TextStyle(
+                            fontFamily: 'Hanken Grotesk',
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          "Isi form di bawah untuk menambahkan materi baru.",
+                          style: TextStyle(fontFamily: 'Hanken Grotesk', color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Title
+            _label("Title"),
+            _sectionCard(
+              child: _styledTextField(titleController, hint: "Title Name"),
+            ),
+
+            // Description
+            _label("Deskripsi Material"),
+            _sectionCard(
+              child: _styledTextField(descriptionController,
+                  hint: "Masukkan deskripsi singkat", maxLines: 3),
+            ),
+
+            // Plant (styled like CMSQuestion)
+            _label("Plant (Dipilih Otomatis)"),
+            _sectionCard(child: _styledDropdown()),
+
+            // Upload
+            _label("Upload (PDF / PPT / MP4)"),
+            _sectionCard(child: _uploadCard()),
+
             const SizedBox(height: 20),
-            _buildSectionHeader("Plant", "Chosen plant: ${selectedPlant ?? '-'}"),
-            _buildDropdownCard(),
-            const SizedBox(height: 20),
-            _buildSectionHeader(
-                "Upload", "Upload your material (PDF, PPT, or MP4)"),
-            _buildUploadCard(),
-            const SizedBox(height: 50),
           ],
         ),
       ),
+
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         child: Row(
@@ -289,10 +358,9 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF07840B),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 child: const Text(
                   "Add Material",

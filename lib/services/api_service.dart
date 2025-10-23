@@ -1219,4 +1219,57 @@ Future<List<Plant>> fetchPlantsCMS() async {
       return [];
     }
   }
+    // ---------------------------
+  // ✅ Create Question untuk Plant (CMS)
+  // ---------------------------
+  Future<bool> createQuestionPlant({
+  required String questionText,
+  required String questionType,
+  required String explanation,
+  required List<int> plantIds,
+  required List<Map<String, dynamic>> choices,
+}) async {
+  final String apiUrl = EnvHelper.get('API_URL');
+  final String accessHeaderKey = EnvHelper.get('API_HEADERS');
+  final String? accessToken = box.get('token');
+
+  if (apiUrl.isEmpty) throw Exception("API_URL tidak ditemukan!");
+  if (accessToken == null || accessToken.isEmpty) {
+    throw Exception('Access token tidak ditemukan.');
+  }
+
+  final url = Uri.parse('$apiUrl/question/create-question-plant');
+  final headers = {
+    accessHeaderKey: accessToken,
+    'Content-Type': 'application/json',
+  };
+
+  final body = json.encode({
+    "question_text": questionText,
+    "question_type": questionType,
+    "explanation": explanation,
+    "plant_ids": plantIds,
+    "choices": choices,
+  });
+
+  print("🌐 [CREATE QUESTION] POST → $url");
+  print("📦 Headers: $headers");
+  print("📦 Body: $body");
+
+  try {
+    final response = await http.post(url, headers: headers, body: body).timeout(_timeout);
+    print("📥 Status: ${response.statusCode}");
+    print("📥 Body: ${response.body}");
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return true;
+    } else {
+      final decoded = json.decode(response.body);
+      throw Exception('Gagal membuat soal: ${decoded['message'] ?? response.body}');
+    }
+  } catch (e) {
+    print("❌ Error createQuestionPlant(): $e");
+    rethrow;
+  }
+}
 }
