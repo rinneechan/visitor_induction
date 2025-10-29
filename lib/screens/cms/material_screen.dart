@@ -1,6 +1,13 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:go_router/go_router.dart';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:she_vi/utils/env_helper.dart';
+import 'package:she_vi/services/api_service.dart';
+import 'package:she_vi/models/material_model.dart';
 
 class AddMaterialScreen extends StatefulWidget {
   final String plantId;
@@ -14,8 +21,10 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   String? selectedPlant;
-  String? uploadedFile;
+  PlatformFile? pickedFile; // <-- handle web & mobile
   IconData fileIcon = Icons.insert_drive_file;
+
+  final ApiService apiService = ApiService();
 
   final List<String> plantList = [
     "Cemindo Bayah Plant",
@@ -49,14 +58,16 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf', 'ppt', 'pptx', 'mp4'],
+      withData: true,
     );
 
-    if (result != null && result.files.single.path != null) {
+    if (result != null && result.files.isNotEmpty) {
+      final file = result.files.single;
       setState(() {
-        uploadedFile = result.files.single.name;
-        if (uploadedFile!.endsWith('.mp4')) {
+        pickedFile = file;
+        if (file.name.endsWith('.mp4')) {
           fileIcon = Icons.movie;
-        } else if (uploadedFile!.endsWith('.pdf')) {
+        } else if (file.name.endsWith('.pdf')) {
           fileIcon = Icons.picture_as_pdf;
         } else {
           fileIcon = Icons.slideshow;
@@ -65,48 +76,87 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
     }
   }
 
-  void _showConfirmationDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        content: const Text(
-          "Have you entered the details correctly?",
-          style: TextStyle(fontFamily: 'Hanken Grotesk'),
+  Future<void> _uploadMaterial() async {
+    if (titleController.text.isEmpty ||
+        descriptionController.text.isEmpty ||
+        pickedFile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("⚠️ Harap lengkapi semua data dan unggah file!"),
+          backgroundColor: Colors.orange,
         ),
-        actions: [
-          TextButton(
-            style: TextButton.styleFrom(
-              backgroundColor: const Color(0xFF07840B),
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Material added successfully")),
-              );
-              context.go('/cms/material/${widget.plantId}');
-            },
-            child: const Text(
-              "Yes",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              "No",
-              style: TextStyle(color: Colors.black),
-            ),
-          ),
-        ],
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("⏳ Sedang menambahkan material..."),
+        backgroundColor: Colors.blueAccent,
+        duration: Duration(seconds: 1),
       ),
     );
+
+    try {
+      File? fileToUpload;
+
+      if (!kIsWeb && pickedFile?.path != null) {
+        fileToUpload = File(pickedFile!.path!);
+      }
+
+      final result = await apiService.addMaterialCMS(
+        materialname: titleController.text,
+        status: "1", // disesuaikan dengan backend boolean/1/0
+        isactive: "1",
+        folder: "",
+        plantId: widget.plantId,
+        file: fileToUpload,
+        webFileBytes: kIsWeb ? pickedFile?.bytes : null,
+        webFileName: kIsWeb ? pickedFile?.name : null,
+      );
+
+      // Cek hasil dari API
+      if (result != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("✅ Material berhasil ditambahkan!"),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+
+        // Kosongkan form setelah berhasil
+        titleController.clear();
+        descriptionController.clear();
+        setState(() {
+          pickedFile = null;
+          fileIcon = Icons.insert_drive_file;
+        });
+
+        // Arahkan kembali ke halaman CMS material list
+        Future.delayed(const Duration(milliseconds: 800), () {
+          context.go('/cms');
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("❌ Gagal menambahkan material. Coba lagi."),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      print("Upload error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("🚫 Terjadi kesalahan: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
-  // ---------- UI building helpers (style aligned with CmsQuestionScreen) ----------
   Widget _sectionCard({required Widget child}) {
     return Card(
       elevation: 2,
@@ -134,10 +184,7 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
   InputDecoration _outlineInputDecoration(String hint) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(
-        fontFamily: 'Hanken Grotesk',
-        color: Colors.grey,
-      ),
+      hintStyle: const TextStyle(fontFamily: 'Hanken Grotesk', color: Colors.grey),
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
@@ -162,9 +209,7 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: const Color(0xFF07840B), width: 1.2),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 6)
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 6)],
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -174,35 +219,21 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
             isExpanded: true,
             icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF07840B)),
             items: plantList
-                .map(
-                  (p) => DropdownMenuItem<String>(
-                    value: p,
-                    child: Text(
-                      p,
-                      style: const TextStyle(
-                          fontFamily: 'Hanken Grotesk',
-                          color: Color(0xFF07840B),
-                          fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                )
+                .map((p) => DropdownMenuItem<String>(
+                      value: p,
+                      child: Text(
+                        p,
+                        style: const TextStyle(
+                            fontFamily: 'Hanken Grotesk',
+                            color: Color(0xFF07840B),
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ))
                 .toList(),
             onChanged: (val) => setState(() => selectedPlant = val),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _styledTextField(
-    TextEditingController controller, {
-    required String hint,
-    int maxLines = 1,
-  }) {
-    return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      decoration: _outlineInputDecoration(hint),
     );
   }
 
@@ -224,21 +255,21 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                uploadedFile ?? "Upload PDF, PPT, or MP4",
+                pickedFile != null
+                    ? pickedFile!.name
+                    : "Upload PDF, PPT, atau MP4",
                 style: const TextStyle(
-                  fontFamily: 'Hanken Grotesk',
-                  color: Colors.black87,
-                ),
+                    fontFamily: 'Hanken Grotesk', color: Colors.black87),
               ),
             ),
-            if (uploadedFile != null) const Icon(Icons.check_circle, color: Colors.green),
+            if (pickedFile != null)
+              const Icon(Icons.check_circle, color: Colors.green),
           ],
         ),
       ),
     );
   }
 
-  // ---------- Build ----------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -261,69 +292,24 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header card (mirroring CMSQuestionScreen style)
-            _sectionCard(
-              child: Row(
-                children: [
-                  Container(
-                    width: 6,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF07840B),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          "Form Tambah Materi",
-                          style: TextStyle(
-                            fontFamily: 'Hanken Grotesk',
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          "Isi form di bawah untuk menambahkan materi baru.",
-                          style: TextStyle(fontFamily: 'Hanken Grotesk', color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Title
             _label("Title"),
             _sectionCard(
-              child: _styledTextField(titleController, hint: "Title Name"),
-            ),
-
-            // Description
+                child: TextFormField(
+                    controller: titleController,
+                    decoration: _outlineInputDecoration("Title Name"))),
             _label("Deskripsi Material"),
             _sectionCard(
-              child: _styledTextField(descriptionController,
-                  hint: "Masukkan deskripsi singkat", maxLines: 3),
-            ),
-
-            // Plant (styled like CMSQuestion)
+                child: TextFormField(
+                    controller: descriptionController,
+                    decoration: _outlineInputDecoration("Masukkan deskripsi singkat"),
+                    maxLines: 3)),
             _label("Plant (Dipilih Otomatis)"),
             _sectionCard(child: _styledDropdown()),
-
-            // Upload
             _label("Upload (PDF / PPT / MP4)"),
             _sectionCard(child: _uploadCard()),
-
-            const SizedBox(height: 20),
           ],
         ),
       ),
-
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         child: Row(
@@ -340,26 +326,11 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: ElevatedButton(
-                onPressed: () {
-                  if (titleController.text.isNotEmpty &&
-                      descriptionController.text.isNotEmpty &&
-                      selectedPlant != null &&
-                      uploadedFile != null) {
-                    _showConfirmationDialog();
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                            "Please fill all fields and upload a PDF, PPT, or MP4"),
-                      ),
-                    );
-                  }
-                },
+                onPressed: _uploadMaterial,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF07840B),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                      borderRadius: BorderRadius.circular(10)),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 child: const Text(

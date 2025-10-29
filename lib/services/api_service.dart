@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'dart:io';
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:she_vi/models/InductionMaterial.dart';
 import 'package:she_vi/models/InductionMaterialById.dart';
@@ -16,6 +17,7 @@ import 'package:she_vi/models/EmployeeByOu.dart';
 import 'package:she_vi/models/plant_model.dart';
 import 'package:she_vi/models/plantvisit.dart';
 import 'package:she_vi/models/mc_question.dart';
+import 'package:she_vi/models/material_model.dart';
 import 'package:she_vi/utils/env_helper.dart';
 //import 'package:flutter_dotenv/flutter_dotenv.dart';
 //import 'package:flutter/foundation.dart';
@@ -1092,6 +1094,122 @@ class ApiService {
       return null;
     }
   }
+  Future<bool> createQuestionPlant({
+  required String questionText,
+  required String questionType,
+  required String explanation,
+  required List<int> plantIds,
+  required List<Map<String, dynamic>> choices,
+}) async {
+  final String baseUrl = EnvHelper.get('API_URL');
+  final String? accessToken = box.get('token');
+
+  if (accessToken == null || accessToken.isEmpty) {
+    throw Exception('Access token missing');
+  }
+
+  try {
+    final uri = Uri.parse('$baseUrl/question/add');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'question_text': questionText,
+        'question_type': questionType,
+        'explanation': explanation,
+        'plant_ids': plantIds,
+        'choices': choices,
+      }),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return true;
+    } else {
+      print("Failed createQuestionPlant: ${response.statusCode} | ${response.body}");
+      return false;
+    }
+  } catch (e) {
+    print('Exception createQuestionPlant: $e');
+    return false;
+  }
+}
+
+Future<MaterialModel?> addMaterialCMS({
+  required String materialname,
+  required String status,
+  required String isactive,
+  required String folder,
+  required String plantId,
+  File? file,
+  Uint8List? webFileBytes,
+  String? webFileName,
+}) async {
+  final String apiUrl = EnvHelper.get('API_URL');
+  final String accessHeaderKey = EnvHelper.get('API_HEADERS');
+  final String? accessToken = box.get('token');
+
+  if (apiUrl.isEmpty) throw Exception("API_URL tidak ditemukan di env.json!");
+  if (accessToken == null || accessToken.isEmpty) {
+    throw Exception('Access token is missing or invalid');
+  }
+
+  try {
+    final uri = Uri.parse('$apiUrl/materials/add');
+    final request = http.MultipartRequest('POST', uri);
+
+    // ✅ Field sesuai API backend
+    request.fields['materialname'] = materialname;
+    request.fields['status'] = status.isEmpty ? '1' : status; // default aktif
+    request.fields['isactive'] = isactive.isEmpty ? '1' : isactive;
+    request.fields['folder'] = 'VI_DEV';
+    request.fields['plant_id'] = plantId;
+
+    // ✅ File upload (support web & mobile)
+    if (file != null) {
+      request.files.add(await http.MultipartFile.fromPath('file', file.path));
+    } else if (webFileBytes != null && webFileName != null) {
+      request.files.add(http.MultipartFile.fromBytes(
+        'file',
+        webFileBytes,
+        filename: webFileName,
+      ));
+    } else {
+      throw Exception("Tidak ada file yang diupload");
+    }
+
+    // ✅ Header token
+    request.headers[accessHeaderKey] = accessToken;
+
+    print('==================== 🧾 DEBUG MATERIAL UPLOAD ====================');
+    print('🔑 Access Token: $accessToken');
+    print('🪪 Header Key: $accessHeaderKey');
+    print('📄 Fields: ${request.fields}');
+    print('📎 File: ${request.files.isNotEmpty ? request.files.first.filename : "Tidak ada file"}');
+    print('=================================================================');
+
+    final response = await request.send();
+    final respStr = await response.stream.bytesToString();
+
+    print('📩 Status: ${response.statusCode}');
+    print('📦 Body: $respStr');
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      print('✅ Material berhasil ditambahkan ke backend!');
+      return MaterialModel.fromJson(jsonDecode(respStr));
+    } else {
+      print('❌ Gagal menambahkan material: ${response.statusCode}');
+      print('Response body: $respStr');
+      return null;
+    }
+  } catch (e) {
+    print('🚨 Exception addMaterialCMS: $e');
+    return null;
+  }
+}
+
   // ---------------------------
 // ✅ Ambil daftar plant untuk dashboard / request induction
 // ---------------------------
@@ -1219,57 +1337,4 @@ Future<List<Plant>> fetchPlantsCMS() async {
       return [];
     }
   }
-    // ---------------------------
-  // ✅ Create Question untuk Plant (CMS)
-  // ---------------------------
-  Future<bool> createQuestionPlant({
-  required String questionText,
-  required String questionType,
-  required String explanation,
-  required List<int> plantIds,
-  required List<Map<String, dynamic>> choices,
-}) async {
-  final String apiUrl = EnvHelper.get('API_URL');
-  final String accessHeaderKey = EnvHelper.get('API_HEADERS');
-  final String? accessToken = box.get('token');
-
-  if (apiUrl.isEmpty) throw Exception("API_URL tidak ditemukan!");
-  if (accessToken == null || accessToken.isEmpty) {
-    throw Exception('Access token tidak ditemukan.');
-  }
-
-  final url = Uri.parse('$apiUrl/question/create-question-plant');
-  final headers = {
-    accessHeaderKey: accessToken,
-    'Content-Type': 'application/json',
-  };
-
-  final body = json.encode({
-    "question_text": questionText,
-    "question_type": questionType,
-    "explanation": explanation,
-    "plant_ids": plantIds,
-    "choices": choices,
-  });
-
-  print("🌐 [CREATE QUESTION] POST → $url");
-  print("📦 Headers: $headers");
-  print("📦 Body: $body");
-
-  try {
-    final response = await http.post(url, headers: headers, body: body).timeout(_timeout);
-    print("📥 Status: ${response.statusCode}");
-    print("📥 Body: ${response.body}");
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return true;
-    } else {
-      final decoded = json.decode(response.body);
-      throw Exception('Gagal membuat soal: ${decoded['message'] ?? response.body}');
-    }
-  } catch (e) {
-    print("❌ Error createQuestionPlant(): $e");
-    rethrow;
-  }
-}
 }
