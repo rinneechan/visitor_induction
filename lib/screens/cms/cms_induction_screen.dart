@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:she_vi/models/plant_model.dart';
 import 'package:she_vi/models/mc_question.dart';
+import 'package:she_vi/models/material_by_plant_cms.dart';
 import 'package:she_vi/services/api_service.dart';
 import 'package:she_vi/screens/home/custom_drawer.dart';
 
@@ -20,13 +21,11 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
   List<Plant> plants = [];
   Plant? selectedPlant;
   List<MCQuestion> questions = [];
+  List<MaterialByPlantCMS> materials = [];
+
   bool isLoadingPlants = false;
   bool isLoadingQuestions = false;
-
-  final List<Map<String, String>> materials = [
-    {"title": "Prosedur K3 Dasar", "file": "k3_basic_safety.pptx"},
-    {"title": "Panduan APD di Area Kerja", "file": "safety_equipment_guide.pptx"},
-  ];
+  bool isLoadingMaterials = false;
 
   @override
   void initState() {
@@ -43,29 +42,46 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
         if (widget.plantId != null && widget.plantId!.isNotEmpty) {
           selectedPlant = plants.firstWhere(
             (p) => p.id.toString() == widget.plantId,
-            orElse: () =>
-                plants.isNotEmpty ? plants.first : Plant(id: 0, code: '', name: '', isActive: true),
+            orElse: () => plants.isNotEmpty
+                ? plants.first
+                : Plant(id: 0, code: '', name: '', isActive: true),
           );
-          _loadQuestions();
+          _loadDataForPlant();
         }
       });
+    } catch (e) {
+      debugPrint("❌ Error fetching plants: $e");
     } finally {
       setState(() => isLoadingPlants = false);
     }
   }
 
-  Future<void> _loadQuestions() async {
+  Future<void> _loadDataForPlant() async {
     if (selectedPlant == null) return;
-    setState(() => isLoadingQuestions = true);
+    setState(() {
+      isLoadingQuestions = true;
+      isLoadingMaterials = true;
+    });
     try {
-      final fetched = await api.fetchQuestionsByPlant(selectedPlant!.id);
+      final fetchedQuestions =
+          await api.fetchQuestionsByPlant(selectedPlant!.id);
+      final fetchedMaterials =
+          await api.fetchMaterialsByPlant(selectedPlant!.id.toString());
       setState(() {
-        questions = fetched;
+        questions = fetchedQuestions;
+        materials = fetchedMaterials;
       });
-    } catch (_) {
-      setState(() => questions = []);
+    } catch (e) {
+      debugPrint('❌ Error loading plant data: $e');
+      setState(() {
+        questions = [];
+        materials = [];
+      });
     } finally {
-      setState(() => isLoadingQuestions = false);
+      setState(() {
+        isLoadingQuestions = false;
+        isLoadingMaterials = false;
+      });
     }
   }
 
@@ -74,30 +90,46 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
     setState(() {
       selectedPlant = newPlant;
       questions = [];
+      materials = [];
     });
-    _loadQuestions();
+    _loadDataForPlant();
   }
 
-  void _goToAddMaterial() {
+  /// Navigasi ke halaman tambah material
+  /// Setelah user kembali, halaman otomatis refresh list material
+  Future<void> _goToAddMaterial() async {
     if (selectedPlant == null) return;
-    context.push('/cms/material/add', extra: {'plantId': selectedPlant!.id.toString()});
+
+    final result = await context.push('/cms/material/add',
+        extra: {'plantId': selectedPlant!.id.toString()});
+
+    // 🔄 Jika halaman Add Material mengembalikan 'refresh' (berhasil tambah)
+    if (result == 'refresh') {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Materi baru berhasil ditambahkan!',
+            style: GoogleFonts.hankenGrotesk()),
+        backgroundColor: Colors.green[700],
+      ));
+      _loadDataForPlant();
+    }
   }
 
   void _goToCmsQuestionScreen() {
     if (selectedPlant == null) return;
-    context.push('/cms/questions', extra: {'plantId': selectedPlant!.id.toString()});
+    context.push('/cms/questions',
+        extra: {'plantId': selectedPlant!.id.toString()});
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const CustomDrawer(username: "Admin CMS"), // ✅ Sidebar Drawer CMS
+      drawer: const CustomDrawer(username: "Admin CMS"),
       appBar: AppBar(
         title: Text(
           "CMS Induction",
           style: GoogleFonts.hankenGrotesk(
             fontWeight: FontWeight.bold,
-            color: Colors.white, // ✅ Warna teks title diubah jadi putih
+            color: Colors.white,
           ),
         ),
         backgroundColor: const Color(0xFF2E7D32),
@@ -110,18 +142,22 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Dropdown Plant
+                  // =======================
+                  // 🌱 Dropdown Plant
+                  // =======================
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         "Pilih Plant:",
-                        style: GoogleFonts.hankenGrotesk(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: GoogleFonts.hankenGrotesk(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       Expanded(
                         child: Container(
                           margin: const EdgeInsets.only(left: 16),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 4),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
@@ -129,17 +165,19 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
                               BoxShadow(
                                 color: Colors.black12,
                                 blurRadius: 6,
-                                offset: Offset(0, 3),
+                                offset: const Offset(0, 3),
                               ),
                             ],
-                            border: Border.all(color: Colors.grey.shade300, width: 1),
+                            border: Border.all(
+                                color: Colors.grey.shade300, width: 1),
                           ),
                           child: DropdownButtonHideUnderline(
                             child: DropdownButton<Plant>(
                               isExpanded: true,
                               borderRadius: BorderRadius.circular(12),
                               dropdownColor: Colors.white,
-                              icon: Icon(Icons.keyboard_arrow_down_rounded, color: Colors.green[700]),
+                              icon: Icon(Icons.keyboard_arrow_down_rounded,
+                                  color: Colors.green[700]),
                               value: selectedPlant,
                               hint: Text(
                                 "Pilih Plant",
@@ -154,7 +192,8 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
                                     (p) => DropdownMenuItem<Plant>(
                                       value: p,
                                       child: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 8),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8),
                                         child: Text(
                                           p.name,
                                           style: GoogleFonts.hankenGrotesk(
@@ -177,17 +216,23 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
 
                   const SizedBox(height: 20),
 
-                  // List Soal
+                  // =======================
+                  // 📘 Daftar Soal
+                  // =======================
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text("Daftar Soal",
-                          style: GoogleFonts.hankenGrotesk(fontSize: 18, fontWeight: FontWeight.bold)),
+                          style: GoogleFonts.hankenGrotesk(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
                       ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E7D32)),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2E7D32)),
                         onPressed: _goToCmsQuestionScreen,
                         icon: const Icon(Icons.add, color: Colors.white),
-                        label: Text("Tambah Soal", style: GoogleFonts.hankenGrotesk(color: Colors.white)),
+                        label: Text("Tambah Soal",
+                            style: GoogleFonts.hankenGrotesk(
+                                color: Colors.white)),
                       ),
                     ],
                   ),
@@ -201,7 +246,8 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
                             ? Center(
                                 child: Text(
                                   "Belum ada soal untuk plant ini.",
-                                  style: GoogleFonts.hankenGrotesk(color: Colors.grey),
+                                  style: GoogleFonts.hankenGrotesk(
+                                      color: Colors.grey),
                                 ),
                               )
                             : ListView.builder(
@@ -211,14 +257,17 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
                                   return GestureDetector(
                                     onTap: () => _showQuestionDetail(q),
                                     child: Container(
-                                      margin: const EdgeInsets.symmetric(vertical: 6),
+                                      margin: const EdgeInsets.symmetric(
+                                          vertical: 6),
                                       padding: const EdgeInsets.all(16),
                                       decoration: BoxDecoration(
                                         color: Colors.white,
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius:
+                                            BorderRadius.circular(12),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.grey.withOpacity(0.2),
+                                            color:
+                                                Colors.grey.withOpacity(0.2),
                                             blurRadius: 5,
                                             offset: const Offset(0, 3),
                                           )
@@ -226,7 +275,8 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
                                       ),
                                       child: Text("${index + 1}. ${q.question}",
                                           style: GoogleFonts.hankenGrotesk(
-                                              fontWeight: FontWeight.bold, fontSize: 16)),
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16)),
                                     ),
                                   );
                                 },
@@ -235,48 +285,77 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
 
                   const SizedBox(height: 16),
 
-                  // Materi
+                  // =======================
+                  // 📂 Daftar Materi
+                  // =======================
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text("Daftar Materi",
-                          style: GoogleFonts.hankenGrotesk(fontSize: 18, fontWeight: FontWeight.bold)),
+                          style: GoogleFonts.hankenGrotesk(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
                       ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E7D32)),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2E7D32)),
                         onPressed: _goToAddMaterial,
                         icon: const Icon(Icons.add, color: Colors.white),
-                        label: Text("Tambah Materi", style: GoogleFonts.hankenGrotesk(color: Colors.white)),
+                        label: Text("Tambah Materi",
+                            style: GoogleFonts.hankenGrotesk(
+                                color: Colors.white)),
                       ),
                     ],
                   ),
                   const SizedBox(height: 10),
+
                   Expanded(
                     flex: 1,
-                    child: ListView.builder(
-                      itemCount: materials.length,
-                      itemBuilder: (context, index) {
-                        final mat = materials[index];
-                        return Container(
-                          margin: const EdgeInsets.symmetric(vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.grey.withOpacity(0.2),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2))
-                            ],
-                          ),
-                          child: ListTile(
-                            leading: const Icon(Icons.picture_as_pdf, color: Color(0xFF2E7D32)),
-                            title: Text(mat["title"] ?? '',
-                                style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.w600)),
-                            subtitle: Text(mat["file"] ?? '', style: GoogleFonts.hankenGrotesk()),
-                          ),
-                        );
-                      },
-                    ),
+                    child: isLoadingMaterials
+                        ? const Center(child: CircularProgressIndicator())
+                        : materials.isEmpty
+                            ? Center(
+                                child: Text(
+                                  "Belum ada materi untuk plant ini.",
+                                  style: GoogleFonts.hankenGrotesk(
+                                      color: Colors.grey),
+                                ),
+                              )
+                            : RefreshIndicator(
+                                onRefresh: _loadDataForPlant,
+                                child: ListView.builder(
+                                  itemCount: materials.length,
+                                  itemBuilder: (context, index) {
+                                    final mat = materials[index];
+                                    return Container(
+                                      margin: const EdgeInsets.symmetric(
+                                          vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(10),
+                                        boxShadow: [
+                                          BoxShadow(
+                                              color:
+                                                  Colors.grey.withOpacity(0.2),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 2))
+                                        ],
+                                      ),
+                                      child: ListTile(
+                                        leading: const Icon(
+                                            Icons.picture_as_pdf,
+                                            color: Color(0xFF2E7D32)),
+                                        title: Text(
+                                            mat.materialName ??
+                                                'Nama materi tidak tersedia',
+                                            style: GoogleFonts.hankenGrotesk(
+                                                fontWeight: FontWeight.w600)),
+                                        subtitle: Text(
+                                            "Material ID: ${mat.id ?? '-'}",
+                                            style: GoogleFonts.hankenGrotesk()),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
                   ),
                 ],
               ),
@@ -288,27 +367,40 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text("Detail Soal", style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.bold)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(question.question, style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            if (question.isMultipleChoice) ...[
-              if (question.optionA != null) Text("A. ${question.optionA}", style: GoogleFonts.hankenGrotesk()),
-              if (question.optionB != null) Text("B. ${question.optionB}", style: GoogleFonts.hankenGrotesk()),
-              if (question.optionC != null) Text("C. ${question.optionC}", style: GoogleFonts.hankenGrotesk()),
-              if (question.optionD != null) Text("D. ${question.optionD}", style: GoogleFonts.hankenGrotesk()),
-            ] else if (question.isTrueFalse) ...[
-              Text("A. Benar", style: GoogleFonts.hankenGrotesk()),
-              Text("B. Salah", style: GoogleFonts.hankenGrotesk()),
+        title: Text("Detail Soal",
+            style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.bold)),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(question.question,
+                  style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              if (question.isMultipleChoice) ...[
+                if (question.optionA != null)
+                  Text("A. ${question.optionA}",
+                      style: GoogleFonts.hankenGrotesk()),
+                if (question.optionB != null)
+                  Text("B. ${question.optionB}",
+                      style: GoogleFonts.hankenGrotesk()),
+                if (question.optionC != null)
+                  Text("C. ${question.optionC}",
+                      style: GoogleFonts.hankenGrotesk()),
+                if (question.optionD != null)
+                  Text("D. ${question.optionD}",
+                      style: GoogleFonts.hankenGrotesk()),
+              ] else if (question.isTrueFalse) ...[
+                Text("A. Benar", style: GoogleFonts.hankenGrotesk()),
+                Text("B. Salah", style: GoogleFonts.hankenGrotesk()),
+              ],
+              const SizedBox(height: 8),
+              Text("Jawaban Benar: ${question.correctAnswer ?? '-'}",
+                  style: GoogleFonts.hankenGrotesk(
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF2E7D32))),
             ],
-            const SizedBox(height: 8),
-            Text("Jawaban Benar: ${question.correctAnswer ?? '-'}",
-                style: GoogleFonts.hankenGrotesk(
-                    fontWeight: FontWeight.bold, color: const Color(0xFF2E7D32))),
-          ],
+          ),
         ),
         actions: [
           TextButton(

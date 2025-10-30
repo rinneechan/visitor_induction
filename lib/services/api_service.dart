@@ -18,6 +18,7 @@ import 'package:she_vi/models/plant_model.dart';
 import 'package:she_vi/models/plantvisit.dart';
 import 'package:she_vi/models/mc_question.dart';
 import 'package:she_vi/models/material_model.dart';
+import 'package:she_vi/models/material_by_plant_cms.dart';
 import 'package:she_vi/utils/env_helper.dart';
 //import 'package:flutter_dotenv/flutter_dotenv.dart';
 //import 'package:flutter/foundation.dart';
@@ -1137,6 +1138,8 @@ class ApiService {
   }
 }
 
+// ======================= FINAL REFACTOR =======================
+// FILE: api_service.dart (atau file service material CMS kamu)
 Future<MaterialModel?> addMaterialCMS({
   required String materialname,
   required String status,
@@ -1157,17 +1160,38 @@ Future<MaterialModel?> addMaterialCMS({
   }
 
   try {
+    // ================== 1️⃣ CEK DUPLIKAT TERLEBIH DAHULU ==================
+    print('🔍 Mengecek duplikasi material sebelum upload...');
+    List<MaterialByPlantCMS> existingMaterials = [];
+    try {
+      existingMaterials = await fetchMaterialsByPlant(plantId);
+    } catch (e) {
+      print('⚠️ Gagal fetch material list untuk cek duplikat: $e');
+    }
+
+    final newTitleNormalized = materialname.toLowerCase().trim();
+    final alreadyExists = existingMaterials.any((m) {
+    final name = (m.materialName ?? '').toString().toLowerCase().trim();
+  return name.isNotEmpty && name == newTitleNormalized;
+});
+
+    if (alreadyExists) {
+      print('⚠️ Material dengan nama "$materialname" sudah ada di plant $plantId.');
+      throw Exception("Material sudah terdaftar di plant ini");
+    }
+
+    // ================== 2️⃣ JIKA TIDAK ADA DUPLIKAT, LANJUT UPLOAD ==================
     final uri = Uri.parse('$apiUrl/materials/add');
     final request = http.MultipartRequest('POST', uri);
 
-    // ✅ Field sesuai API backend
+    // ✅ Field sesuai backend
     request.fields['materialname'] = materialname;
-    request.fields['status'] = status.isEmpty ? '1' : status; // default aktif
+    request.fields['status'] = status.isEmpty ? '1' : status;
     request.fields['isactive'] = isactive.isEmpty ? '1' : isactive;
-    request.fields['folder'] = 'VI_DEV';
+    request.fields['folder'] = folder.isEmpty ? 'VI_DEV' : folder;
     request.fields['plant_id'] = plantId;
 
-    // ✅ File upload (support web & mobile)
+    // ✅ File upload (support mobile & web)
     if (file != null) {
       request.files.add(await http.MultipartFile.fromPath('file', file.path));
     } else if (webFileBytes != null && webFileName != null) {
@@ -1180,9 +1204,10 @@ Future<MaterialModel?> addMaterialCMS({
       throw Exception("Tidak ada file yang diupload");
     }
 
-    // ✅ Header token
+    // ✅ Header Token
     request.headers[accessHeaderKey] = accessToken;
 
+    // ================== 3️⃣ DEBUG INFO ==================
     print('==================== 🧾 DEBUG MATERIAL UPLOAD ====================');
     print('🔑 Access Token: $accessToken');
     print('🪪 Header Key: $accessHeaderKey');
@@ -1196,6 +1221,7 @@ Future<MaterialModel?> addMaterialCMS({
     print('📩 Status: ${response.statusCode}');
     print('📦 Body: $respStr');
 
+    // ================== 4️⃣ HASIL RESPONSE ==================
     if (response.statusCode == 200 || response.statusCode == 201) {
       print('✅ Material berhasil ditambahkan ke backend!');
       return MaterialModel.fromJson(jsonDecode(respStr));
@@ -1337,4 +1363,62 @@ Future<List<Plant>> fetchPlantsCMS() async {
       return [];
     }
   }
+    // ====================================================
+// ✅ Get Material by Plant (CMS)
+// Endpoint: GET /materials/materialplant/:id
+// Model: MaterialByPlantCMS
+// ====================================================
+Future<List<MaterialByPlantCMS>> fetchMaterialsByPlant(String plantId) async {
+  final String apiUrl = EnvHelper.get('API_URL');
+  final String accessHeaderKey = EnvHelper.get('API_HEADERS');
+  final String? accessToken = box.get('token');
+
+  if (apiUrl.isEmpty) throw Exception("API_URL tidak ditemukan di env.json!");
+  if (accessToken == null || accessToken.isEmpty) {
+    throw Exception('Access token tidak tersedia atau invalid');
+  }
+
+  final url = Uri.parse('$apiUrl/materials/materialplant/$plantId');
+  print("🌐 [FETCH MATERIAL BY PLANT CMS] GET → $url");
+
+  try {
+    final response = await http.get(
+      url,
+      headers: {
+        accessHeaderKey: accessToken,
+        'Content-Type': 'application/json',
+      },
+    );
+
+    print("📥 Status: ${response.statusCode}");
+    print("📦 Body: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final decoded = json.decode(response.body);
+      final data = decoded['data'];
+
+      if (data == null) {
+        print("⚠️ Data kosong untuk plant $plantId");
+        return [];
+      }
+
+      // Beberapa API kadang return objek tunggal atau list
+      if (data is List) {
+        return data.map((item) => MaterialByPlantCMS.fromJson(item)).toList();
+      } else if (data is Map<String, dynamic>) {
+        return [MaterialByPlantCMS.fromJson(data)];
+      } else {
+        print("⚠️ Format data tidak dikenali");
+        return [];
+      }
+    } else {
+      print("❌ Gagal fetch material CMS: ${response.body}");
+      throw Exception(
+          'Gagal mengambil data material CMS (HTTP ${response.statusCode})');
+    }
+  } catch (e) {
+    print("🚨 Exception fetchMaterialsByPlantCMS: $e");
+    throw Exception("Terjadi kesalahan saat mengambil material CMS: $e");
+  }
+}
 }
