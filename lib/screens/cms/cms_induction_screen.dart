@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:she_vi/models/plant_model.dart';
 import 'package:she_vi/models/mc_question.dart';
 import 'package:she_vi/models/material_by_plant_cms.dart';
+import 'package:she_vi/models/inductionMaterial.dart';
 import 'package:she_vi/services/api_service.dart';
 import 'package:she_vi/screens/home/custom_drawer.dart';
 
@@ -33,46 +34,93 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
     _loadPlants();
   }
 
+  /// ✅ Ambil daftar plant dan tambahkan "All Plant" di atas
   Future<void> _loadPlants() async {
     setState(() => isLoadingPlants = true);
     try {
       final fetchedPlants = await api.fetchPlantsCMS();
+
+      final allOption = Plant(
+        id: 0,
+        code: '',
+        name: 'All Plant',
+        isActive: true,
+      );
+
       setState(() {
-        plants = fetchedPlants;
+        plants = [allOption, ...fetchedPlants];
         if (widget.plantId != null && widget.plantId!.isNotEmpty) {
           selectedPlant = plants.firstWhere(
             (p) => p.id.toString() == widget.plantId,
-            orElse: () => plants.isNotEmpty
-                ? plants.first
-                : Plant(id: 0, code: '', name: '', isActive: true),
+            orElse: () => allOption,
           );
-          _loadDataForPlant();
+        } else {
+          selectedPlant = allOption;
         }
       });
+
+      // Saat pertama kali buka, langsung load All Plant
+      await _loadQuestions();
     } catch (e) {
-      debugPrint("❌ Error fetching plants: $e");
+      debugPrint('❌ Gagal memuat plant: $e');
     } finally {
       setState(() => isLoadingPlants = false);
     }
   }
 
+  /// ✅ Load “All Plant” materials dari API induction_material
+  Future<void> _loadQuestions() async {
+    setState(() => isLoadingQuestions = true);
+    try {
+      // Jika selectedPlant = "All Plant", panggil induction_material API
+      if (selectedPlant != null && selectedPlant!.name == "All Plant") {
+        final fetchedMaterials = await api.fetchInductionMaterials();
+
+        setState(() {
+          materials = fetchedMaterials
+              .map(
+                (e) => MaterialByPlantCMS(
+                  id: e.idMateri,
+                  materialName: e.namaMateri,
+                  fileName: e.urlMateri,
+                  folder: 'All Plant',
+                  plantId: 0,
+                ),
+              )
+              .toList();
+          questions = []; // Kosongkan pertanyaan di All Plant
+        });
+      } else {
+        // Jika bukan All Plant, load berdasarkan plant
+        await _loadDataForPlant();
+      }
+    } catch (e) {
+      debugPrint('❌ Gagal memuat data induction material: $e');
+    } finally {
+      setState(() => isLoadingQuestions = false);
+    }
+  }
+
+  /// ✅ Load data pertanyaan dan materi berdasarkan plant tertentu
   Future<void> _loadDataForPlant() async {
     if (selectedPlant == null) return;
     setState(() {
       isLoadingQuestions = true;
       isLoadingMaterials = true;
     });
+
     try {
       final fetchedQuestions =
           await api.fetchQuestionsByPlant(selectedPlant!.id);
       final fetchedMaterials =
           await api.fetchMaterialsByPlant(selectedPlant!.id.toString());
+
       setState(() {
         questions = fetchedQuestions;
         materials = fetchedMaterials;
       });
     } catch (e) {
-      debugPrint('❌ Error loading plant data: $e');
+      debugPrint('❌ Error loading data per plant: $e');
       setState(() {
         questions = [];
         materials = [];
@@ -85,25 +133,25 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
     }
   }
 
-  void _onPlantChanged(Plant? newPlant) {
+  /// ✅ Aksi saat dropdown plant diganti
+  void _onPlantChanged(Plant? newPlant) async {
     if (newPlant == null) return;
     setState(() {
       selectedPlant = newPlant;
       questions = [];
       materials = [];
     });
-    _loadDataForPlant();
+
+    await _loadQuestions(); // auto-refresh sesuai pilihan
   }
 
   /// Navigasi ke halaman tambah material
-  /// Setelah user kembali, halaman otomatis refresh list material
   Future<void> _goToAddMaterial() async {
     if (selectedPlant == null) return;
 
     final result = await context.push('/cms/material/add',
         extra: {'plantId': selectedPlant!.id.toString()});
 
-    // 🔄 Jika halaman Add Material mengembalikan 'refresh' (berhasil tambah)
     if (result == 'refresh') {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Materi baru berhasil ditambahkan!',
@@ -245,7 +293,9 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
                         : questions.isEmpty
                             ? Center(
                                 child: Text(
-                                  "Belum ada soal untuk plant ini.",
+                                  selectedPlant?.name == "All Plant"
+                                      ? "Soal tidak tersedia di mode All Plant."
+                                      : "Belum ada soal untuk plant ini.",
                                   style: GoogleFonts.hankenGrotesk(
                                       color: Colors.grey),
                                 ),
@@ -320,7 +370,7 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
                                 ),
                               )
                             : RefreshIndicator(
-                                onRefresh: _loadDataForPlant,
+                                onRefresh: _loadQuestions,
                                 child: ListView.builder(
                                   itemCount: materials.length,
                                   itemBuilder: (context, index) {
@@ -371,11 +421,11 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
             style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.bold)),
         content: SingleChildScrollView(
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(question.question,
-                  style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.bold)),
+                  style: GoogleFonts.hankenGrotesk(
+                      fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               if (question.isMultipleChoice) ...[
                 if (question.optionA != null)
