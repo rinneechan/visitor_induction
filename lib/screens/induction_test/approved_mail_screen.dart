@@ -6,9 +6,15 @@ class ApprovedMailScreen extends StatefulWidget {
   final String idrequest;
 
   const ApprovedMailScreen({
+<<<<<<< HEAD
     super.key,
     required this.idrequest,
   });
+=======
+    Key? key,
+    required this.idrequest,
+  }) : super(key: key);
+>>>>>>> web-v1.2
 
   @override
   _ApprovedMailScreenState createState() => _ApprovedMailScreenState();

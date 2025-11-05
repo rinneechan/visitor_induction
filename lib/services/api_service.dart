@@ -2,7 +2,10 @@ import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'dart:io';
 import 'dart:async';
+<<<<<<< HEAD
 import 'dart:typed_data';
+=======
+>>>>>>> web-v1.2
 import 'package:http/http.dart' as http;
 import 'package:she_vi/models/InductionMaterial.dart';
 import 'package:she_vi/models/InductionMaterialById.dart';
@@ -17,8 +20,11 @@ import 'package:she_vi/models/EmployeeByOu.dart';
 import 'package:she_vi/models/plant_model.dart';
 import 'package:she_vi/models/plantvisit.dart';
 import 'package:she_vi/models/mc_question.dart';
+<<<<<<< HEAD
 import 'package:she_vi/models/material_model.dart';
 import 'package:she_vi/models/material_by_plant_cms.dart';
+=======
+>>>>>>> web-v1.2
 import 'package:she_vi/utils/env_helper.dart';
 //import 'package:flutter_dotenv/flutter_dotenv.dart';
 //import 'package:flutter/foundation.dart';
@@ -124,6 +130,12 @@ class ApiService {
           String compname = responseData['data']['company_name'] ?? '';
           String jobposs = responseData['data']['job_position'] ?? '';
           String typeuser = responseData['data']['user_type'] ?? '';
+<<<<<<< HEAD
+=======
+          String area_code = responseData['data']['area_code'] ?? '';
+          String name_role = responseData['data']['name_role'] ?? '';
+
+>>>>>>> web-v1.2
           String fcmtoken = responseData['data']['fcmToken'] ?? '';
           String token = responseData['access_token'] ?? '';
 
@@ -135,6 +147,11 @@ class ApiService {
           await box.put('compname', compname);
           await box.put('jobposs', jobposs);
           await box.put('typeuser', typeuser);
+<<<<<<< HEAD
+=======
+          await box.put('area_code', area_code);
+          await box.put('name_role', name_role);
+>>>>>>> web-v1.2
           await box.put('fcmtoken', fcmtoken);
           await box.put('token', token);
 
@@ -427,6 +444,10 @@ class ApiService {
       throw Exception('Failed to load data: $e');
     }
   }
+<<<<<<< HEAD
+=======
+
+>>>>>>> web-v1.2
   Future<List<Dept>> fetchDept(String level) async {
     //final url = 'http://10.10.10.72:3001/plants/get-dep-plant';
     //final url = 'https://cemindo-apps.com/api_visitor_induction/plants/get-dep-plant';
@@ -1095,6 +1116,7 @@ class ApiService {
       return null;
     }
   }
+<<<<<<< HEAD
   Future<bool> createQuestionPlant({
   required String questionText,
   required String questionType,
@@ -1235,10 +1257,13 @@ Future<MaterialModel?> addMaterialCMS({
     return null;
   }
 }
+=======
+>>>>>>> web-v1.2
 
   // ---------------------------
 // ✅ Ambil daftar plant untuk dashboard / request induction
 // ---------------------------
+<<<<<<< HEAD
 Future<List<Plantvisit>> fetchPlants() async {
   final String apiUrl = EnvHelper.get('API_URL');
   final String accessHeaderKey = EnvHelper.get('API_HEADERS');
@@ -1283,10 +1308,57 @@ Future<List<Plantvisit>> fetchPlants() async {
     throw Exception('Failed to load plants: $e');
   }
 }
+=======
+  Future<List<Plantvisit>> fetchPlants() async {
+    final String apiUrl = EnvHelper.get('API_URL');
+    final String accessHeaderKey = EnvHelper.get('API_HEADERS');
+    final String? accessToken = box.get('token');
+
+    if (apiUrl.isEmpty) throw Exception("API_URL tidak ditemukan di env.json!");
+    if (accessToken == null || accessToken.isEmpty) {
+      throw Exception('Access token is missing or invalid');
+    }
+
+    final url = Uri.parse('$apiUrl/plants');
+    final headers = {
+      accessHeaderKey: accessToken,
+      'Content-Type': 'application/json',
+    };
+
+    print("🌐 [FETCH PLANTS - DASHBOARD] Request → $url");
+    print("📦 Headers: $headers");
+
+    try {
+      final response = await http.get(url, headers: headers).timeout(_timeout);
+
+      print("📥 Status: ${response.statusCode}");
+      print("📥 Body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final decoded = json.decode(response.body);
+
+        final data = decoded['data']?['plants'] ?? decoded['data'] ?? decoded;
+
+        if (data is List) {
+          print("🌱 Total plants (dashboard): ${data.length}");
+          return data.map((e) => Plantvisit.fromJson(e)).toList();
+        } else {
+          throw Exception('Invalid data format: expected list of plants');
+        }
+      } else {
+        throw Exception('Failed to load plants: ${response.statusCode}');
+      }
+    } on Exception catch (e) {
+      print("❌ Error in fetchPlants(): $e");
+      throw Exception('Failed to load plants: $e');
+    }
+  }
+>>>>>>> web-v1.2
 
 // ---------------------------
 // ✅ Ambil daftar plant untuk CMS
 // ---------------------------
+<<<<<<< HEAD
 Future<List<Plant>> fetchPlantsCMS() async {
   final String apiUrl = EnvHelper.get('API_URL');
   final String accessHeaderKey = EnvHelper.get('API_HEADERS');
@@ -1331,6 +1403,52 @@ Future<List<Plant>> fetchPlantsCMS() async {
     throw Exception('Failed to load plants: $e');
   }
 }
+=======
+  Future<List<Plant>> fetchPlantsCMS() async {
+    final String apiUrl = EnvHelper.get('API_URL');
+    final String accessHeaderKey = EnvHelper.get('API_HEADERS');
+    final String? accessToken = box.get('token');
+
+    if (apiUrl.isEmpty) throw Exception("API_URL tidak ditemukan di env.json!");
+    if (accessToken == null || accessToken.isEmpty) {
+      throw Exception('Access token is missing or invalid');
+    }
+
+    final url = Uri.parse('$apiUrl/plants');
+    final headers = {
+      accessHeaderKey: accessToken,
+      'Content-Type': 'application/json',
+    };
+
+    print("🌐 [FETCH PLANTS - CMS] Request → $url");
+    print("📦 Headers: $headers");
+
+    try {
+      final response = await http.get(url, headers: headers).timeout(_timeout);
+
+      print("📥 Status: ${response.statusCode}");
+      print("📥 Body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final decoded = json.decode(response.body);
+
+        final data = decoded['data']?['plants'] ?? decoded['data'] ?? decoded;
+
+        if (data is List) {
+          print("🌱 Total plants (CMS): ${data.length}");
+          return data.map((e) => Plant.fromJson(e)).toList();
+        } else {
+          throw Exception('Invalid data format: expected list of plants');
+        }
+      } else {
+        throw Exception('Failed to load plants: ${response.statusCode}');
+      }
+    } on Exception catch (e) {
+      print("❌ Error in fetchPlantsCMS(): $e");
+      throw Exception('Failed to load plants: $e');
+    }
+  }
+>>>>>>> web-v1.2
 
   Future<List<MCQuestion>> fetchQuestionsByPlant(int plantId) async {
     final String apiUrl = EnvHelper.get('API_URL');
@@ -1342,7 +1460,14 @@ Future<List<Plant>> fetchPlantsCMS() async {
       throw Exception('Access token invalid');
 
     final url = Uri.parse('$apiUrl/question/get-question-plant?id=$plantId');
+<<<<<<< HEAD
     final headers = {accessHeaderKey: accessToken, 'Content-Type': 'application/json'};
+=======
+    final headers = {
+      accessHeaderKey: accessToken,
+      'Content-Type': 'application/json'
+    };
+>>>>>>> web-v1.2
 
     try {
       final response = await http.get(url, headers: headers).timeout(_timeout);
@@ -1363,6 +1488,7 @@ Future<List<Plant>> fetchPlantsCMS() async {
       return [];
     }
   }
+<<<<<<< HEAD
     // ====================================================
 // ✅ Get Material by Plant (CMS)
 // Endpoint: GET /materials/materialplant/:id
@@ -1421,4 +1547,6 @@ Future<List<MaterialByPlantCMS>> fetchMaterialsByPlant(String plantId) async {
     throw Exception("Terjadi kesalahan saat mengambil material CMS: $e");
   }
 }
+=======
+>>>>>>> web-v1.2
 }

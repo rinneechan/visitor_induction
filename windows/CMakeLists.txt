@@ -1,10 +1,18 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
+<<<<<<< HEAD
 project(test_project LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
 set(BINARY_NAME "test_project")
+=======
+project(she_vi LANGUAGES CXX)
+
+# The name of the executable created for the application. Change this to change
+# the on-disk name of your application.
+set(BINARY_NAME "she_vi")
+>>>>>>> web-v1.2
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # test_project
+=======
+# SHE Visitor Inductions
+>>>>>>> web-v1.2
 
 A new Flutter project.
 

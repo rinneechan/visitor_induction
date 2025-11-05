@@ -9,7 +9,11 @@ import 'package:go_router/go_router.dart';
 
 class MainmenuScreen extends StatefulWidget {
   final String employeeid;
+<<<<<<< HEAD
   const MainmenuScreen({super.key, required this.employeeid});
+=======
+  const MainmenuScreen({Key? key, required this.employeeid}) : super(key: key);
+>>>>>>> web-v1.2
 
   @override
   _MainmenuScreenState createState() => _MainmenuScreenState();
@@ -83,7 +87,11 @@ class _MainmenuScreenState extends State<MainmenuScreen> {
         ),
         drawer: CustomDrawer(username: username ?? "Guest"),
         body: Center(
+<<<<<<< HEAD
           child: SizedBox(
+=======
+          child: Container(
+>>>>>>> web-v1.2
             width: MediaQuery.of(context).size.shortestSide,
             child: Stack(
               children: <Widget>[

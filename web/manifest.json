@@ -1,7 +1,13 @@
 {
+<<<<<<< HEAD
     "name": "test_project",
     "short_name": "test_project",
     "start_url": ".",
+=======
+    "name": "she_vi",
+    "short_name": "she_vi",
+    "start_url": "/web-visitor-induction/",
+>>>>>>> web-v1.2
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",

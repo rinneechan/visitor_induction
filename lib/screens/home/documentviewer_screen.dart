@@ -14,10 +14,17 @@ class DocumentViewer extends StatefulWidget {
   final String namaFile;
 
   const DocumentViewer({
+<<<<<<< HEAD
     super.key,
     required this.idmateri,
     required this.namaFile,
   });
+=======
+    Key? key,
+    required this.idmateri,
+    required this.namaFile,
+  }) : super(key: key);
+>>>>>>> web-v1.2
 
   @override
   _DocumentViewerState createState() => _DocumentViewerState();

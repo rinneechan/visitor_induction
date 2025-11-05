@@ -46,7 +46,10 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
 
   // Colors
   final Color primaryGreen = const Color(0xFF07840B);
+<<<<<<< HEAD
   final Color lightGrey = const Color(0xFFF5F5F5);
+=======
+>>>>>>> web-v1.2
 
   @override
   void initState() {
@@ -72,7 +75,10 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
       if (token == null || token.isEmpty) {
         Navigator.pushReplacementNamed(context, '/chooseaccess');
       } else {
+<<<<<<< HEAD
         // load plants, employees & durations
+=======
+>>>>>>> web-v1.2
         _loadData();
       }
     });
@@ -95,6 +101,7 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
       final List<Plantvisit> plants = await apiService.fetchPlants();
       setState(() {
         plantlist = plants;
+<<<<<<< HEAD
         // auto-select first plant if none selected
         if (_selectedPlant == null && plantlist.isNotEmpty) {
           _selectedPlant = plantlist.first;
@@ -102,6 +109,12 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
           // load employees for first plant
           _loadEmplo(_selectedPlant!.id.toString());
         }
+=======
+        // ❌ jangan auto-select plant pertama
+        // ✅ biarkan user memilih manual
+        _selectedPlant = null;
+        _updateNextButtonState();
+>>>>>>> web-v1.2
       });
     } catch (e) {
       debugPrint('Failed to fetch plants: $e');
@@ -138,6 +151,10 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
       final duras = await apiService.fetchDuratuion();
       setState(() {
         duraslist = duras;
+<<<<<<< HEAD
+=======
+        _updateNextButtonState();
+>>>>>>> web-v1.2
       });
     } catch (e) {
       debugPrint('Error fetching durations: $e');
@@ -157,6 +174,7 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
     });
   }
 
+<<<<<<< HEAD
   void _updateButtonState() {
     if (_selectedPlant != null) {
       final String idplant = _selectedPlant!.id.toString();
@@ -167,6 +185,8 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
     }
   }
 
+=======
+>>>>>>> web-v1.2
   void _validateReason() {
     setState(() {
       _isReasonValid = _reasonController.text.trim().isNotEmpty;
@@ -190,7 +210,10 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
   }
 
   Future<void> _next() async {
+<<<<<<< HEAD
     // validations
+=======
+>>>>>>> web-v1.2
     if (visitorid == null || visitorid!.isEmpty) {
       _showCreateError('Visitor ID tidak ditemukan.');
       return;
@@ -255,7 +278,12 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
   }
 
   void _showCreateError(String message) {
+<<<<<<< HEAD
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+=======
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+>>>>>>> web-v1.2
   }
 
   void _showConnectionError(String message) {
@@ -265,17 +293,30 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
         title: const Text('Error'),
         content: Text(message),
         actions: [
+<<<<<<< HEAD
           TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('OK')),
+=======
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK')),
+>>>>>>> web-v1.2
         ],
       ),
     );
   }
 
+<<<<<<< HEAD
   // ------------------ BUILD UI ------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: lightGrey,
+=======
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey.shade50,
+>>>>>>> web-v1.2
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
@@ -287,11 +328,21 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
             fontWeight: FontWeight.w700,
           ),
         ),
+<<<<<<< HEAD
+=======
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
+>>>>>>> web-v1.2
       ),
       drawer: CustomDrawer(username: username ?? 'Guest'),
       body: SafeArea(
         child: Stack(
           children: [
+<<<<<<< HEAD
             SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
               child: Column(
@@ -354,6 +405,81 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
               Positioned.fill(
                 child: Container(
                   color: Colors.black38,
+=======
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: SingleChildScrollView(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildCardHeader(),
+                      const SizedBox(height: 16),
+                      _buildForm(context),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 16,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.arrow_back,
+                                color: Colors.black87),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: _isButtonEnabled ? _next : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _isButtonEnabled
+                                  ? primaryGreen
+                                  : Colors.grey.shade400,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              'Next',
+                              style: GoogleFonts.hankenGrotesk(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            if (_isLoading)
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black.withOpacity(0.3),
+>>>>>>> web-v1.2
                   child: const Center(child: CircularProgressIndicator()),
                 ),
               ),
@@ -364,6 +490,7 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
   }
 
   Widget _buildCardHeader() {
+<<<<<<< HEAD
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -385,11 +512,46 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
             style: GoogleFonts.hankenGrotesk(fontSize: 14, color: Colors.grey.shade700),
           ),
         ],
+=======
+    return Card(
+      margin: EdgeInsets.zero, // ✅ hilangkan margin bawaan card
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade300),
+      ),
+      color: Colors.white,
+      child: Container(
+        width: double.infinity, // ✅ biar lebar penuh sejajar dengan form
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Request Induction Form',
+              style: GoogleFonts.hankenGrotesk(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF222222),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Please fill in all required details before proceeding.',
+              style: GoogleFonts.hankenGrotesk(
+                fontSize: 14,
+                color: Colors.grey.shade700,
+              ),
+            ),
+          ],
+        ),
+>>>>>>> web-v1.2
       ),
     );
   }
 
   Widget _buildForm(BuildContext context) {
+<<<<<<< HEAD
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -525,11 +687,184 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
             style: GoogleFonts.hankenGrotesk(fontSize: 13, color: Colors.grey.shade700),
           ),
         ],
+=======
+    return Card(
+      margin: EdgeInsets.zero, // ✅ hilangkan margin default biar sejajar header
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade300),
+      ),
+      color: Colors.white,
+      child: Container(
+        width: double.infinity, // ✅ jaga lebar konsisten
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildDropdownSection(
+              label: 'Plant Destination',
+              child: DropdownButtonFormField<Plantvisit>(
+                value: _selectedPlant,
+                isExpanded: true,
+                decoration: _inputDecoration(),
+                items: plantlist.map((p) {
+                  return DropdownMenuItem<Plantvisit>(
+                    value: p,
+                    child: Text(p.plantName ?? p.plantCode ?? ''),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedPlant = value;
+                    _selectedEmplo = null;
+                    emplolist = [];
+                  });
+                  if (value != null) _loadEmplo(value.plantCode);
+                  _updateNextButtonState();
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildDropdownSection(
+              label: 'PIC Name & Department',
+              child: DropdownButtonFormField<EmployeeByOu>(
+                value: _selectedEmplo,
+                isExpanded: true,
+                decoration: _inputDecoration(),
+                items: emplolist
+                    .map((e) => DropdownMenuItem<EmployeeByOu>(
+                          value: e,
+                          child: Text(
+                            '${e.fullname} - ${e.unitname}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.hankenGrotesk(fontSize: 14),
+                          ),
+                        ))
+                    .toList(),
+                onChanged: (value) {
+                  setState(() => _selectedEmplo = value);
+                  _updateNextButtonState();
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildDropdownSection(
+              label: 'Arrival Date',
+              child: GestureDetector(
+                onTap: () => _selectDate(context),
+                child: Container(
+                  height: 56,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  alignment: Alignment.centerLeft,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    _selectedDate == null
+                        ? 'Choose a date'
+                        : _selectedDate!.toLocal().toString().split(' ')[0],
+                    style: GoogleFonts.hankenGrotesk(color: Colors.black87),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildDropdownSection(
+              label: 'Visit Duration',
+              child: DropdownButtonFormField<customDurations.Durations>(
+                value: _selectedDuras,
+                isExpanded: true,
+                decoration: _inputDecoration(),
+                items: duraslist.map((d) {
+                  return DropdownMenuItem(
+                    value: d,
+                    child: Text(d.nameduration),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() => _selectedDuras = value);
+                  _updateNextButtonState();
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildDropdownSection(
+              label: 'Reason to Visit',
+              child: Container(
+                height: 120,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(
+                    color: _isReasonValid ? Colors.grey.shade300 : Colors.red,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: TextField(
+                  controller: _reasonController,
+                  maxLines: null,
+                  expands: true,
+                  onChanged: (_) => _validateReason(),
+                  decoration: const InputDecoration.collapsed(
+                    hintText: 'Specify reason for visit',
+                  ),
+                ),
+              ),
+            ),
+            if (!_isReasonValid)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  'Reason is required',
+                  style: TextStyle(color: Colors.red.shade700),
+                ),
+              ),
+            const SizedBox(height: 20),
+            Text(
+              'By submitting this form, I declare that all provided details are true and correct.',
+              style: GoogleFonts.hankenGrotesk(
+                fontSize: 13,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+>>>>>>> web-v1.2
       ),
     );
   }
 
+<<<<<<< HEAD
   TextStyle _sectionStyle() {
     return GoogleFonts.hankenGrotesk(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF343434));
+=======
+  Widget _buildDropdownSection({required String label, required Widget child}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: _sectionStyle()),
+        const SizedBox(height: 8),
+        child,
+      ],
+    );
+  }
+
+  InputDecoration _inputDecoration() {
+    return InputDecoration(
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+    );
+  }
+
+  TextStyle _sectionStyle() {
+    return GoogleFonts.hankenGrotesk(
+      fontSize: 16,
+      fontWeight: FontWeight.w700,
+      color: const Color(0xFF343434),
+    );
+>>>>>>> web-v1.2
   }
 }

@@ -2,7 +2,11 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 
 class NoSeekControls extends StatefulWidget {
+<<<<<<< HEAD
   const NoSeekControls({super.key});
+=======
+  const NoSeekControls({Key? key}) : super(key: key);
+>>>>>>> web-v1.2
 
   @override
   _NoSeekControlsState createState() => _NoSeekControlsState();

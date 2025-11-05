@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<<<<<<< HEAD
 <html>
 <head>
   <!--
@@ -19,10 +20,21 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
+=======
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="SHE Visitor Induction">
+  <!-- <base href="/web-visitor-induction/"> -->
+  <base href="$FLUTTER_BASE_HREF">
+>>>>>>> web-v1.2
 
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
+<<<<<<< HEAD
   <meta name="apple-mobile-web-app-title" content="test_project">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
@@ -45,6 +57,66 @@
   </script>
   <script src="assets/packages/pdfx/assets/pdf.js" defer></script>
   <script src="assets/packages/pdfx/assets/pdf.worker.js" defer></script>
+=======
+  <meta name="apple-mobile-web-app-title" content="she_vi">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: url('assets/images/BackgroundSedia.png') no-repeat center center fixed;
+      background-size: cover;
+    }
+  </style>
+
+  <link rel="apple-touch-icon" href="icons/logo-sedia.png">
+  <link rel="icon" type="image/png" href="icons/logo-sedia.png"/>
+  <title>SHE Visitor Induction</title>
+
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Firebase SDK -->
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-messaging-compat.js"></script>
+
+
+  <!-- PDF.js -->
+  <script type="module">
+    import { getDocument, GlobalWorkerOptions } from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/build/pdf.mjs';
+    GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/build/pdf.worker.mjs';
+  </script>
+
+  <!-- Firebase Config -->
+  <script src="firebase-config.js"></script>
+
+  <!-- Service Worker -->
+  <script>
+    if (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === 'cemindo-apps.com') {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('firebase-messaging-sw.js')
+          .then((registration) => {
+            console.log('✅ Service Worker registered with scope:', registration.scope);
+            import('./firebase-config.js').then(({ messaging }) => {
+              console.log('✅ Firebase Messaging initialized:', messaging);
+            }).catch((error) => {
+              console.error('❌ Error loading Firebase Config:', error);
+            });
+          })
+          .catch((error) => {
+            console.error('❌ Service Worker registration failed:', error);
+          });
+      } else {
+        console.warn('⚠️ Service Workers are not supported in this browser.');
+      }
+    } else {
+      console.warn('⚠️ Service Worker is disabled because context is not secure.');
+    }
+  </script>
+</head>
+
+<body>
+>>>>>>> web-v1.2
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

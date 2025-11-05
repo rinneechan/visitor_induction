@@ -11,7 +11,11 @@ import 'package:go_router/go_router.dart';
 
 class MenusatuScreen extends StatefulWidget {
   final String username;
+<<<<<<< HEAD
   const MenusatuScreen({super.key, required this.username});
+=======
+  const MenusatuScreen({Key? key, required this.username}) : super(key: key);
+>>>>>>> web-v1.2
   @override
   _MenusatuScreenState createState() => _MenusatuScreenState();
 }
@@ -89,13 +93,21 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
   @override
   Widget build(BuildContext context) {
     // Fungsi untuk mendapatkan warna berdasarkan status
+<<<<<<< HEAD
     Color getStatusColor(String status) {
+=======
+    Color _getStatusColor(String status) {
+>>>>>>> web-v1.2
       if (status == '0') {
         return Color(0xFFD18410); // Warna untuk On-Review
       } else if (status == '1') {
         return Color(0xFF1357BD); // Warna untuk Induction Test
       } else if (status == '2') {
+<<<<<<< HEAD
         return Color(0x0007840b); // Warna untuk Induction Test
+=======
+        return Color(0x07840B); // Warna untuk Induction Test
+>>>>>>> web-v1.2
       } else if (status == '3') {
         return Color(0xFF07840B); // Warna untuk Induction Test
       } else if (status == '4') {
@@ -104,7 +116,11 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
       return Color(0x00757575); // Warna default (misalnya untuk status lainnya)
     }
 
+<<<<<<< HEAD
     Color getStatusColorRequest(String status) {
+=======
+    Color _getStatusColorRequest(String status) {
+>>>>>>> web-v1.2
       if (status == '0') {
         return Color(0xFFD18410); // Warna untuk On-Review
       } else if (status == '1') {
@@ -158,7 +174,11 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
               _loadData(); // Panggil fungsi reload data
             },
             child: Center(
+<<<<<<< HEAD
               child: SizedBox(
+=======
+              child: Container(
+>>>>>>> web-v1.2
                 width: MediaQuery.of(context).size.shortestSide,
                 height: MediaQuery.of(context).size.height,
                 child: Stack(
@@ -171,6 +191,7 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                             elevation: 0,
                             color: Colors.white,
                             shape: RoundedRectangleBorder(
+<<<<<<< HEAD
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Padding(
@@ -198,6 +219,32 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                   Padding(
                                     padding: const EdgeInsets.all(
                                         16.0), // Padding di semua sisi (top, bottom, left, right)
+=======
+                              borderRadius: BorderRadius.circular(
+                                  12), // sedikit lebih lembut
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(20.0), // lebih lega
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Click the button below to schedule your visitor induction.',
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2, // batasi maksimal 2 baris
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: Color(0xFF757575),
+                                      fontFamily: 'Hanken Grotesk',
+                                      fontSize: 15.0,
+                                      fontWeight: FontWeight.w400,
+                                      height: 1.3, // sedikit jarak antar baris
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  SizedBox(
+                                    width: double.infinity,
+>>>>>>> web-v1.2
                                     child: ElevatedButton(
                                       onPressed: () {
                                         context.push('/request-new-induction');
@@ -206,13 +253,18 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                         backgroundColor:
                                             const Color(0xFF07840B),
                                         padding: const EdgeInsets.symmetric(
+<<<<<<< HEAD
                                             vertical:
                                                 16.0), // Padding vertikal dalam tombol
+=======
+                                            vertical: 16.0),
+>>>>>>> web-v1.2
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(8.0),
                                         ),
                                       ),
+<<<<<<< HEAD
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
@@ -230,10 +282,24 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                       ),
                                     ),
                                   )
+=======
+                                      child: Text(
+                                        'Request New Inductionn',
+                                        style: const TextStyle(
+                                          color: Colors.white, // ✅ tetap putih
+                                          fontFamily: 'Hanken Grotesk',
+                                          fontSize: 16.0,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+>>>>>>> web-v1.2
                                 ],
                               ),
                             ),
                           ),
+<<<<<<< HEAD
                           // SizedBox(height: 8),
                           // Card(
                           //   elevation: 0,
@@ -478,6 +544,10 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                           //   ),
                           // ),
 
+=======
+
+                          // SizedBox(height: 8),
+>>>>>>> web-v1.2
                           Card(
                             elevation: 0,
                             color: Colors.white,
@@ -549,12 +619,20 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                                                 .statusId ==
                                                             1) {
                                                           context.push(
+<<<<<<< HEAD
                                                               '/detail-info?id=${progresson.idrequest}');
+=======
+                                                              '/employee/detail-info?id=${progresson.idrequest}');
+>>>>>>> web-v1.2
                                                         } else if (progresson
                                                                 .statusId ==
                                                             3) {
                                                           context.push(
+<<<<<<< HEAD
                                                               '/aktif-info?id=${progresson.idrequest}');
+=======
+                                                              '/visitor/aktif-info?id=${progresson.idrequest}');
+>>>>>>> web-v1.2
                                                         }
                                                       }
                                                     : null,
@@ -700,7 +778,11 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                                               fontWeight:
                                                                   FontWeight
                                                                       .w700,
+<<<<<<< HEAD
                                                               color: getStatusColor(
+=======
+                                                              color: _getStatusColor(
+>>>>>>> web-v1.2
                                                                   progresson
                                                                       .statusid),
                                                             ),
@@ -726,6 +808,7 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                             ),
                           ),
 
+<<<<<<< HEAD
                           // Card(
                           //   elevation: 0,
                           //   color: Colors.white,
@@ -902,6 +985,8 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                           //   ),
                           // ),
 
+=======
+>>>>>>> web-v1.2
                           Card(
                             elevation: 0,
                             color: Colors.white,
@@ -1136,8 +1221,12 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                               return InkWell(
                                                 onTap: () {
                                                   context.push(
+<<<<<<< HEAD
                                                       '/detail-history?id=${history.idrequest}');
                                                   //context.push('/visitor-request?id=${history.idrequest}');
+=======
+                                                      '/employee/detail-history?id=${history.idrequest}');
+>>>>>>> web-v1.2
                                                 },
                                                 child: Container(
                                                   decoration: BoxDecoration(
@@ -1165,7 +1254,11 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                                         MainAxisAlignment
                                                             .spaceBetween,
                                                     children: [
+<<<<<<< HEAD
                                                       SizedBox(
+=======
+                                                      Container(
+>>>>>>> web-v1.2
                                                         width: 230,
                                                         child: Column(
                                                           crossAxisAlignment:
@@ -1277,7 +1370,11 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                                               fontWeight:
                                                                   FontWeight
                                                                       .w700,
+<<<<<<< HEAD
                                                               color: getStatusColorRequest(
+=======
+                                                              color: _getStatusColorRequest(
+>>>>>>> web-v1.2
                                                                   history
                                                                       .statusid),
                                                             ),
