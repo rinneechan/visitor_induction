@@ -1,23 +1,26 @@
 // lib/route/app_route.dart
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 // -----------------------
-// SCREENS
+// AUTH & GENERAL SCREENS
 // -----------------------
-
-// Auth & General
 import 'package:she_vi/screens/login/login_screen.dart';
 import 'package:she_vi/screens/login/logout_screen.dart';
 import 'package:she_vi/screens/login/createnewpass_screen.dart';
 import 'package:she_vi/screens/welcome_screen.dart';
 import 'package:she_vi/screens/chooseaccess_screen.dart';
 
-// Home - Internal
+// -----------------------
+// HOME (INTERNAL)
+// -----------------------
 import 'package:she_vi/screens/home/mainmenu_screen.dart';
 import 'package:she_vi/screens/home/menusatu_screen.dart';
 
-// Home - External
+// -----------------------
+// HOME (EXTERNAL)
+// -----------------------
 import 'package:she_vi/screens/home/mainmenuExternal_screen.dart';
 import 'package:she_vi/screens/home/external/register_screen.dart';
 import 'package:she_vi/screens/home/external/request_induction_form_screen.dart'
@@ -26,7 +29,9 @@ import 'package:she_vi/screens/home/external/request_induction_screen.dart'
     as screen;
 import 'package:she_vi/screens/home/external/request_submitted_screen.dart';
 
-// Pages
+// -----------------------
+// PAGES
+// -----------------------
 import 'package:she_vi/screens/page/detailhistory.dart';
 import 'package:she_vi/screens/page/requestsubmitted_screen.dart';
 import 'package:she_vi/screens/page/reqinductionysatu_screen.dart';
@@ -34,7 +39,9 @@ import 'package:she_vi/screens/page/detaiinfo.dart';
 import 'package:she_vi/screens/page/detailvisit.dart';
 import 'package:she_vi/screens/page/visitorrequest_Screen.dart';
 
-// Induction Test
+// -----------------------
+// INDUCTION TEST SCREENS
+// -----------------------
 import 'package:she_vi/screens/induction_test/welcome_testsatu_screen.dart';
 import 'package:she_vi/screens/induction_test/welcome_testdua_screen.dart';
 import 'package:she_vi/screens/induction_test/question_screen.dart';
@@ -42,23 +49,29 @@ import 'package:she_vi/screens/induction_test/test_complated_screen.dart';
 import 'package:she_vi/screens/induction_test/approved_mail_screen.dart';
 import 'package:she_vi/screens/induction_test/completed_screen.dart';
 
-// CMS Screens
+// -----------------------
+// CMS SCREENS
+// -----------------------
 import 'package:she_vi/screens/cms/cms_induction_screen.dart';
 import 'package:she_vi/screens/cms/cms_question_screen.dart';
 import 'package:she_vi/screens/cms/material_screen.dart';
 
-// Utils / Services
+// -----------------------
+// UTILS / SERVICES
+// -----------------------
 import 'package:she_vi/screens/setting/navigator_service.dart';
 
-// ✅ HANYA KELAS AppRouter — TANPA main() atau runApp()
+/// ======================================================
+/// ✅ AppRouter: Kelas tunggal untuk mengatur semua route
+/// ======================================================
 class AppRouter {
   static final GoRouter router = GoRouter(
-    navigatorKey: globalNavigatorKey, // ✅ Ini benar!
+    navigatorKey: globalNavigatorKey, // 🔑 Gunakan global navigator
     initialLocation: '/',
     routes: [
-      /// -----------------------
-      /// AUTH & GENERAL ROUTES
-      /// -----------------------
+      /// ======================================================
+      /// 🔐 AUTH & GENERAL ROUTES
+      /// ======================================================
       GoRoute(path: '/', builder: (context, state) => const WelcomeScreen()),
       GoRoute(
           path: '/welcome', builder: (context, state) => const WelcomeScreen()),
@@ -69,6 +82,8 @@ class AppRouter {
           path: '/register',
           builder: (context, state) => const RegisterScreen()),
       GoRoute(path: '/logout', builder: (context, state) => LogoutScreen()),
+
+      // 🔑 Reset password (dengan 3 parameter path)
       GoRoute(
         path: '/create-new-pass/:employeeid/:fullName/:email',
         builder: (context, state) {
@@ -83,9 +98,9 @@ class AppRouter {
         },
       ),
 
-      /// -----------------------
-      /// EMPLOYEE ROUTES (Internal)
-      /// -----------------------
+      /// ======================================================
+      /// 🧑‍💼 EMPLOYEE ROUTES (INTERNAL)
+      /// ======================================================
       GoRoute(
         path: '/employee/main-menu',
         builder: (context, state) {
@@ -112,19 +127,21 @@ class AppRouter {
         },
       ),
       GoRoute(
-          path: '/request-new-induction',
-          builder: (context, state) => ReqInductionySatu()),
+        path: '/request-new-induction',
+        builder: (context, state) => ReqInductionySatu(),
+      ),
       GoRoute(
         path: '/employee/request-submitted',
         builder: (context, state) => RequestSubmitted(username: 'defaultID'),
       ),
 
-      /// -----------------------
-      /// VISITOR ROUTES (External)
-      /// -----------------------
+      /// ======================================================
+      /// 🧍‍♂️ VISITOR ROUTES (EXTERNAL)
+      /// ======================================================
       GoRoute(
-          path: '/main-menu-ext',
-          builder: (context, state) => const MainmenuExternalScreen()),
+        path: '/main-menu-ext',
+        builder: (context, state) => const MainmenuExternalScreen(),
+      ),
       GoRoute(
         path: '/visitor/aktif-info',
         builder: (context, state) {
@@ -140,11 +157,13 @@ class AppRouter {
         },
       ),
       GoRoute(
-          path: '/request-induction',
-          builder: (context, state) => const screen.RequestInductionScreen()),
+        path: '/request-induction',
+        builder: (context, state) => const screen.RequestInductionScreen(),
+      ),
       GoRoute(
-          path: '/request-form',
-          builder: (context, state) => const form.RequestInductionFormScreen()),
+        path: '/request-form',
+        builder: (context, state) => const form.RequestInductionFormScreen(),
+      ),
       GoRoute(
         path: '/request-submitted',
         builder: (context, state) {
@@ -160,9 +179,9 @@ class AppRouter {
         },
       ),
 
-      /// -----------------------
-      /// INDUCTION TEST ROUTES
-      /// -----------------------
+      /// ======================================================
+      /// 🧠 INDUCTION TEST ROUTES
+      /// ======================================================
       GoRoute(
         path: '/induction/welcome-test',
         builder: (context, state) {
@@ -221,49 +240,43 @@ class AppRouter {
           return CompletedScreen(idrequest: idRequest);
         },
       ),
-   
-   /// -----------------------
-/// CMS ROUTES
-/// -----------------------
-GoRoute(
-  path: '/cms',
-  builder: (context, state) {
-    final plantId = state.extra as String? ?? ''; 
-    return CmsInductionScreen(plantId: plantId);
-  },
-),
 
-GoRoute(
-  path: '/cms/questions',
-  builder: (context, state) {
-    print("EXTRA VALUE TYPE: ${state.extra.runtimeType}");
-    // state.extra sekarang bisa berupa Map<String, String>
-    String plantId = '';
-    if (state.extra is Map<String, String>) {
-      plantId = (state.extra as Map<String, String>)['plantId'] ?? '';
-    } else if (state.extra is String) {
-      plantId = state.extra as String;
-    }
-
-    return CmsQuestionScreen(plantId: plantId);
-  },
-),
-
-GoRoute(
-  path: '/cms/material/add',
-  builder: (context, state) {
-    print("EXTRA VALUE TYPE: ${state.extra.runtimeType}");
-    String plantId = '';
-    if (state.extra is Map<String, String>) {
-      plantId = (state.extra as Map<String, String>)['plantId'] ?? '';
-    } else if (state.extra is String) {
-      plantId = state.extra as String;
-    }
-
-    return AddMaterialScreen(plantId: plantId);
-  },
-),
-  ],
- );
-
+      /// ======================================================
+      /// 🧩 CMS ROUTES
+      /// ======================================================
+      GoRoute(
+        path: '/cms',
+        builder: (context, state) {
+          final plantId = state.extra as String? ?? '';
+          return CmsInductionScreen(plantId: plantId);
+        },
+      ),
+      GoRoute(
+        path: '/cms/questions',
+        builder: (context, state) {
+          print("EXTRA VALUE TYPE: ${state.extra.runtimeType}");
+          String plantId = '';
+          if (state.extra is Map<String, String>) {
+            plantId = (state.extra as Map<String, String>)['plantId'] ?? '';
+          } else if (state.extra is String) {
+            plantId = state.extra as String;
+          }
+          return CmsQuestionScreen(plantId: plantId);
+        },
+      ),
+      GoRoute(
+        path: '/cms/material/add',
+        builder: (context, state) {
+          print("EXTRA VALUE TYPE: ${state.extra.runtimeType}");
+          String plantId = '';
+          if (state.extra is Map<String, String>) {
+            plantId = (state.extra as Map<String, String>)['plantId'] ?? '';
+          } else if (state.extra is String) {
+            plantId = state.extra as String;
+          }
+          return AddMaterialScreen(plantId: plantId);
+        },
+      ),
+    ],
+  );
 }

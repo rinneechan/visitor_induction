@@ -11,11 +11,7 @@ import 'package:go_router/go_router.dart';
 
 class MenusatuScreen extends StatefulWidget {
   final String username;
-<<<<<<< HEAD
-  const MenusatuScreen({super.key, required this.username});
-=======
   const MenusatuScreen({Key? key, required this.username}) : super(key: key);
->>>>>>> web-v1.2
   @override
   _MenusatuScreenState createState() => _MenusatuScreenState();
 }
@@ -93,21 +89,13 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
   @override
   Widget build(BuildContext context) {
     // Fungsi untuk mendapatkan warna berdasarkan status
-<<<<<<< HEAD
-    Color getStatusColor(String status) {
-=======
     Color _getStatusColor(String status) {
->>>>>>> web-v1.2
       if (status == '0') {
         return Color(0xFFD18410); // Warna untuk On-Review
       } else if (status == '1') {
         return Color(0xFF1357BD); // Warna untuk Induction Test
       } else if (status == '2') {
-<<<<<<< HEAD
-        return Color(0x0007840b); // Warna untuk Induction Test
-=======
         return Color(0x07840B); // Warna untuk Induction Test
->>>>>>> web-v1.2
       } else if (status == '3') {
         return Color(0xFF07840B); // Warna untuk Induction Test
       } else if (status == '4') {
@@ -116,11 +104,7 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
       return Color(0x00757575); // Warna default (misalnya untuk status lainnya)
     }
 
-<<<<<<< HEAD
-    Color getStatusColorRequest(String status) {
-=======
     Color _getStatusColorRequest(String status) {
->>>>>>> web-v1.2
       if (status == '0') {
         return Color(0xFFD18410); // Warna untuk On-Review
       } else if (status == '1') {
@@ -174,11 +158,7 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
               _loadData(); // Panggil fungsi reload data
             },
             child: Center(
-<<<<<<< HEAD
-              child: SizedBox(
-=======
               child: Container(
->>>>>>> web-v1.2
                 width: MediaQuery.of(context).size.shortestSide,
                 height: MediaQuery.of(context).size.height,
                 child: Stack(
@@ -191,35 +171,6 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                             elevation: 0,
                             color: Colors.white,
                             shape: RoundedRectangleBorder(
-<<<<<<< HEAD
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Center(
-                                    child: SizedBox(
-                                      width: 230,
-                                      child: Text(
-                                        'Click the button below to schedule your visitor induction.',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: Color(0xFF757575),
-                                          fontFamily: 'Hanken Grotesk',
-                                          fontSize: 14.0,
-                                          fontWeight: FontWeight.w400,
-                                          height: 1.0,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(height: 16),
-                                  Padding(
-                                    padding: const EdgeInsets.all(
-                                        16.0), // Padding di semua sisi (top, bottom, left, right)
-=======
                               borderRadius: BorderRadius.circular(
                                   12), // sedikit lebih lembut
                             ),
@@ -244,7 +195,6 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                   const SizedBox(height: 20),
                                   SizedBox(
                                     width: double.infinity,
->>>>>>> web-v1.2
                                     child: ElevatedButton(
                                       onPressed: () {
                                         context.push('/request-new-induction');
@@ -253,36 +203,12 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                         backgroundColor:
                                             const Color(0xFF07840B),
                                         padding: const EdgeInsets.symmetric(
-<<<<<<< HEAD
-                                            vertical:
-                                                16.0), // Padding vertikal dalam tombol
-=======
                                             vertical: 16.0),
->>>>>>> web-v1.2
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(8.0),
                                         ),
                                       ),
-<<<<<<< HEAD
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: const [
-                                          Text(
-                                            'Request New Induction',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontFamily: 'Hanken Grotesk',
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  )
-=======
                                       child: Text(
                                         'Request New Inductionn',
                                         style: const TextStyle(
@@ -294,260 +220,12 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                       ),
                                     ),
                                   ),
->>>>>>> web-v1.2
                                 ],
                               ),
                             ),
                           ),
-<<<<<<< HEAD
-                          // SizedBox(height: 8),
-                          // Card(
-                          //   elevation: 0,
-                          //   color: Colors.white,
-                          //   shape: RoundedRectangleBorder(
-                          //     borderRadius: BorderRadius.circular(8),
-                          //   ),
-                          //   child: Padding(
-                          //     padding: const EdgeInsets.all(16.0),
-                          //     child: Column(
-                          //       mainAxisSize: MainAxisSize.min,
-                          //       crossAxisAlignment: CrossAxisAlignment.start,
-                          //       children: [
-                          //         Row(
-                          //           children: [
-                          //             Container(
-                          //               child: IconButton(
-                          //                 icon: Image.asset(
-                          //                   'assets/images/akar_icons_history.png',
-                          //                   width: 24.0,
-                          //                   height: 24.0,
-                          //                 ),
-                          //                 onPressed: () {
-                          //                   // context.pop();
-                          //                 },
-                          //               ),
-                          //             ),
-                          //             SizedBox(width: 10),
-                          //             Text(
-                          //               'On Progress',
-                          //               style: TextStyle(
-                          //                 color: Color(0xFF757575),
-                          //                 fontFamily: 'Hanken Grotesk',
-                          //                 fontSize: 16.0,
-                          //                 fontWeight: FontWeight.w700,
-                          //                 height: 1.0,
-                          //               ),
-                          //             ),
-                          //           ],
-                          //         ),
-                          //         Flexible(
-                          //           fit: FlexFit.loose,
-                          //           child: FutureBuilder<
-                          //               List<InductionRequestProgress>>(
-                          //             future: fetchInductionProgress,
-                          //             builder: (context, snapshot) {
-                          //               if (snapshot.connectionState ==
-                          //                   ConnectionState.waiting) {
-                          //                 return Center();
-                          //               } else if (snapshot.hasError) {
-                          //                 return Center(child: Text(''));
-                          //               } else if (!snapshot.hasData ||
-                          //                   snapshot.data!.isEmpty) {
-                          //                 return Center(
-                          //                     child: Text("No data available"));
-                          //               } else {
-                          //                 return ListView.builder(
-                          //                   physics:
-                          //                       const NeverScrollableScrollPhysics(),
-                          //                   shrinkWrap:
-                          //                       true, // Membatasi tinggi ListView
-                          //                   itemCount: snapshot.data!.length,
-                          //                   itemBuilder: (context, index) {
-                          //                     final progresson =
-                          //                         snapshot.data![index];
-                          //                     return InkWell(
-                          //                       onTap: (progresson.statusId ==
-                          //                                   1 ||
-                          //                               progresson.statusId ==
-                          //                                   3)
-                          //                           ? () {
-                          //                               if (progresson
-                          //                                       .statusId ==
-                          //                                   1) {
-                          //                                 context.push(
-                          //                                     '/detail-info?id=${progresson.idrequest}');
-                          //                               } else if (progresson
-                          //                                       .statusId ==
-                          //                                   3) {
-                          //                                 context.push(
-                          //                                     '/aktif-info?id=${progresson.idrequest}');
-                          //                               }
-                          //                             }
-                          //                           : null,
-                          //                       child: Container(
-                          //                         decoration: BoxDecoration(
-                          //                           border: Border.all(
-                          //                             color:
-                          //                                 const Color.fromARGB(
-                          //                                     255,
-                          //                                     143,
-                          //                                     140,
-                          //                                     140),
-                          //                             width: 1.0,
-                          //                           ),
-                          //                           borderRadius:
-                          //                               BorderRadius.circular(
-                          //                                   10),
-                          //                         ),
-                          //                         padding: const EdgeInsets
-                          //                             .symmetric(
-                          //                             horizontal: 16.0,
-                          //                             vertical: 8.0),
-                          //                         margin: EdgeInsets.symmetric(
-                          //                             vertical: 5.0),
-                          //                         child: Row(
-                          //                           mainAxisAlignment:
-                          //                               MainAxisAlignment
-                          //                                   .spaceBetween,
-                          //                           children: [
-                          //                             Container(
-                          //                               width: 230,
-                          //                               child: Column(
-                          //                                 crossAxisAlignment:
-                          //                                     CrossAxisAlignment
-                          //                                         .start,
-                          //                                 children: [
-                          //                                   Text(
-                          //                                     progresson.plant,
-                          //                                     style: TextStyle(
-                          //                                       fontFamily:
-                          //                                           'Hanken Grotesk',
-                          //                                       fontSize: 14,
-                          //                                       fontWeight:
-                          //                                           FontWeight
-                          //                                               .w400,
-                          //                                       color: Color(
-                          //                                           0xFF343434),
-                          //                                     ),
-                          //                                   ),
-                          //                                   SizedBox(height: 5),
-                          //                                   Text(
-                          //                                     progresson
-                          //                                         .department,
-                          //                                     style: TextStyle(
-                          //                                       fontFamily:
-                          //                                           'Hanken Grotesk',
-                          //                                       fontSize: 14,
-                          //                                       fontWeight:
-                          //                                           FontWeight
-                          //                                               .w400,
-                          //                                       color: Color(
-                          //                                           0xFF757575),
-                          //                                     ),
-                          //                                   ),
-                          //                                   SizedBox(height: 5),
-                          //                                   Row(
-                          //                                     mainAxisAlignment:
-                          //                                         MainAxisAlignment
-                          //                                             .start, // Mengatur posisi elemen pada baris
-                          //                                     children: <Widget>[
-                          //                                       Text(
-                          //                                         progresson
-                          //                                             .arrivalDate,
-                          //                                         style:
-                          //                                             TextStyle(
-                          //                                           fontFamily:
-                          //                                               'Hanken Grotesk',
-                          //                                           fontSize:
-                          //                                               14,
-                          //                                           fontWeight:
-                          //                                               FontWeight
-                          //                                                   .w400,
-                          //                                           color: Color(
-                          //                                               0xFF757575),
-                          //                                         ),
-                          //                                       ),
-                          //                                       SizedBox(
-                          //                                           width: 5),
-                          //                                       Text(
-                          //                                         '-',
-                          //                                         style:
-                          //                                             TextStyle(
-                          //                                           fontFamily:
-                          //                                               'Hanken Grotesk',
-                          //                                           fontSize:
-                          //                                               14,
-                          //                                           fontWeight:
-                          //                                               FontWeight
-                          //                                                   .w400,
-                          //                                           color: Color(
-                          //                                               0xFF757575),
-                          //                                         ),
-                          //                                       ),
-                          //                                       SizedBox(
-                          //                                           width: 5),
-                          //                                       Text(
-                          //                                         progresson
-                          //                                             .visitDuration,
-                          //                                         style:
-                          //                                             TextStyle(
-                          //                                           fontFamily:
-                          //                                               'Hanken Grotesk',
-                          //                                           fontSize:
-                          //                                               14,
-                          //                                           fontWeight:
-                          //                                               FontWeight
-                          //                                                   .w400,
-                          //                                           color: Color(
-                          //                                               0xFF757575),
-                          //                                         ),
-                          //                                       ),
-                          //                                     ],
-                          //                                   )
-                          //                                 ],
-                          //                               ),
-                          //                             ),
-                          //                             Column(
-                          //                               crossAxisAlignment:
-                          //                                   CrossAxisAlignment
-                          //                                       .start,
-                          //                               children: [
-                          //                                 Text(
-                          //                                   progresson.status,
-                          //                                   style: TextStyle(
-                          //                                     fontFamily:
-                          //                                         'Hanken Grotesk',
-                          //                                     fontSize: 14,
-                          //                                     fontWeight:
-                          //                                         FontWeight
-                          //                                             .w700,
-                          //                                     color: _getStatusColor(
-                          //                                         progresson
-                          //                                             .statusid),
-                          //                                   ),
-                          //                                 ),
-                          //                                 SizedBox(height: 5),
-                          //                               ],
-                          //                             ),
-                          //                           ],
-                          //                         ),
-                          //                       ),
-                          //                     );
-                          //                   },
-                          //                 );
-                          //               }
-                          //             },
-                          //           ),
-                          //         ),
-                          //       ],
-                          //     ),
-                          //   ),
-                          // ),
-
-=======
 
                           // SizedBox(height: 8),
->>>>>>> web-v1.2
                           Card(
                             elevation: 0,
                             color: Colors.white,
@@ -619,20 +297,12 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                                                 .statusId ==
                                                             1) {
                                                           context.push(
-<<<<<<< HEAD
-                                                              '/detail-info?id=${progresson.idrequest}');
-=======
                                                               '/employee/detail-info?id=${progresson.idrequest}');
->>>>>>> web-v1.2
                                                         } else if (progresson
                                                                 .statusId ==
                                                             3) {
                                                           context.push(
-<<<<<<< HEAD
-                                                              '/aktif-info?id=${progresson.idrequest}');
-=======
                                                               '/visitor/aktif-info?id=${progresson.idrequest}');
->>>>>>> web-v1.2
                                                         }
                                                       }
                                                     : null,
@@ -778,11 +448,7 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                                               fontWeight:
                                                                   FontWeight
                                                                       .w700,
-<<<<<<< HEAD
-                                                              color: getStatusColor(
-=======
                                                               color: _getStatusColor(
->>>>>>> web-v1.2
                                                                   progresson
                                                                       .statusid),
                                                             ),
@@ -808,185 +474,6 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                             ),
                           ),
 
-<<<<<<< HEAD
-                          // Card(
-                          //   elevation: 0,
-                          //   color: Colors.white,
-                          //   shape: RoundedRectangleBorder(
-                          //     borderRadius: BorderRadius.circular(8),
-                          //   ),
-                          //   child: Padding(
-                          //     padding: const EdgeInsets.all(16.0),
-                          //     child: Column(
-                          //       mainAxisSize: MainAxisSize.min,
-                          //       crossAxisAlignment: CrossAxisAlignment.start,
-                          //       children: [
-                          //         Row(
-                          //           children: [
-                          //             Container(
-                          //               child: IconButton(
-                          //                 icon: Image.asset(
-                          //                   'assets/images/Induction_Material.png',
-                          //                   width: 18.0,
-                          //                   height: 20.0,
-                          //                 ),
-                          //                 onPressed: () {},
-                          //               ),
-                          //             ),
-                          //             SizedBox(width: 10),
-                          //             Text(
-                          //               'SHE Training Module',
-                          //               style: TextStyle(
-                          //                 color: Color(0xFF757575),
-                          //                 fontFamily: 'Hanken Grotesk',
-                          //                 fontSize: 16.0,
-                          //                 fontWeight: FontWeight.w700,
-                          //                 height: 1.0,
-                          //               ),
-                          //             ),
-                          //           ],
-                          //         ),
-                          //         SizedBox(height: 16),
-                          //         // Membungkus FutureBuilder dengan Expanded atau Flexible
-                          //         Flexible(
-                          //           fit: FlexFit
-                          //               .loose, // Membiarkan FutureBuilder mengatur tingginya sendiri
-                          //           child:
-                          //               FutureBuilder<List<InductionMaterial>>(
-                          //             future: futureMaterials,
-                          //             builder: (context, snapshot) {
-                          //               if (snapshot.connectionState ==
-                          //                   ConnectionState.waiting) {
-                          //                 return Center(
-                          //                     // child: CircularProgressIndicator()
-                          //                     );
-                          //               } else if (snapshot.hasError) {
-                          //                 return Center(
-                          //                     child: Text(
-                          //                         'Error: ${snapshot.error}'));
-                          //               } else if (!snapshot.hasData ||
-                          //                   snapshot.data!.isEmpty) {
-                          //                 return Center(
-                          //                     child: Text("No data available"));
-                          //               } else {
-                          //                 return ListView.builder(
-                          //                   physics:
-                          //                       const NeverScrollableScrollPhysics(),
-                          //                   shrinkWrap:
-                          //                       true, // Membatasi tinggi ListView
-                          //                   itemCount: snapshot.data!.length,
-                          //                   itemBuilder: (context, index) {
-                          //                     final material =
-                          //                         snapshot.data![index];
-                          //                     return InkWell(
-                          //                       onTap: () {
-                          //                         Navigator.push(
-                          //                           context,
-                          //                           MaterialPageRoute(
-                          //                             builder: (context) =>
-                          //                                 DocumentViewer(
-                          //                               idmateri: material
-                          //                                   .idMateri
-                          //                                   .toString(),
-                          //                               namaFile:
-                          //                                   material.namaMateri,
-                          //                             ),
-                          //                           ),
-                          //                         );
-                          //                       },
-                          //                       child: Container(
-                          //                         decoration: BoxDecoration(
-                          //                           border: Border.all(
-                          //                             color:
-                          //                                 const Color.fromARGB(
-                          //                                     255,
-                          //                                     143,
-                          //                                     140,
-                          //                                     140),
-                          //                             width: 1.0,
-                          //                           ),
-                          //                           borderRadius:
-                          //                               BorderRadius.circular(
-                          //                                   10),
-                          //                         ),
-                          //                         padding: const EdgeInsets
-                          //                             .symmetric(
-                          //                             horizontal: 16.0,
-                          //                             vertical: 8.0),
-                          //                         margin: EdgeInsets.symmetric(
-                          //                             vertical: 5.0),
-                          //                         child: Row(
-                          //                           mainAxisAlignment:
-                          //                               MainAxisAlignment
-                          //                                   .spaceBetween,
-                          //                           children: [
-                          //                             Container(
-                          //                               width: 230,
-                          //                               child: Column(
-                          //                                 crossAxisAlignment:
-                          //                                     CrossAxisAlignment
-                          //                                         .start,
-                          //                                 children: [
-                          //                                   Text(
-                          //                                     material
-                          //                                         .namaMateri,
-                          //                                     style: TextStyle(
-                          //                                       fontFamily:
-                          //                                           'Hanken Grotesk',
-                          //                                       fontSize: 14,
-                          //                                       fontWeight:
-                          //                                           FontWeight
-                          //                                               .w400,
-                          //                                       color: Color(
-                          //                                           0xFF343434),
-                          //                                     ),
-                          //                                   ),
-                          //                                   SizedBox(height: 5),
-                          //                                 ],
-                          //                               ),
-                          //                             ),
-                          //                             Column(
-                          //                               crossAxisAlignment:
-                          //                                   CrossAxisAlignment
-                          //                                       .start,
-                          //                               children: [
-                          //                                 Text(
-                          //                                   'Download',
-                          //                                   style: TextStyle(
-                          //                                     fontFamily:
-                          //                                         'Hanken Grotesk',
-                          //                                     fontSize: 14,
-                          //                                     fontWeight:
-                          //                                         FontWeight
-                          //                                             .w700,
-                          //                                     fontStyle:
-                          //                                         FontStyle
-                          //                                             .normal,
-                          //                                     height: 1.0,
-                          //                                     color: Color(
-                          //                                         0xFF343434),
-                          //                                   ),
-                          //                                 ),
-                          //                                 SizedBox(height: 5),
-                          //                               ],
-                          //                             ),
-                          //                           ],
-                          //                         ),
-                          //                       ),
-                          //                     );
-                          //                   },
-                          //                 );
-                          //               }
-                          //             },
-                          //           ),
-                          //         ),
-                          //       ],
-                          //     ),
-                          //   ),
-                          // ),
-
-=======
->>>>>>> web-v1.2
                           Card(
                             elevation: 0,
                             color: Colors.white,
@@ -1221,12 +708,7 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                               return InkWell(
                                                 onTap: () {
                                                   context.push(
-<<<<<<< HEAD
-                                                      '/detail-history?id=${history.idrequest}');
-                                                  //context.push('/visitor-request?id=${history.idrequest}');
-=======
                                                       '/employee/detail-history?id=${history.idrequest}');
->>>>>>> web-v1.2
                                                 },
                                                 child: Container(
                                                   decoration: BoxDecoration(
@@ -1254,11 +736,7 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                                         MainAxisAlignment
                                                             .spaceBetween,
                                                     children: [
-<<<<<<< HEAD
-                                                      SizedBox(
-=======
                                                       Container(
->>>>>>> web-v1.2
                                                         width: 230,
                                                         child: Column(
                                                           crossAxisAlignment:
@@ -1370,11 +848,7 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
                                                               fontWeight:
                                                                   FontWeight
                                                                       .w700,
-<<<<<<< HEAD
-                                                              color: getStatusColorRequest(
-=======
                                                               color: _getStatusColorRequest(
->>>>>>> web-v1.2
                                                                   history
                                                                       .statusid),
                                                             ),

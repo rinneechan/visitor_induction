@@ -23,9 +23,9 @@ class _TrueFalseScreenState extends State<TrueFalseScreen> {
         context.go('/cms');
       });
     } else {
-      // Dummy data untuk True/False
+      // Dummy data sementara (bisa diganti API call)
       questions = List.generate(
-        5,
+        6,
         (index) => TFQuestion(
           kode: "TFQ-${index + 1}",
           statement: "Contoh pertanyaan True/False nomor ${index + 1}",
@@ -58,15 +58,26 @@ class _TrueFalseScreenState extends State<TrueFalseScreen> {
     final draftCount = questions.where((q) => q.status == "Draft").length;
 
     return Scaffold(
+      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
-        title: Text("CMS - True/False (${widget.plantId})"),
         backgroundColor: const Color(0xFF07840B),
+        elevation: 0,
+        title: Text(
+          "True/False Questions",
+          style: const TextStyle(
+            fontFamily: 'Hanken Grotesk',
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: Column(
         children: [
-          // Tabs
+          // ==== FILTER TABS ====
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Row(
               children: [
                 _buildTab("All", questions.length),
@@ -78,36 +89,132 @@ class _TrueFalseScreenState extends State<TrueFalseScreen> {
                 if (selectedCount > 0)
                   GestureDetector(
                     onTap: () => toggleSelectAll(false),
-                    child: const Text("Deselect All", style: TextStyle(color: Color(0xFF07840B))),
+                    child: const Text(
+                      "Deselect All",
+                      style: TextStyle(
+                        fontFamily: 'Hanken Grotesk',
+                        color: Color(0xFF07840B),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
               ],
             ),
           ),
-          const Divider(height: 1),
-          // List pertanyaan
+          const Divider(height: 1, thickness: 1),
+
+          // ==== LIST ====
           Expanded(
             child: ListView.builder(
               itemCount: filteredQuestions.length,
               itemBuilder: (context, index) {
                 final q = filteredQuestions[index];
                 return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  elevation: 2,
                   child: ListTile(
                     leading: Checkbox(
                       value: q.isSelected,
+                      activeColor: const Color(0xFF07840B),
                       onChanged: (val) {
                         setState(() => q.isSelected = val ?? false);
                       },
                     ),
-                    title: Text(q.kode),
-                    subtitle: Text(q.statement),
-                    trailing: Text(q.status),
+                    title: Text(
+                      q.statement,
+                      style: const TextStyle(
+                        fontFamily: 'Hanken Grotesk',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    subtitle: Text(
+                      "Kode: ${q.kode} • ${q.createdAt}",
+                      style: const TextStyle(
+                        fontFamily: 'Hanken Grotesk',
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: q.status == "Active"
+                            ? Colors.green.shade100
+                            : Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        q.status,
+                        style: TextStyle(
+                          color: q.status == "Active"
+                              ? Colors.green.shade800
+                              : Colors.grey.shade700,
+                          fontFamily: 'Hanken Grotesk',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    onTap: () {
+                      setState(() => q.isSelected = !q.isSelected);
+                    },
                   ),
                 );
               },
             ),
           ),
         ],
+      ),
+
+      // ==== BOTTOM BAR ====
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: Row(
+          children: [
+            ElevatedButton(
+              onPressed: () => context.go('/cms/$widget.plantId'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey[400],
+                shape: const CircleBorder(),
+                padding: const EdgeInsets.all(14),
+              ),
+              child: const Icon(Icons.arrow_back, color: Colors.white),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Tambah pertanyaan baru"),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                  // TODO: navigasi ke form tambah question
+                },
+                icon: const Icon(Icons.add_circle_outline),
+                label: const Text(
+                  "Add Question",
+                  style: TextStyle(
+                    fontFamily: 'Hanken Grotesk',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF07840B),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -116,16 +223,24 @@ class _TrueFalseScreenState extends State<TrueFalseScreen> {
     final isActive = selectedTab == label;
     return GestureDetector(
       onTap: () => setState(() => selectedTab = label),
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? Colors.black : Colors.white,
+          color: isActive ? const Color(0xFF07840B) : Colors.white,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey.shade400),
+          border: Border.all(
+            color: isActive ? const Color(0xFF07840B) : Colors.grey.shade400,
+            width: 1.2,
+          ),
         ),
         child: Text(
           "$label ($count)",
-          style: TextStyle(color: isActive ? Colors.white : Colors.black87),
+          style: TextStyle(
+            fontFamily: 'Hanken Grotesk',
+            fontWeight: FontWeight.w600,
+            color: isActive ? Colors.white : Colors.black87,
+          ),
         ),
       ),
     );

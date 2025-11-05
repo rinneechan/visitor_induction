@@ -1,26 +1,4 @@
 <!DOCTYPE html>
-<<<<<<< HEAD
-<html>
-<head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="$FLUTTER_BASE_HREF">
-
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
-=======
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -29,37 +7,12 @@
   <meta name="description" content="SHE Visitor Induction">
   <!-- <base href="/web-visitor-induction/"> -->
   <base href="$FLUTTER_BASE_HREF">
->>>>>>> web-v1.2
-
+ 
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<<<<<<< HEAD
-  <meta name="apple-mobile-web-app-title" content="test_project">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
-
-  <title>test_project</title>
-  <link rel="manifest" href="manifest.json">
-</head>
-<body>
-  <script src='https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/build/pdf.min.mjs' type='module'></script>
-  <script type='module'>
-  var { pdfjsLib } = globalThis;
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/build/pdf.worker.mjs';
-
-  var pdfRenderOptions = {
-    cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/cmaps/',
-    cMapPacked: true,
-  }
-  </script>
-  <script src="assets/packages/pdfx/assets/pdf.js" defer></script>
-  <script src="assets/packages/pdfx/assets/pdf.worker.js" defer></script>
-=======
   <meta name="apple-mobile-web-app-title" content="she_vi">
-
+ 
   <style>
     body {
       margin: 0;
@@ -68,28 +21,28 @@
       background-size: cover;
     }
   </style>
-
+ 
   <link rel="apple-touch-icon" href="icons/logo-sedia.png">
   <link rel="icon" type="image/png" href="icons/logo-sedia.png"/>
   <title>SHE Visitor Induction</title>
-
+ 
   <link rel="manifest" href="manifest.json">
-
+ 
   <!-- Firebase SDK -->
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-messaging-compat.js"></script>
-
-
+ 
+ 
   <!-- PDF.js -->
   <script type="module">
     import { getDocument, GlobalWorkerOptions } from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/build/pdf.mjs';
     GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/build/pdf.worker.mjs';
   </script>
-
+ 
   <!-- Firebase Config -->
   <script src="firebase-config.js"></script>
-
+ 
   <!-- Service Worker -->
   <script>
     if (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === 'cemindo-apps.com') {
@@ -114,9 +67,8 @@
     }
   </script>
 </head>
-
+ 
 <body>
->>>>>>> web-v1.2
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

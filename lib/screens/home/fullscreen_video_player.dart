@@ -4,12 +4,8 @@ import 'package:video_player/video_player.dart';
 class FullScreenVideoPlayer extends StatefulWidget {
   final VideoPlayerController controller;
 
-<<<<<<< HEAD
-  const FullScreenVideoPlayer({super.key, required this.controller});
-=======
   const FullScreenVideoPlayer({Key? key, required this.controller})
       : super(key: key);
->>>>>>> web-v1.2
 
   @override
   State<FullScreenVideoPlayer> createState() => _FullScreenVideoPlayerState();
