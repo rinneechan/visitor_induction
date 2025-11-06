@@ -233,84 +233,81 @@ class _LoginScreenState extends State<LoginScreen> {
   void _loginPass() async {
     String username = _usernameController.text.trim();
     String password = _passwordController.text.trim();
-    if (username.isNotEmpty && password.isNotEmpty) {
-      setState(() {
-        _isLoading = true;
-      });
 
-      try {
-        final connectivityResult = await Connectivity().checkConnectivity();
-        if (connectivityResult == ConnectivityResult.none) {
-          setState(() {
-            _isLoading = false;
-          });
-          _showConnectionError();
-          return;
-        }
-
-        String? fcmToken;
-
-        if (kIsWeb) {
-          fcmToken = 'shevi'; // Tandai bahwa aplikasi dijalankan di web
-        } else {
-          FirebaseMessaging messaging = FirebaseMessaging.instance;
-          fcmToken = await messaging.getToken();
-
-          if (fcmToken == null) {
-            debugPrint('❌ Gagal mendapatkan FCM token.');
-          }
-        }
-
-        bool isLoginSuccessful =
-            await _apiService.loginNikPass(username, password, fcmToken ?? '');
-
-        // ✅ Tambahkan ini sebelum setState
-        if (!mounted) return;
-
-        setState(() {
-          _isLoading = false;
-        });
-
-        if (isLoginSuccessful) {
-          // Simpan data
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setBool('isLoggedIn', true);
-          await prefs.setString('username', username);
-
-          // Inisialisasi notifikasi — ini bisa memicu setState setelah navigasi
-          await FirebaseNotificationService().initNotifications();
-
-          // Navigasi — setelah ini, LoginScreen akan di-unmount
-          GoRouter.of(context)
-              .go('/employee/request-induction', extra: {'username': username});
-        } else {
-          _showLoginPassError(
-            errorMessage: 'Login gagal. Harap periksa kembali kredensial Anda.',
-          );
-        }
-      } on SocketException {
-        // ✅ Tambahkan ini juga
-        if (!mounted) return;
-
-        setState(() {
-          _isLoading = false;
-        });
-        debugPrint("❌ Tidak ada koneksi internet.");
-        _showConnectionError();
-      } catch (e) {
-        // ✅ Tambahkan ini juga
-        if (!mounted) return;
-
-        setState(() {
-          _isLoading = false;
-        });
-        debugPrint("❌ Error saat login: $e");
-        _showLoginPassError(errorMessage: e.toString());
-      }
-    } else {
+    if (username.isEmpty || password.isEmpty) {
       _showLoginPassError(
         errorMessage: 'Username dan password tidak boleh kosong.',
       );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // 🔌 Cek koneksi
+      final connectivityResult = await Connectivity().checkConnectivity();
+      if (connectivityResult == ConnectivityResult.none) {
+        if (!mounted) return;
+        setState(() => _isLoading = false);
+        _showConnectionError();
+        return;
+      }
+
+      // 🔐 Ambil FCM token
+      String? fcmToken;
+      if (kIsWeb) {
+        fcmToken = 'shevi'; // Jalankan di Web
+      } else {
+        FirebaseMessaging messaging = FirebaseMessaging.instance;
+        fcmToken = await messaging.getToken();
+        if (fcmToken == null) {
+          debugPrint('❌ Gagal mendapatkan FCM token.');
+        }
+      }
+
+      // 🚀 Proses login ke API
+      bool isLoginSuccessful =
+          await _apiService.loginNikPass(username, password, fcmToken ?? '');
+
+      if (!mounted) return;
+
+      if (isLoginSuccessful) {
+        // 💾 Simpan data login
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isLoggedIn', true);
+        await prefs.setString('username', username);
+
+        // 🔔 Inisialisasi notifikasi (jika perlu)
+        await FirebaseNotificationService().initNotifications();
+
+        // ✅ Navigasi langsung tanpa delay visual
+        GoRouter.of(context).go(
+          '/employee/request-induction',
+          extra: {'username': username},
+        );
+
+        // ❌ Tidak perlu setState(_isLoading = false) — karena layar ini dihapus
+        return;
+      }
+
+      // ❌ Login gagal
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      _showLoginPassError(
+        errorMessage: 'Login gagal. Harap periksa kembali kredensial Anda.',
+      );
+    } on SocketException {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      debugPrint("❌ Tidak ada koneksi internet.");
+      _showConnectionError();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      debugPrint("❌ Error saat login: $e");
+      _showLoginPassError(errorMessage: e.toString());
     }
   }
 

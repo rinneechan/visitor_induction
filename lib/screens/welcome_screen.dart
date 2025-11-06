@@ -29,7 +29,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         if (isLoggedIn) {
           //Navigator.pushReplacementNamed(context, '/main-menu');
           //context.go('/main-menu');
-          GoRouter.of(context).go('/request-induction',
+          GoRouter.of(context).go('/employee/request-induction',
               extra: {'username': username ?? 'defaultID'});
         } else {
           //context.go('/login');
