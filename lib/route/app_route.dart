@@ -3,6 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+// MODELS
+import 'package:she_vi/models/mc_question.dart';
+
 // -----------------------
 // AUTH & GENERAL SCREENS
 // -----------------------
@@ -55,6 +58,8 @@ import 'package:she_vi/screens/induction_test/completed_screen.dart';
 import 'package:she_vi/screens/cms/cms_induction_screen.dart';
 import 'package:she_vi/screens/cms/cms_question_screen.dart';
 import 'package:she_vi/screens/cms/material_screen.dart';
+import 'package:she_vi/screens/cms/cms_edit_question_screen.dart';
+import 'package:she_vi/screens/cms/cms_duplicate_question_screen.dart';
 
 // -----------------------
 // UTILS / SERVICES
@@ -277,6 +282,22 @@ class AppRouter {
           return AddMaterialScreen(plantId: plantId);
         },
       ),
+            GoRoute(
+  path: '/cms/question/edit',
+  builder: (context, state) {
+    final question = state.extra as MCQuestion?;
+    return CmsEditQuestionScreen(question: question!);
+  },
+),
+
+GoRoute(
+  path: '/cms/question/duplicate',
+  builder: (context, state) {
+    final question = state.extra as MCQuestion?;
+    return CmsDuplicateQuestionScreen(question: question!);
+  },
+),
     ],
   );
+  
 }

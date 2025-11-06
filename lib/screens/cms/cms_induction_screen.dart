@@ -405,52 +405,127 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
     );
   }
 
-  void _showQuestionDetail(MCQuestion question) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text("Detail Soal",
-            style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.bold)),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(question.question,
-                  style:
-                      GoogleFonts.hankenGrotesk(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              if (question.isMultipleChoice) ...[
-                if (question.optionA != null)
-                  Text("A. ${question.optionA}",
-                      style: GoogleFonts.hankenGrotesk()),
-                if (question.optionB != null)
-                  Text("B. ${question.optionB}",
-                      style: GoogleFonts.hankenGrotesk()),
-                if (question.optionC != null)
-                  Text("C. ${question.optionC}",
-                      style: GoogleFonts.hankenGrotesk()),
-                if (question.optionD != null)
-                  Text("D. ${question.optionD}",
-                      style: GoogleFonts.hankenGrotesk()),
-              ] else if (question.isTrueFalse) ...[
-                Text("A. Benar", style: GoogleFonts.hankenGrotesk()),
-                Text("B. Salah", style: GoogleFonts.hankenGrotesk()),
-              ],
-              const SizedBox(height: 8),
-              Text("Jawaban Benar: ${question.correctAnswer ?? '-'}",
-                  style: GoogleFonts.hankenGrotesk(
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF2E7D32))),
+void _showQuestionDetail(MCQuestion question) {
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: Text(
+        "Detail Soal",
+        style: GoogleFonts.hankenGrotesk(
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
+        ),
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              question.question,
+              style: GoogleFonts.hankenGrotesk(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            if (question.isMultipleChoice) ...[
+              if (question.optionA != null)
+                Text("A. ${question.optionA}",
+                    style: GoogleFonts.hankenGrotesk(fontSize: 15)),
+              if (question.optionB != null)
+                Text("B. ${question.optionB}",
+                    style: GoogleFonts.hankenGrotesk(fontSize: 15)),
+              if (question.optionC != null)
+                Text("C. ${question.optionC}",
+                    style: GoogleFonts.hankenGrotesk(fontSize: 15)),
+              if (question.optionD != null)
+                Text("D. ${question.optionD}",
+                    style: GoogleFonts.hankenGrotesk(fontSize: 15)),
+            ] else if (question.isTrueFalse) ...[
+              Text("A. Benar", style: GoogleFonts.hankenGrotesk(fontSize: 15)),
+              Text("B. Salah", style: GoogleFonts.hankenGrotesk(fontSize: 15)),
             ],
+
+            const SizedBox(height: 10),
+            Text(
+              "Jawaban Benar: ${question.correctAnswer ?? '-'}",
+              style: GoogleFonts.hankenGrotesk(
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF2E7D32),
+              ),
+            ),
+          ],
+        ),
+      ),
+
+      actionsAlignment: MainAxisAlignment.end,
+      actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      actions: [
+        // Tombol Edit
+        TextButton.icon(
+          icon: const Icon(Icons.edit, color: Color(0xFF07840B)),
+          label: Text(
+            "Edit",
+            style: GoogleFonts.hankenGrotesk(
+              color: const Color(0xFF07840B),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          style: TextButton.styleFrom(
+            backgroundColor: const Color(0xFFE8F5E9),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+            context.push('/cms/question/edit', extra: question);
+          },
+        ),
+
+        // Tombol Duplicate
+        TextButton.icon(
+          icon: const Icon(Icons.copy, color: Color(0xFF07840B)),
+          label: Text(
+            "Duplicate",
+            style: GoogleFonts.hankenGrotesk(
+              color: const Color(0xFF07840B),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          style: TextButton.styleFrom(
+            backgroundColor: const Color(0xFFE8F5E9),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+            context.push('/cms/question/duplicate', extra: question);
+          },
+        ),
+
+        // Tombol Tutup
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          style: TextButton.styleFrom(
+            backgroundColor: const Color(0xFFF2ECFF),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+          child: Text(
+            "Tutup",
+            style: GoogleFonts.hankenGrotesk(
+              color: const Color(0xFF5A4BDB),
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("Tutup", style: GoogleFonts.hankenGrotesk()),
-          ),
-        ],
-      ),
-    );
-  }
+      ],
+    ),
+  );
+}
 }
