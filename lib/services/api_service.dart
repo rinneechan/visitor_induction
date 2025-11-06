@@ -115,6 +115,9 @@ class ApiService {
             responseData['status'] == true &&
             responseData['data'] != null &&
             responseData['access_token'] != null) {
+          // 🔹 Pastikan box dibuka ulang
+          final box = await Hive.openBox('userBox');
+
           // Ambil data dari respons
           String userid = responseData['data']['id'] ?? '';
           String visitorid =
@@ -124,6 +127,7 @@ class ApiService {
           String compname = responseData['data']['company_name'] ?? '';
           String jobposs = responseData['data']['job_position'] ?? '';
           String typeuser = responseData['data']['user_type'] ?? '';
+          String nameRole = responseData['data']['name_role'] ?? '';
           String fcmtoken = responseData['data']['fcmToken'] ?? '';
           String token = responseData['access_token'] ?? '';
 
@@ -135,6 +139,7 @@ class ApiService {
           await box.put('compname', compname);
           await box.put('jobposs', jobposs);
           await box.put('typeuser', typeuser);
+          await box.put('nameRole', nameRole);
           await box.put('fcmtoken', fcmtoken);
           await box.put('token', token);
 

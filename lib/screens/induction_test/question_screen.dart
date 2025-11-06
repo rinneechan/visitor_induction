@@ -412,7 +412,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                                       child: ElevatedButton(
                                         onPressed: () {
                                           context.go(
-                                            '/induction/welcome-test?idrequest=${widget.idrequest}&plantId=${widget.plantId}&plantName=${widget.plantName}',
+                                            '/welcome-test?idrequest=${widget.idrequest}&plantId=${widget.plantId}&plantName=${widget.plantName}',
                                           );
                                         },
                                         style: ElevatedButton.styleFrom(

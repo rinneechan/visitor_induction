@@ -22,7 +22,7 @@ class _ChooseAccessScreenState extends State<ChooseAccess> {
     final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
     if (isLoggedIn) {
-      context.go('/main-menu');
+      context.go('/employee/request-induction');
     }
   }
 
