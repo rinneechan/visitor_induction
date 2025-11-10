@@ -31,6 +31,7 @@ import 'package:she_vi/screens/home/external/request_induction_form_screen.dart'
 import 'package:she_vi/screens/home/external/request_induction_screen.dart'
     as screen;
 import 'package:she_vi/screens/home/external/request_submitted_screen.dart';
+import 'package:she_vi/screens/home/external/induction_landing_screen.dart';
 
 // -----------------------
 // PAGES
@@ -183,6 +184,13 @@ class AppRouter {
           return DetailVisit(idrequest: idRequest);
         },
       ),
+     GoRoute(
+        path: '/landing-test',
+        builder: (context, state) => const InductionLandingScreen(),
+      ),
+
+
+
 
       /// ======================================================
       /// 🧠 INDUCTION TEST ROUTES

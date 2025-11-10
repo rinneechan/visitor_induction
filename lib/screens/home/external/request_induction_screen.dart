@@ -29,9 +29,10 @@ class RequestInductionScreen extends StatelessWidget {
             height: MediaQuery.of(context).size.height,
             child: Stack(
               children: [
+                /// Konten utama
                 SafeArea(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(bottom: 80),
+                    padding: const EdgeInsets.only(bottom: 100),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
                         minHeight: MediaQuery.of(context).size.height,
@@ -42,6 +43,39 @@ class RequestInductionScreen extends StatelessWidget {
                           const Divider(height: 1, thickness: 0.8),
                           _buildMaterialList(),
                         ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                /// Tombol Testing Landing Page (di bawah)
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    color: Colors.white,
+                    padding: const EdgeInsets.all(16),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF07840B),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () {
+                          // Arahkan ke halaman landing test (ganti path sesuai router kamu)
+                          context.go('/landing-test');
+                        },
+                        child: const Text(
+                          "TESTING LANDING PAGE",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -74,11 +108,11 @@ class RequestInductionScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           SizedBox(
-            width: 280, // fixed width
-            height: 44, // fixed height agar proporsional
+            width: 280,
+            height: 44,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF07840B),
+                backgroundColor: const Color(0xFF07840B),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),
@@ -111,7 +145,7 @@ class RequestInductionScreen extends StatelessWidget {
           child: Row(
             children: [
               Image.asset(
-                "assets/images/ri_presentation-line.png", // icon sesuai figma
+                "assets/images/ri_presentation-line.png",
                 width: 20,
                 height: 20,
               ),
