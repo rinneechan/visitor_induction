@@ -193,7 +193,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
                           });
                         } else {
                           context.go(
-                            '/test-complated?idrequest=${widget.idrequest}&plantId=${widget.plantId}&plantName=${widget.plantName}',
+                            // '/test-complated?idrequest=${widget.idrequest}&plantId=${widget.plantId}&plantName=${widget.plantName}',
+                            '/induction/test-completed?idrequest=${widget.idrequest}&plantId=${widget.plantId}&plantName=${widget.plantName}',
                           );
                         }
                       }
