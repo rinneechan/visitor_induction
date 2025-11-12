@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:she_vi/services/api_service.dart'; // Import the API service
-//import 'package:hive/hive.dart';
+import 'package:she_vi/services/api_service.dart'; // Import API service
 
 class ApprovedMailExsternalScreen extends StatefulWidget {
   final String idrequest;
@@ -11,23 +10,28 @@ class ApprovedMailExsternalScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ApprovedMailScreenState createState() => _ApprovedMailScreenState();
+  _ApprovedMailExsternalScreenState createState() =>
+      _ApprovedMailExsternalScreenState();
 }
 
-class _ApprovedMailScreenState extends State<ApprovedMailExsternalScreen> {
+class _ApprovedMailExsternalScreenState
+    extends State<ApprovedMailExsternalScreen> {
   bool isLoading = false;
   String approvalMessage = '';
 
   @override
   void initState() {
     super.initState();
-    // Call API method when the screen is loaded
+    _initApproval();
+  }
+
+  Future<void> _initApproval() async {
     try {
       int requestId = int.tryParse(widget.idrequest) ?? -1;
       if (requestId == -1) {
-        throw FormatException("Invalid request ID: ${widget.idrequest}");
+        throw const FormatException("Invalid request ID");
       }
-      _sendApprovalRequest(requestId);
+      await _sendApprovalRequest(requestId);
     } catch (e) {
       debugPrint('Error parsing ID: $e');
       setState(() {
@@ -36,51 +40,47 @@ class _ApprovedMailScreenState extends State<ApprovedMailExsternalScreen> {
     }
   }
 
-  // Function to send the approval request
   Future<void> _sendApprovalRequest(int idrequest) async {
     setState(() {
       isLoading = true;
-      approvalMessage =
-          'Processing...'; // Indicate the request is being processed
+      approvalMessage = 'Processing...';
     });
 
     try {
-      String responseMessage =
+      final responseMessage =
           await ApiService().sendApprovalexsternalRequest(idrequest);
+
       setState(() {
-        approvalMessage = responseMessage; // Use message from API
+        approvalMessage = responseMessage;
         isLoading = false;
       });
     } catch (e) {
       setState(() {
-        approvalMessage = e.toString(); // Display error message
+        approvalMessage = 'Error: ${e.toString()}';
         isLoading = false;
       });
     }
   }
 
-  // This is to handle back navigation logic
-  Future<bool> _onWillPop() async {
-    return true;
-  }
-
   @override
   Widget build(BuildContext context) {
-    double bodyWidth =
-        MediaQuery.of(context).size.width * 0.5; // 90% dari lebar layar
+    double bodyWidth = MediaQuery.of(context).size.width * 0.9;
+
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text('Approval Request'),
-      // ),
       body: Center(
         child: isLoading
-            ? CircularProgressIndicator() // Show loading indicator while processing
+            ? const CircularProgressIndicator()
             : Container(
                 width: bodyWidth,
-                padding: EdgeInsets.all(20),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.green),
+                  border: Border.all(
+                    color: approvalMessage.contains('successfully')
+                        ? Colors.green
+                        : Colors.red,
+                    width: 2,
+                  ),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -92,9 +92,9 @@ class _ApprovedMailScreenState extends State<ApprovedMailExsternalScreen> {
                       color: approvalMessage.contains('successfully')
                           ? Colors.green
                           : Colors.red,
-                      size: 50.0,
+                      size: 60.0,
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Text(
                       approvalMessage,
                       style: TextStyle(
@@ -106,15 +106,20 @@ class _ApprovedMailScreenState extends State<ApprovedMailExsternalScreen> {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: 10),
-                    if (approvalMessage.contains('successfully'))
-                      Text(
+                    if (approvalMessage.contains('successfully')) ...[
+                      const SizedBox(height: 10),
+                      const Text(
                         'You can safely close this page.',
-                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
                         textAlign: TextAlign.center,
                       ),
+                    ],
                   ],
-                )),
+                ),
+              ),
       ),
     );
   }
