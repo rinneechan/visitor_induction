@@ -94,18 +94,16 @@ class ApiServiceExternal {
     try {
       final response = await http.post(url, headers: headers, body: body);
 
-      if (response.statusCode == 200) {
-        final res = jsonDecode(response.body);
-        debugPrint("✅ Submit success: $res");
-        return true;
-      } else {
-        debugPrint(
-            "❌ Submit failed [${response.statusCode}]: ${response.body}");
-        return false;
-      }
-    } catch (e) {
-      debugPrint("🚨 Error submitInductionRequestExternal: $e");
+      if (response.statusCode == 200 || response.statusCode == 201) {
+      final responseBody = jsonDecode(response.body);
+      return responseBody['status'] == true;
+    } else {
+      debugPrint("Submit failed [${response.statusCode}]: ${response.body}");
       return false;
     }
+  } catch (e) {
+    debugPrint('Error submit induction request: $e');
+    return false;
   }
+}
 }

@@ -2,6 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 import 'package:she_vi/models/duration_external_model.dart';
 import 'package:she_vi/models/plant_external.dart';
 import 'package:she_vi/models/user_plant_external.dart';
@@ -31,7 +34,7 @@ class _RequestInductionFormScreenState
   final TextEditingController _reasonController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
 
-  // Dropdowns
+  // Dropdown data
   PlantExternal? _selectedPlant;
   List<PlantExternal> _plantList = [];
   bool _isPlantLoading = false;
@@ -66,7 +69,7 @@ class _RequestInductionFormScreenState
     super.dispose();
   }
 
-  // ------------------- API Functions -------------------
+  // ---------------- API HANDLERS ----------------
 
   Future<void> _loadPlants() async {
     setState(() => _isPlantLoading = true);
@@ -102,7 +105,7 @@ class _RequestInductionFormScreenState
     }
   }
 
-  // ------------------- Helpers -------------------
+  // ---------------- HELPERS ----------------
 
   Future<void> _onPlantChanged(PlantExternal? plant) async {
     setState(() {
@@ -110,11 +113,10 @@ class _RequestInductionFormScreenState
       _employeeList = [];
       _selectedEmplo = null;
     });
-
     if (plant == null) return;
 
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 150), () {
+    _debounce = Timer(const Duration(milliseconds: 200), () {
       _loadEmployeesForPlant(plant.plantCode);
     });
   }
@@ -146,8 +148,26 @@ class _RequestInductionFormScreenState
     );
   }
 
-  // ------------------- Submit -------------------
+  // ---------------- EMAIL SENDER ----------------
+  Future<void> _sendEmail(String recipient) async {
+    try {
+      final url = Uri.parse("http://10.10.10.72:3007/send-email");
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "to": recipient,
+          "subject": "Visitor Induction Request",
+          "message": "Visitor induction request Anda berhasil dibuat.",
+        }),
+      );
+      debugPrint("Email response: ${response.statusCode} ${response.body}");
+    } catch (e) {
+      debugPrint("Failed to send email: $e");
+    }
+  }
 
+  // ---------------- SUBMIT ----------------
   Future<void> _submitRequest() async {
     if (!_formKey.currentState!.validate() ||
         _selectedPlant == null ||
@@ -175,28 +195,54 @@ class _RequestInductionFormScreenState
       arrivalDate: _arrivalDateController.text.trim(),
       durationId: _selectedDuration!.id,
       reasonToVisit: _reasonController.text.trim(),
-      createdBy: "system",
-      updatedBy: "system",
+      createdBy: "01122070002",
+      updatedBy: "01122070002",
     );
 
     setState(() => _isSubmitting = false);
 
-    if (success) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('✅ Request submitted successfully')),
-        );
-        context.go('/employee/request-induction');
-      }
+    if (success && mounted) {
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.check_circle, color: Colors.green, size: 64),
+              const SizedBox(height: 16),
+              Text("Success!",
+                  style: GoogleFonts.hankenGrotesk(
+                      fontSize: 20, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              const Text("Your visitor induction request has been submitted."),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await _sendEmail(_emailController.text.trim());
+                  if (mounted) context.go('/request-submitted');
+                },
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF07840B),
+                    minimumSize: const Size(double.infinity, 45)),
+                child: const Text("OK",
+                    style: TextStyle(color: Colors.white, fontSize: 16)),
+              ),
+            ],
+          ),
+        ),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('❌ Gagal mengirim request')),
+        const SnackBar(content: Text('❌ Gagal submit induction request')),
       );
     }
   }
 
-  // ------------------- UI -------------------
-
+  // ---------------- UI ----------------
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -209,20 +255,35 @@ class _RequestInductionFormScreenState
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
-          title: Text("Visitor Induction",
-              style: GoogleFonts.hankenGrotesk(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF111827))),
+          title: Text(
+            "Visitor Induction",
+            style: GoogleFonts.hankenGrotesk(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF111827),
+            ),
+          ),
           centerTitle: true,
         ),
         drawer: const CustomDrawer(username: "Guest"),
         body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-            child: Form(
-              key: _formKey,
-              child: _currentPage == 0 ? _buildPage1() : _buildPage2(),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: SingleChildScrollView(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      _buildStepIndicator(),
+                      const SizedBox(height: 24),
+                      _currentPage == 0 ? _buildPage1() : _buildPage2(),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -230,129 +291,179 @@ class _RequestInductionFormScreenState
     );
   }
 
-  // ------------------- Page 1 -------------------
-
-  Widget _buildPage1() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  // ---------------- STEP INDICATOR ----------------
+  Widget _buildStepIndicator() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildTextField(
-            _emailController, "Work Email", "Enter your work email"),
-        const SizedBox(height: 16),
-        _buildTextField(
-            _companyController, "Company Name", "Enter company name"),
-        const SizedBox(height: 16),
-        _buildTextField(_nameController, "Full Name", "Enter full name"),
-        const SizedBox(height: 16),
-        _buildTextField(_jobController, "Job Position", "Enter job position"),
-        const SizedBox(height: 16),
-        _buildTextField(_phoneController, "Phone Number", "Enter phone number"),
-        const SizedBox(height: 24),
-        ElevatedButton(
-          onPressed: () {
-            if (_formKey.currentState!.validate()) {
-              setState(() => _currentPage = 1);
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF07840B),
-            minimumSize: const Size(double.infinity, 48),
-          ),
-          child: const Text("Next", style: TextStyle(color: Colors.white)),
-        ),
+        _buildStep("1", "Visitor Information", _currentPage == 0),
+        Container(width: 40, height: 2, color: Colors.grey[300]),
+        _buildStep("2", "Request Details", _currentPage == 1),
       ],
     );
   }
 
-  // ------------------- Page 2 -------------------
-
-  Widget _buildPage2() {
+  Widget _buildStep(String number, String title, bool active) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildDropdownSection(
-          label: 'Plant Destination',
-          child: _isPlantLoading
-              ? const Center(child: CircularProgressIndicator())
-              : DropdownButtonFormField<PlantExternal>(
-                  value: _selectedPlant,
-                  isExpanded: true,
-                  decoration: _inputDecoration(),
-                  items: _plantList
-                      .map((p) =>
-                          DropdownMenuItem(value: p, child: Text(p.plantName)))
-                      .toList(),
-                  onChanged: _onPlantChanged,
-                  validator: (value) => value == null ? "Select plant" : null,
-                ),
+        CircleAvatar(
+          backgroundColor:
+              active ? const Color(0xFF07840B) : Colors.grey.shade400,
+          child: Text(number,
+              style:
+                  const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         ),
-        const SizedBox(height: 16),
-        _buildDropdownSection(
-          label: 'PIC & Department',
-          child: _isEmployeeLoading
-              ? const Center(child: CircularProgressIndicator())
-              : DropdownButtonFormField<UserPlantExternal>(
-                  value: _selectedEmplo,
-                  isExpanded: true,
-                  decoration: _inputDecoration(),
-                  items: _employeeList
-                      .map((e) => DropdownMenuItem(
-                            value: e,
-                            child: Text("${e.fullName} - ${e.unitName}"),
-                          ))
-                      .toList(),
-                  onChanged: (val) => setState(() => _selectedEmplo = val),
-                ),
-        ),
-        const SizedBox(height: 16),
-        _buildDropdownSection(
-          label: 'Visit Duration',
-          child: _isDurationLoading
-              ? const Center(child: CircularProgressIndicator())
-              : DropdownButtonFormField<DurationExternal>(
-                  value: _selectedDuration,
-                  isExpanded: true,
-                  decoration: _inputDecoration(),
-                  items: _durationList
-                      .map((d) => DropdownMenuItem(
-                            value: d,
-                            child: Text(
-                                '${d.passType} (${d.minDurationMonths}-${d.maxDurationMonths} months)'),
-                          ))
-                      .toList(),
-                  onChanged: (val) => setState(() => _selectedDuration = val),
-                ),
-        ),
-        const SizedBox(height: 16),
-        GestureDetector(
-          onTap: _pickDate,
-          child: AbsorbPointer(
-            child: _buildTextField(
-                _arrivalDateController, "Arrival Date", "Select date"),
+        const SizedBox(height: 6),
+        Text(title,
+            style: GoogleFonts.hankenGrotesk(
+                fontSize: 13,
+                color: active ? const Color(0xFF07840B) : Colors.grey)),
+      ],
+    );
+  }
+
+  // ---------------- PAGE 1 ----------------
+  Widget _buildPage1() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: _boxDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildTextField(_emailController, "Work Email", "Enter your work email"),
+          const SizedBox(height: 16),
+          _buildTextField(_companyController, "Company Name", "Enter company name"),
+          const SizedBox(height: 16),
+          _buildTextField(_nameController, "Full Name", "Enter full name"),
+          const SizedBox(height: 16),
+          _buildTextField(_jobController, "Job Position", "Enter job position"),
+          const SizedBox(height: 16),
+          _buildTextField(_phoneController, "Phone Number", "Enter phone number"),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: () {
+              if (_formKey.currentState!.validate()) {
+                setState(() => _currentPage = 1);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF07840B),
+              minimumSize: const Size(double.infinity, 48),
+            ),
+            child: const Text("Next", style: TextStyle(color: Colors.white)),
           ),
-        ),
-        const SizedBox(height: 16),
-        _buildTextField(_reasonController, "Reason To Visit", "Enter reason"),
-        const SizedBox(height: 24),
-        ElevatedButton(
-          onPressed: _isSubmitting ? null : _submitRequest,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF07840B),
-            minimumSize: const Size(double.infinity, 48),
+        ],
+      ),
+    );
+  }
+
+  // ---------------- PAGE 2 ----------------
+  Widget _buildPage2() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: _boxDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildDropdownSection(
+            label: 'Plant Destination',
+            child: _isPlantLoading
+                ? const Center(child: CircularProgressIndicator())
+                : DropdownButtonFormField<PlantExternal>(
+                    value: _selectedPlant,
+                    isExpanded: true,
+                    decoration: _inputDecoration(),
+                    items: _plantList
+                        .map((p) => DropdownMenuItem(
+                              value: p,
+                              child: Text(p.plantName),
+                            ))
+                        .toList(),
+                    onChanged: _onPlantChanged,
+                    validator: (value) => value == null ? "Select plant" : null,
+                  ),
           ),
-          child: _isSubmitting
-              ? const CircularProgressIndicator(color: Colors.white)
-              : const Text("Submit", style: TextStyle(color: Colors.white)),
-        ),
-        const SizedBox(height: 12),
-        OutlinedButton(
-          onPressed: () => context.go('/employee/request-induction'),
-          style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: Colors.green),
-            minimumSize: const Size(double.infinity, 48),
+          const SizedBox(height: 16),
+          _buildDropdownSection(
+            label: 'PIC & Department',
+            child: _isEmployeeLoading
+                ? const Center(child: CircularProgressIndicator())
+                : DropdownButtonFormField<UserPlantExternal>(
+                    value: _selectedEmplo,
+                    isExpanded: true,
+                    decoration: _inputDecoration(),
+                    items: _employeeList
+                        .map((e) => DropdownMenuItem(
+                              value: e,
+                              child: Text("${e.fullName} - ${e.unitName}"),
+                            ))
+                        .toList(),
+                    onChanged: (val) => setState(() => _selectedEmplo = val),
+                  ),
           ),
-          child:
-              const Text("Back to Menu", style: TextStyle(color: Colors.green)),
+          const SizedBox(height: 16),
+          _buildDropdownSection(
+            label: 'Visit Duration',
+            child: _isDurationLoading
+                ? const Center(child: CircularProgressIndicator())
+                : DropdownButtonFormField<DurationExternal>(
+                    value: _selectedDuration,
+                    isExpanded: true,
+                    decoration: _inputDecoration(),
+                    items: _durationList
+                        .map((d) => DropdownMenuItem(
+                              value: d,
+                              child: Text(d.passType),
+                            ))
+                        .toList(),
+                    onChanged: (val) => setState(() => _selectedDuration = val),
+                  ),
+          ),
+          const SizedBox(height: 16),
+          GestureDetector(
+            onTap: _pickDate,
+            child: AbsorbPointer(
+              child: _buildTextField(
+                  _arrivalDateController, "Arrival Date", "Select date"),
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildTextField(_reasonController, "Reason To Visit", "Enter reason"),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: _isSubmitting ? null : _submitRequest,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF07840B),
+              minimumSize: const Size(double.infinity, 48),
+            ),
+            child: _isSubmitting
+                ? const CircularProgressIndicator(color: Colors.white)
+                : const Text("Submit", style: TextStyle(color: Colors.white)),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton(
+            onPressed: () => setState(() => _currentPage = 0),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Colors.green),
+              minimumSize: const Size(double.infinity, 48),
+            ),
+            child: const Text("Back", style: TextStyle(color: Colors.green)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ---------------- REUSABLE UI ----------------
+  BoxDecoration _boxDecoration() {
+    return BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.05),
+          blurRadius: 8,
+          offset: const Offset(0, 4),
         ),
       ],
     );
