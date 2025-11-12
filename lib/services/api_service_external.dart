@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart'; // untuk debugPrint
+import 'package:flutter/foundation.dart';
 import 'package:she_vi/utils/env_helper.dart';
 import 'package:she_vi/models/duration_external_model.dart';
 import 'package:she_vi/models/plant_external.dart';
 import 'package:she_vi/models/user_plant_external.dart';
-import 'package:she_vi/models/induction_request_external.dart';
 
 class ApiServiceExternal {
   static const String _apiKey = 'rahasia123';
@@ -23,7 +22,8 @@ class ApiServiceExternal {
   }
 
   // ------------------- Employees by Plant -------------------
-  static Future<List<UserPlantExternal>> fetchUserByPlantExternal(String plantCode) async {
+  static Future<List<UserPlantExternal>> fetchUserByPlantExternal(
+      String plantCode) async {
     final String apiUrl = EnvHelper.get('API_URL');
     final response = await http.get(
       Uri.parse('$apiUrl/plants-external/get-user-plant/$plantCode'),
@@ -48,47 +48,64 @@ class ApiServiceExternal {
 
   // ------------------- Submit Induction Request -------------------
   static Future<bool> submitInductionRequestExternal({
-  required String visitorId,
-  required String statusId,
-  required String plantId,
-  required String departmentName,
-  required String picName,
-  required String arrivalDate,
-  required int durationId,
-  required String reasonToVisit,
-  required String createdBy,
-  required String updatedBy,
-}) async {
-  final request = InductionRequestExternal(
-    visitorId: visitorId,
-    statusId: statusId,
-    plantId: plantId,
-    departmentName: departmentName,
-    picName: picName,
-    arrivalDate: arrivalDate,
-    durationId: durationId,
-    reasonToVisit: reasonToVisit,
-    createdBy: createdBy,
-    updatedBy: updatedBy,
-  );
+    required String fullName,
+    required String companyName,
+    required String workEmail,
+    required String noHp,
+    required String jobPosition,
+    required String userType,
+    required String tokenFirebase,
+    required int plantId,
+    required String departmentName,
+    required String picName,
+    required String arrivalDate,
+    required int durationId,
+    required String reasonToVisit,
+    required String createdBy,
+    required String updatedBy,
+  }) async {
+    final String apiUrl = EnvHelper.get('API_URL');
+    final url =
+        Uri.parse('$apiUrl/inductionrequest-external/add-request-external');
 
-  final String apiUrl = EnvHelper.get('API_URL');
-  final url = '$apiUrl/inductionrequest-external/add-request-external';
+    final headers = {
+      'x-api-key': _apiKey,
+      'Content-Type': 'application/json',
+    };
 
-  try {
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json', 'x-api-key': _apiKey},
-      body: jsonEncode(request.toJson()),
-    );
+    final body = jsonEncode({
+      "full_name": fullName,
+      "company_name": companyName,
+      "work_email": workEmail,
+      "nohp": noHp,
+      "job_position": jobPosition,
+      "user_type": userType,
+      "tokenfirebase": tokenFirebase,
+      "plant_id": plantId,
+      "department_name": departmentName,
+      "pic_name": picName,
+      "arrival_date": arrivalDate,
+      "duration_id": durationId,
+      "reason_to_visit": reasonToVisit,
+      "created_by": createdBy,
+      "updated_by": updatedBy,
+    });
 
-    debugPrint("STATUS CODE: ${response.statusCode}");
-    debugPrint("BODY RESPONSE: ${response.body}");
+    try {
+      final response = await http.post(url, headers: headers, body: body);
 
-    return response.statusCode == 200 || response.statusCode == 201;
-  } catch (e) {
-    debugPrint('Error submit induction request: $e');
-    return false;
+      if (response.statusCode == 200) {
+        final res = jsonDecode(response.body);
+        debugPrint("✅ Submit success: $res");
+        return true;
+      } else {
+        debugPrint(
+            "❌ Submit failed [${response.statusCode}]: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      debugPrint("🚨 Error submitInductionRequestExternal: $e");
+      return false;
+    }
   }
-}
 }

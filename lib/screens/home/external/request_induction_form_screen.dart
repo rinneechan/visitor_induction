@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import 'package:she_vi/utils/env_helper.dart';
 import 'package:she_vi/models/duration_external_model.dart';
 import 'package:she_vi/models/plant_external.dart';
 import 'package:she_vi/models/user_plant_external.dart';
@@ -22,6 +20,7 @@ class _RequestInductionFormScreenState
     extends State<RequestInductionFormScreen> {
   int _currentPage = 0;
   final _formKey = GlobalKey<FormState>();
+  bool _isSubmitting = false;
 
   // Controllers
   final TextEditingController _emailController = TextEditingController();
@@ -144,51 +143,87 @@ class _RequestInductionFormScreenState
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
       ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF1357BD)),
-      ),
     );
   }
 
-  Widget _buildDropdownSection({required String label, required Widget child}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: GoogleFonts.hankenGrotesk(
-                fontSize: 14, fontWeight: FontWeight.w500, color: const Color(0xFF374151))),
-        const SizedBox(height: 6),
-        child,
-      ],
+  // ------------------- Submit -------------------
+
+  Future<void> _submitRequest() async {
+    if (!_formKey.currentState!.validate() ||
+        _selectedPlant == null ||
+        _selectedEmplo == null ||
+        _selectedDuration == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lengkapi semua field terlebih dahulu')),
+      );
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    final success = await ApiServiceExternal.submitInductionRequestExternal(
+      fullName: _nameController.text.trim(),
+      companyName: _companyController.text.trim(),
+      workEmail: _emailController.text.trim(),
+      noHp: _phoneController.text.trim(),
+      jobPosition: _jobController.text.trim(),
+      userType: "External",
+      tokenFirebase: "firebase_token_123",
+      plantId: _selectedPlant!.id,
+      departmentName: _selectedEmplo!.unitName,
+      picName: _selectedEmplo!.fullName,
+      arrivalDate: _arrivalDateController.text.trim(),
+      durationId: _selectedDuration!.id,
+      reasonToVisit: _reasonController.text.trim(),
+      createdBy: "system",
+      updatedBy: "system",
     );
+
+    setState(() => _isSubmitting = false);
+
+    if (success) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('✅ Request submitted successfully')),
+        );
+        context.go('/employee/request-induction');
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('❌ Gagal mengirim request')),
+      );
+    }
   }
 
-  // ------------------- Build -------------------
+  // ------------------- UI -------------------
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text("Visitor Induction",
-            style: GoogleFonts.hankenGrotesk(
-                fontSize: 20, fontWeight: FontWeight.w600, color: const Color(0xFF111827))),
-        centerTitle: true,
-      ),
-      drawer: const CustomDrawer(username: "Guest"),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-          child: Form(
-            key: _formKey,
-            child: _currentPage == 0 ? _buildPage1() : _buildPage2(),
+    return WillPopScope(
+      onWillPop: () async {
+        context.go('/employee/request-induction');
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF9FAFB),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          title: Text("Visitor Induction",
+              style: GoogleFonts.hankenGrotesk(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF111827))),
+          centerTitle: true,
+        ),
+        drawer: const CustomDrawer(username: "Guest"),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            child: Form(
+              key: _formKey,
+              child: _currentPage == 0 ? _buildPage1() : _buildPage2(),
+            ),
           ),
         ),
       ),
@@ -201,42 +236,29 @@ class _RequestInductionFormScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildProgress("Step 1 of 2"),
+        _buildTextField(
+            _emailController, "Work Email", "Enter your work email"),
         const SizedBox(height: 16),
-        Text("Request Induction Form",
-            style: GoogleFonts.hankenGrotesk(
-                fontSize: 22, fontWeight: FontWeight.w700, color: const Color(0xFF111827))),
-        const SizedBox(height: 24),
-        _buildTextField(_emailController, "Work Email", "Enter your work email",
-            validator: (value) {
-          if (value == null || value.isEmpty) return "Work Email is required";
-          final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-          if (!emailRegex.hasMatch(value)) return "Enter a valid email";
-          return null;
-        }),
-        const SizedBox(height: 16),
-        _buildTextField(_companyController, "Company Name", "Enter company name"),
+        _buildTextField(
+            _companyController, "Company Name", "Enter company name"),
         const SizedBox(height: 16),
         _buildTextField(_nameController, "Full Name", "Enter full name"),
         const SizedBox(height: 16),
         _buildTextField(_jobController, "Job Position", "Enter job position"),
         const SizedBox(height: 16),
-        _buildTextField(_phoneController, "Phone Number", "Enter phone number",
-            validator: (value) {
-          if (value == null || value.isEmpty) return "Phone number is required";
-          final phoneRegex = RegExp(r'^[0-9]{10,13}$');
-          if (!phoneRegex.hasMatch(value)) return "Enter a valid phone number";
-          return null;
-        }),
-        const SizedBox(height: 32),
+        _buildTextField(_phoneController, "Phone Number", "Enter phone number"),
+        const SizedBox(height: 24),
         ElevatedButton(
           onPressed: () {
-            if (_formKey.currentState!.validate()) setState(() => _currentPage = 1);
+            if (_formKey.currentState!.validate()) {
+              setState(() => _currentPage = 1);
+            }
           },
           style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF07840B),
-              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24)),
-          child: const Text("Next", style: TextStyle(color: Colors.white, fontSize: 16)),
+            backgroundColor: const Color(0xFF07840B),
+            minimumSize: const Size(double.infinity, 48),
+          ),
+          child: const Text("Next", style: TextStyle(color: Colors.white)),
         ),
       ],
     );
@@ -248,8 +270,6 @@ class _RequestInductionFormScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildProgress("Step 2 of 2"),
-        const SizedBox(height: 16),
         _buildDropdownSection(
           label: 'Plant Destination',
           child: _isPlantLoading
@@ -259,15 +279,16 @@ class _RequestInductionFormScreenState
                   isExpanded: true,
                   decoration: _inputDecoration(),
                   items: _plantList
-                      .map((p) => DropdownMenuItem(value: p, child: Text(p.plantName)))
+                      .map((p) =>
+                          DropdownMenuItem(value: p, child: Text(p.plantName)))
                       .toList(),
                   onChanged: _onPlantChanged,
-                  validator: (value) => value == null ? "Plant Destination is required" : null,
+                  validator: (value) => value == null ? "Select plant" : null,
                 ),
         ),
         const SizedBox(height: 16),
         _buildDropdownSection(
-          label: 'PIC Name & Department',
+          label: 'PIC & Department',
           child: _isEmployeeLoading
               ? const Center(child: CircularProgressIndicator())
               : DropdownButtonFormField<UserPlantExternal>(
@@ -276,10 +297,11 @@ class _RequestInductionFormScreenState
                   decoration: _inputDecoration(),
                   items: _employeeList
                       .map((e) => DropdownMenuItem(
-                          value: e, child: Text('${e.fullName} - ${e.unitName}')))
+                            value: e,
+                            child: Text("${e.fullName} - ${e.unitName}"),
+                          ))
                       .toList(),
                   onChanged: (val) => setState(() => _selectedEmplo = val),
-                  validator: (value) => value == null ? "PIC is required" : null,
                 ),
         ),
         const SizedBox(height: 16),
@@ -292,80 +314,77 @@ class _RequestInductionFormScreenState
                   isExpanded: true,
                   decoration: _inputDecoration(),
                   items: _durationList
-                      .map((d) => DropdownMenuItem(value: d, child: Text(d.passType)))
+                      .map((d) => DropdownMenuItem(
+                            value: d,
+                            child: Text(
+                                '${d.passType} (${d.minDurationMonths}-${d.maxDurationMonths} months)'),
+                          ))
                       .toList(),
                   onChanged: (val) => setState(() => _selectedDuration = val),
-                  validator: (value) => value == null ? "Visit Duration is required" : null,
                 ),
         ),
         const SizedBox(height: 16),
         GestureDetector(
           onTap: _pickDate,
           child: AbsorbPointer(
-              child: _buildTextField(_arrivalDateController, "Arrival Date", "Select date")),
+            child: _buildTextField(
+                _arrivalDateController, "Arrival Date", "Select date"),
+          ),
         ),
         const SizedBox(height: 16),
         _buildTextField(_reasonController, "Reason To Visit", "Enter reason"),
         const SizedBox(height: 24),
         ElevatedButton(
-          onPressed: () async {
-            if (_formKey.currentState!.validate() &&
-                _selectedPlant != null &&
-                _selectedEmplo != null &&
-                _selectedDuration != null) {
-
-              bool success = await ApiServiceExternal.submitInductionRequestExternal(
-              visitorId: "26", // ambil dari user login
-              statusId: "0",
-              plantId: _selectedPlant!.id.toString(),
-              departmentName: _selectedEmplo!.unitName,
-              picName: _selectedEmplo!.fullName,
-              arrivalDate: _arrivalDateController.text,
-              durationId: _selectedDuration!.id,
-              reasonToVisit: _reasonController.text,
-              createdBy: "01122070002", // nanti ambil dari session login
-              updatedBy: "01122070002",
-);
-
-              if (success) {
-                GoRouter.of(context).go("/request-submitted?email=${_emailController.text}");
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Gagal submit induction request')),
-                );
-              }
-            }
-          },
+          onPressed: _isSubmitting ? null : _submitRequest,
           style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF07840B),
-              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24)),
-          child: const Text("Submit", style: TextStyle(color: Colors.white, fontSize: 16)),
-        )
+            backgroundColor: const Color(0xFF07840B),
+            minimumSize: const Size(double.infinity, 48),
+          ),
+          child: _isSubmitting
+              ? const CircularProgressIndicator(color: Colors.white)
+              : const Text("Submit", style: TextStyle(color: Colors.white)),
+        ),
+        const SizedBox(height: 12),
+        OutlinedButton(
+          onPressed: () => context.go('/employee/request-induction'),
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: Colors.green),
+            minimumSize: const Size(double.infinity, 48),
+          ),
+          child:
+              const Text("Back to Menu", style: TextStyle(color: Colors.green)),
+        ),
       ],
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, String hint,
-      {String? Function(String?)? validator}) {
+  Widget _buildTextField(
+      TextEditingController controller, String label, String hint) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label,
-            style: GoogleFonts.hankenGrotesk(
-                fontSize: 14, fontWeight: FontWeight.w500, color: const Color(0xFF374151))),
+            style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.w500)),
         const SizedBox(height: 6),
         TextFormField(
           controller: controller,
-          validator: validator ?? (value) => value == null || value.isEmpty ? "$label is required" : null,
+          validator: (value) =>
+              value == null || value.isEmpty ? "$label is required" : null,
           decoration: _inputDecoration(hintText: hint),
         ),
       ],
     );
   }
 
-  Widget _buildProgress(String stepText) {
-    return Text(stepText,
-        style: GoogleFonts.hankenGrotesk(
-            fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF6B7280)));
+  Widget _buildDropdownSection({required String label, required Widget child}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.w500)),
+        const SizedBox(height: 6),
+        child,
+      ],
+    );
   }
 }

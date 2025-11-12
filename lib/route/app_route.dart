@@ -66,6 +66,10 @@ import 'package:she_vi/screens/cms/cms_duplicate_question_screen.dart';
 // UTILS / SERVICES
 // -----------------------
 import 'package:she_vi/screens/setting/navigator_service.dart';
+// -----------------------
+// Exsternal
+// -----------------------
+import 'package:she_vi/screens/home/external/approved_mail_exsternal_screen.dart';
 
 /// ======================================================
 /// ✅ AppRouter: Kelas tunggal untuk mengatur semua route
@@ -162,10 +166,7 @@ class AppRouter {
           return VisitorRequest(idrequest: idRequest);
         },
       ),
-      GoRoute(
-        path: '/request-induction',
-        builder: (context, state) => const screen.RequestInductionScreen(),
-      ),
+
       GoRoute(
         path: '/request-form',
         builder: (context, state) => const form.RequestInductionFormScreen(),
@@ -184,13 +185,10 @@ class AppRouter {
           return DetailVisit(idrequest: idRequest);
         },
       ),
-     GoRoute(
+      GoRoute(
         path: '/landing-test',
         builder: (context, state) => const InductionLandingScreen(),
       ),
-
-
-
 
       /// ======================================================
       /// 🧠 INDUCTION TEST ROUTES
@@ -290,22 +288,48 @@ class AppRouter {
           return AddMaterialScreen(plantId: plantId);
         },
       ),
-            GoRoute(
-  path: '/cms/question/edit',
-  builder: (context, state) {
-    final question = state.extra as MCQuestion?;
-    return CmsEditQuestionScreen(question: question!);
-  },
-),
+      GoRoute(
+        path: '/cms/question/edit',
+        builder: (context, state) {
+          final question = state.extra as MCQuestion?;
+          return CmsEditQuestionScreen(question: question!);
+        },
+      ),
 
-GoRoute(
-  path: '/cms/question/duplicate',
-  builder: (context, state) {
-    final question = state.extra as MCQuestion?;
-    return CmsDuplicateQuestionScreen(question: question!);
-  },
-),
+      GoRoute(
+        path: '/cms/question/duplicate',
+        builder: (context, state) {
+          final question = state.extra as MCQuestion?;
+          return CmsDuplicateQuestionScreen(question: question!);
+        },
+      ),
+
+      /// ======================================================
+      /// 🧠 exsternal
+      /// ======================================================
+
+      GoRoute(
+        path: '/request-induction',
+        builder: (context, state) => const screen.RequestInductionScreen(),
+      ),
+
+      GoRoute(
+        path: '/exsternal/approved-email',
+        builder: (context, state) {
+          final idRequest = state.uri.queryParameters['idrequest'];
+
+          if (idRequest == null) {
+            // Jika parameter tidak ada, bisa arahkan ke halaman error / not found
+            return const Scaffold(
+              body: Center(
+                child: Text('Invalid or missing request ID'),
+              ),
+            );
+          }
+
+          return ApprovedMailExsternalScreen(idrequest: idRequest);
+        },
+      ),
     ],
   );
-  
 }

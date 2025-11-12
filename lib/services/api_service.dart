@@ -1451,4 +1451,46 @@ class ApiService {
       throw Exception("Terjadi kesalahan saat mengambil material CMS: $e");
     }
   }
+
+//Approval email exsternal no token
+  Future<String> sendApprovalexsternalRequest(int idrequest) async {
+    final String apiUrl = EnvHelper.get('API_URL');
+    final String accessHeaderKey = EnvHelper.get('API_HEADERS');
+    if (apiUrl.isEmpty) {
+      throw Exception("API_URL tidak ditemukan di env.json!");
+    }
+    final String approvalUrl =
+        '$apiUrl/requestinduction/update-induction-exsterna/$idrequest';
+    final Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
+
+    final body = json.encode({"status_id": '1'});
+    print('Sending approval request: $body');
+
+    try {
+      final response = await http.put(
+        Uri.parse(approvalUrl),
+        headers: headers,
+        body: body,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseBody = json.decode(response.body);
+        print('Approval request successful: ${responseBody['message']}');
+        return responseBody['message']; // Return success message
+      } else {
+        final responseBody = json.decode(response.body);
+        print(
+            'Failed to approve: ${response.statusCode}, ${responseBody['message']}');
+        throw Exception(
+            responseBody['message'] ?? 'Failed to approve induction request');
+      }
+    } catch (e) {
+      print('Error during approval request: $e');
+      throw Exception('Network error occurred');
+    }
+  }
+  //
+  // ================== WASABI SERVICE ==================
 }
