@@ -176,76 +176,24 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     style: const TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                   const SizedBox(height: 16),
-                  // ElevatedButton(
-                  //   onPressed: () {
-                  //     Navigator.pop(context);
-                  //     if (mounted) {
-                  //       if (isCorrect) {
-                  //         // Skor tidak digunakan, jadi dihapus
-                  //       }
-                  //       if (incorrectCount >= 3) {
-                  //         // Akan ditangani di build()
-                  //       } else if (currentQuestionIndex <
-                  //           questions.length - 1) {
-                  //         setState(() {
-                  //           currentQuestionIndex++;
-                  //           selectedOptionIndex = null;
-                  //         });
-                  //       } else {
-                  //         context.go(
-                  //           // '/test-complated?idrequest=${widget.idrequest}&plantId=${widget.plantId}&plantName=${widget.plantName}',
-                  //           '/induction/test-completed?idrequest=${widget.idrequest}&plantId=${widget.plantId}&plantName=${widget.plantName}',
-                  //         );
-                  //       }
-                  //     }
-                  //   },
-                  //   style: ElevatedButton.styleFrom(
-                  //     minimumSize: const Size(double.infinity, 48),
-                  //     backgroundColor: isCorrect
-                  //         ? const Color(0xFF07840B)
-                  //         : const Color(0xFF8F0B0B),
-                  //     shape: RoundedRectangleBorder(
-                  //         borderRadius: BorderRadius.circular(8)),
-                  //   ),
-                  //   child: Text(
-                  //     isCorrect ? 'Continue' : 'I Understood',
-                  //     style: const TextStyle(
-                  //         fontSize: 16,
-                  //         fontWeight: FontWeight.w600,
-                  //         color: Colors.white),
-                  //   ),
-                  // ),
-
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.pop(context); // Menutup bottom sheet
-
+                      Navigator.pop(context);
                       if (mounted) {
                         if (isCorrect) {
                           // Skor tidak digunakan, jadi dihapus
                         }
-
-                        // PERBAIKAN: Jangan langsung navigasi.
-                        // Sebaliknya, panggil setState untuk membangun ulang UI
-                        // sehingga widget 'Start Over' muncul di layar ini.
                         if (incorrectCount >= 3) {
-                          setState(() {
-                            // Hanya setState() saja.
-                            // Ini akan membuat build() dipanggil ulang,
-                            // dan karena incorrectCount >= 3, 
-                            // widget Center(...) akan ditampilkan.
-                          });
-                          return; // Hentikan eksekusi lebih lanjut
-                        }
-
-                        // Jika belum kalah, lanjutkan ke pertanyaan berikutnya atau selesai
-                        if (currentQuestionIndex < questions.length - 1) {
+                          // Akan ditangani di build()
+                        } else if (currentQuestionIndex <
+                            questions.length - 1) {
                           setState(() {
                             currentQuestionIndex++;
                             selectedOptionIndex = null;
                           });
                         } else {
                           context.go(
+                            // '/test-complated?idrequest=${widget.idrequest}&plantId=${widget.plantId}&plantName=${widget.plantName}',
                             '/induction/test-completed?idrequest=${widget.idrequest}&plantId=${widget.plantId}&plantName=${widget.plantName}',
                           );
                         }

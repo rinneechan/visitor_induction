@@ -66,10 +66,9 @@ class _MenusatuScreenState extends State<MenusatuScreen> {
     final String safeVisitorId = visitorid ?? 'defaultVisitorId';
 
     // Mulai fetch semua data paralel
-    futureMaterials = apiService.fetchInductionMaterials();
-    futureHistoryrequest = apiService.fetchInductionrequest(safeVisitorId);
-    fetchInductionProgress =
-        apiService.fetchInductionProgressrequest(safeVisitorId);
+    futureMaterials         = apiService.fetchInductionMaterials();
+    futureHistoryrequest    = apiService.fetchInductionrequest(safeVisitorId);
+    fetchInductionProgress  = apiService.fetchInductionProgressrequest(safeVisitorId);
 
     // Tunggu semua Future selesai
     Future.wait([

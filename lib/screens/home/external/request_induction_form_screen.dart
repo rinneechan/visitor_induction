@@ -1,3 +1,4 @@
+// lib/screens/page/request_induction_form_screen.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -34,6 +35,11 @@ class _RequestInductionFormScreenState
   final TextEditingController _arrivalDateController = TextEditingController();
   final TextEditingController _reasonController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  // Controller untuk search PIC
+  final TextEditingController _picSearchController = TextEditingController();
+
+  // Search Query untuk PIC
+  String _picSearchQuery = '';
 
   // Dropdown data
   PlantExternal? _selectedPlant;
@@ -67,6 +73,7 @@ class _RequestInductionFormScreenState
     _arrivalDateController.dispose();
     _reasonController.dispose();
     _phoneController.dispose();
+    _picSearchController.dispose(); // Tambahkan ini
     super.dispose();
   }
 
@@ -88,6 +95,10 @@ class _RequestInductionFormScreenState
     try {
       _employeeList =
           await ApiServiceExternal.fetchUserByPlantExternal(plantCode);
+      // Reset PIC selection after loading new employees
+      setState(() {
+        _selectedEmplo = null;
+      });
     } catch (e) {
       debugPrint('Error load employees: $e');
     } finally {
@@ -111,8 +122,8 @@ class _RequestInductionFormScreenState
   Future<void> _onPlantChanged(PlantExternal? plant) async {
     setState(() {
       _selectedPlant = plant;
-      _employeeList = [];
-      _selectedEmplo = null;
+      _employeeList = []; // Kosongkan list PIC lama
+      _selectedEmplo = null; // Kosongkan PIC yang dipilih
     });
     if (plant == null) return;
 
@@ -148,6 +159,82 @@ class _RequestInductionFormScreenState
       ),
     );
   }
+
+  // ---------------- MODAL SEARCH PIC ----------------
+  void _showPicSelectionModal() {
+    // Reset search query setiap kali modal dibuka
+    _picSearchController.clear();
+    _picSearchQuery = '';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Agar modal bisa mengikuti ukuran konten
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter modalSetState) { // Gunakan modalSetState untuk internal modal
+            // Fungsi untuk memfilter daftar PIC berdasarkan query
+            List<UserPlantExternal> filteredList = _employeeList.where((employee) {
+              final name = employee.fullName?.toLowerCase() ?? '';
+              final unit = employee.unitName?.toLowerCase() ?? '';
+              final searchQuery = _picSearchQuery.toLowerCase();
+              return name.contains(searchQuery) || unit.contains(searchQuery);
+            }).toList();
+
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom, // Untuk menghindari overlap dengan keyboard
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: TextField(
+                      controller: _picSearchController,
+                      decoration: const InputDecoration(
+                        hintText: 'Search PIC Name or Department...',
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (value) {
+                        modalSetState(() { // Gunakan modalSetState untuk memperbarui filter
+                          _picSearchQuery = value;
+                        });
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: filteredList.length,
+                      itemBuilder: (context, index) {
+                        final employee = filteredList[index];
+                        return ListTile(
+                          title: Text(employee.fullName ?? ''),
+                          subtitle: Text(employee.unitName ?? ''),
+                          onTap: () {
+                            // PENTING: Panggil setState dari StatefulWidget induk untuk memperbarui UI utama
+                            setState(() {
+                              _selectedEmplo = employee;
+                            });
+                            // Setelah setState, tutup modal
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
 
   // ---------------- EMAIL SENDER ----------------
   Future<void> _sendEmail(String recipient) async {
@@ -223,7 +310,7 @@ class _RequestInductionFormScreenState
               ElevatedButton(
                 onPressed: () async {
                   Navigator.pop(context);
-                  await _sendEmail(_emailController.text.trim());
+                  //await _sendEmail(_emailController.text.trim());
                   if (mounted) context.go('/request-submitted');
                 },
                 style: ElevatedButton.styleFrom(
@@ -299,7 +386,7 @@ class _RequestInductionFormScreenState
       children: [
         _buildStep("1", "Visitor Information", _currentPage == 0),
         Container(width: 40, height: 2, color: Colors.grey[300]),
-        _buildStep("2", "Request Details", _currentPage == 1),
+        _buildStep("2", "Request Details", _currentPage == 1), // Perbaikan typo
       ],
     );
   }
@@ -528,21 +615,28 @@ class _RequestInductionFormScreenState
                   ),
           ),
           const SizedBox(height: 16),
+          // Ganti DropdownButtonFormField<UserPlantExternal> untuk PIC dengan ini:
           _buildDropdownSection(
             label: 'PIC & Department',
             child: _isEmployeeLoading
                 ? const Center(child: CircularProgressIndicator())
-                : DropdownButtonFormField<UserPlantExternal>(
-                    value: _selectedEmplo,
-                    isExpanded: true,
-                    decoration: _inputDecoration(),
-                    items: _employeeList
-                        .map((e) => DropdownMenuItem(
-                              value: e,
-                              child: Text("${e.fullName} - ${e.unitName}"),
-                            ))
-                        .toList(),
-                    onChanged: (val) => setState(() => _selectedEmplo = val),
+                : GestureDetector(
+                    onTap: () => _showPicSelectionModal(), // Panggil fungsi modal
+                    child: Container(
+                      height: 56,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      alignment: Alignment.centerLeft,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        _selectedEmplo == null
+                            ? 'Search PIC Name or Department...' // Ganti placeholder
+                            : '${_selectedEmplo!.fullName} - ${_selectedEmplo!.unitName}', // Tampilkan nama dan unit
+                        style: GoogleFonts.hankenGrotesk(color: Colors.black87),
+                      ),
+                    ),
                   ),
           ),
           const SizedBox(height: 16),

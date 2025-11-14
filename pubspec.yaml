@@ -73,6 +73,7 @@ dependencies:
   pdfx: 2.8.0
   syncfusion_flutter_pdfviewer: 27.2.4
   webview_flutter: ^4.7.0
+  universal_html: ^2.2.3
 
   # Media
   video_player: ^2.6.0

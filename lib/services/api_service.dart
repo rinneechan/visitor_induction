@@ -664,8 +664,7 @@ class ApiService {
       print("Error: API_URL tidak ditemukan di env.json!");
       throw Exception("API_URL tidak ditemukan di env.json!");
     }
-    final String url =
-        '$apiUrl/inductionrequest/get-inductionrequest-user-Progress';
+    final String url = '$apiUrl/inductionrequest/get-inductionrequest-user-Progress';
     //final url = 'http://10.10.10.72:3001/inductionrequest/get-inductionrequest-user-Progress';
 
     // Mengambil token dari storage
