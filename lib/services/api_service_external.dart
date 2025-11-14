@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import 'package:she_vi/models/InductionRequestProgressExternal.dart';
 import 'package:she_vi/utils/env_helper.dart';
 import 'package:she_vi/models/duration_external_model.dart';
 import 'package:she_vi/models/plant_external.dart';
 import 'package:she_vi/models/user_plant_external.dart';
+import 'package:she_vi/models/InductionRequestProgressExternal.dart';
 
 class ApiServiceExternal {
   static const String _apiKey = 'rahasia123';
@@ -106,4 +108,45 @@ class ApiServiceExternal {
     return false;
   }
 }
+// ------------------- Induction Request Progress (EXTERNAL) -------------------
+  static Future<List<InductionRequestProgressExternal>> fetchInductionProgressrequestExternal(
+      String visitorId) async {
+    final String apiUrl = EnvHelper.get('API_URL');
+
+    final url =
+        '$apiUrl/inductionrequest-external/get-inductionrequest-user-Progress-exsternal';
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'x-api-key': _apiKey,
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "id": visitorId,
+      }),
+    );
+
+    print("RESPONSE STATUS: ${response.statusCode}");
+    print("RESPONSE BODY: ${response.body}");
+
+    if (response.statusCode != 200) {
+      throw Exception("Failed to load data: ${response.statusCode}");
+    }
+
+    final data = jsonDecode(response.body);
+
+    // Format mengikuti EXACT seperti Plants
+    if (data['data'] == null) {
+      throw Exception("No data found");
+    }
+
+    // diasumsikan struktur: { "data": [ { ... }, { ... } ] }
+    final List<dynamic> jsonList = data['data'];
+
+    return jsonList
+        .map((item) => InductionRequestProgressExternal.fromJson(item))
+        .toList();
+  }
 }
+

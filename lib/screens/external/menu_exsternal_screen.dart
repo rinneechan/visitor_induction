@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:she_vi/screens/home/custom_drawer.dart';
+import 'package:she_vi/models/InductionRequestProgressExternal.dart';
+import 'package:she_vi/services/api_service_external.dart';
 
 class MenuExsternalScreen extends StatefulWidget {
   final String idrequest;
@@ -13,41 +15,36 @@ class MenuExsternalScreen extends StatefulWidget {
 class _MenuExsternalScreenState extends State<MenuExsternalScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // ------------------------------
-  // DUMMY DATA (sementara)
-  // ------------------------------
-  final List<Map<String, dynamic>> dummyProgress = [
-    {
-      "plant": "BAYAH PLANT",
-      "department": "Geologist",
-      "date": "2025-11-12 - 1-3 Month",
-      "status": "On-Review",
-      "color": Color(0xFFFF9800),
-    },
-    {
-      "plant": "CIWANDAN PLANT",
-      "department": "IT System",
-      "date": "2025-11-12 - 1-3 Month",
-      "status": "Induction Test",
-      "color": Color(0xFF1E88E5),
-    },
-    {
-      "plant": "BAYAH PLANT",
-      "department": "Packing and Dispatch",
-      "date": "2025-10-15 - < 1 Month",
-      "status": "Active",
-      "color": Color(0xFF2E7D32),
-    },
-  ];
+  bool _isLoading = true;
+  String? _errorMessage;
 
-  final List<String> dummyMaterials = [
-    "Plant Visitor Induction",
-    "Safety Procedures Overview",
-    "Emergency Response Plan",
-    "Basic Industrial Safety"
-  ];
+  // Data dari API
+  List<InductionRequestProgressExternal> progressList = [];
 
-  // ------------------------------------------------------
+  @override
+  void initState() {
+    super.initState();
+    _loadProgress();
+  }
+
+  Future<void> _loadProgress() async {
+    try {
+      final result = await ApiServiceExternal
+          .fetchInductionProgressrequestExternal(widget.idrequest);
+
+      setState(() {
+        progressList = result;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = "Gagal memuat data ($e)";
+        _isLoading = false;
+      });
+    }
+  }
+
+  // ----------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
@@ -56,48 +53,39 @@ class _MenuExsternalScreenState extends State<MenuExsternalScreen> {
       drawer: const CustomDrawer(),
       backgroundColor: const Color(0xFFF7F7F9),
 
-      // ------------------------------------------------------
-      // HEADER sesuai referensi
-      // ------------------------------------------------------
       appBar: PreferredSize(
-  preferredSize: const Size.fromHeight(56),
-  child: Container(
-    color: Colors.white,
-    child: SafeArea(
-      bottom: false, // supaya tidak ada space tambahan
-      child: Container(
-        height: 56,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.menu, color: Colors.black87, size: 24),
-              padding: EdgeInsets.zero, // hilangkan padding default IconButton
-              constraints: const BoxConstraints(), // hilangkan constraints default supaya rapat
-              onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-            ),
-
-            const SizedBox(width: 32),
-
-            const Text(
-              "Visitor Induction",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: Colors.black87,
+        preferredSize: const Size.fromHeight(56),
+        child: Container(
+          color: Colors.white,
+          child: SafeArea(
+            bottom: false,
+            child: Container(
+              height: 56,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.menu, color: Colors.black87, size: 24),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+                  ),
+                  const SizedBox(width: 32),
+                  const Text(
+                    "Visitor Induction",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
-    ),
-  ),
-),
 
-
-      // ------------------------------------------------------
-      // CONTENT
-      // ------------------------------------------------------
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 900),
@@ -112,62 +100,85 @@ class _MenuExsternalScreenState extends State<MenuExsternalScreen> {
                 _buildSectionCard(
                   title: "On Progress",
                   icon: Icons.history,
-                  child: Column(
-                    children: dummyProgress.map((item) {
-                      return Container(
-                        margin: const EdgeInsets.symmetric(vertical: 6),
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(item["plant"],
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 15)),
-                                  Text(item["department"],
-                                      style:
-                                          const TextStyle(color: Colors.grey)),
-                                  Text(item["date"],
-                                      style:
-                                          const TextStyle(color: Colors.grey)),
-                                ],
+                  child: _isLoading
+                      ? const Center(child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: CircularProgressIndicator(),
+                        ))
+                      : _errorMessage != null
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Text(
+                                  _errorMessage!,
+                                  style: const TextStyle(color: Colors.red),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
+                            )
+                          : Column(
+                              children: progressList.map((item) {
+                                return Container(
+                                  margin: const EdgeInsets.symmetric(vertical: 6),
+                                  padding: const EdgeInsets.all(14),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.grey.shade300),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(item.plant,
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 15)),
+                                            Text(item.department,
+                                                style: const TextStyle(
+                                                    color: Colors.grey)),
+                                            Text(item.dateRange,
+                                                style: const TextStyle(
+                                                    color: Colors.grey)),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        item.status,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          color: _statusColor(item.status),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
                             ),
-                            const SizedBox(width: 8),
-                            Text(
-                              item["status"],
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                color: item["color"],
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
                 ),
 
                 const SizedBox(height: 24),
 
                 // ------------------------------------------------------
-                // TRAINING MODULE SECTION
+                // TRAINING MODULE SECTION (dummy tetap)
                 // ------------------------------------------------------
                 _buildSectionCard(
                   title: "SHE Training Module",
                   icon: Icons.menu_book_outlined,
                   child: Column(
-                    children: dummyMaterials.map((mat) {
+                    children: [
+                      "Plant Visitor Induction",
+                      "Safety Procedures Overview",
+                      "Emergency Response Plan",
+                      "Basic Industrial Safety"
+                    ].map((mat) {
                       return Container(
                         margin: const EdgeInsets.symmetric(vertical: 6),
                         padding: const EdgeInsets.all(14),
@@ -183,8 +194,9 @@ class _MenuExsternalScreenState extends State<MenuExsternalScreen> {
                               child: Text(
                                 mat,
                                 style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -209,43 +221,57 @@ class _MenuExsternalScreenState extends State<MenuExsternalScreen> {
     );
   }
 
+  // Warna status
+  Color _statusColor(String s) {
+    switch (s.toLowerCase()) {
+      case "on-review":
+        return const Color(0xFFFF9800);
+      case "induction test":
+        return const Color(0xFF1E88E5);
+      case "active":
+        return const Color(0xFF2E7D32);
+      default:
+        return Colors.black87;
+    }
+  }
+
   // ------------------------------------------------------
-  // SECTION CARD BUILDER (serupa referensi)
+  // SECTION CARD
   // ------------------------------------------------------
- Widget _buildSectionCard({
-  required String title,
-  required IconData icon,
-  required Widget child,
-}) {
-  return Card(
-    elevation: 0,
-    color: Colors.white,
-    margin: EdgeInsets.zero,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 22, color: Colors.black87),
-              const SizedBox(width: 10),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black87,
+  Widget _buildSectionCard({
+    required String title,
+    required IconData icon,
+    required Widget child,
+  }) {
+    return Card(
+      elevation: 0,
+      color: Colors.white,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, size: 22, color: Colors.black87),
+                const SizedBox(width: 10),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black87,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          child,
-        ],
+              ],
+            ),
+            const SizedBox(height: 16),
+            child,
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
