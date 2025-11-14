@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
@@ -310,8 +311,8 @@ class _RequestInductionFormScreenState
           backgroundColor:
               active ? const Color(0xFF07840B) : Colors.grey.shade400,
           child: Text(number,
-              style:
-                  const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              style: const TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.bold)),
         ),
         const SizedBox(height: 6),
         Text(title,
@@ -322,40 +323,183 @@ class _RequestInductionFormScreenState
     );
   }
 
+  // ---------------- TEXTFIELD V2 (untuk PHONE ONLY) ----------------
+  Widget _buildTextField(
+  TextEditingController controller,
+  String label,
+  String hint, {
+  bool isEmail = false,
+  bool isPhone = false,
+}) {
+  return TextFormField(
+    controller: controller,
+    keyboardType: isPhone ? TextInputType.number : TextInputType.text,
+    inputFormatters: isPhone
+        ? [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(13),
+          ]
+        : null,
+    decoration: InputDecoration(
+      labelText: label,
+      hintText: hint,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+    ),
+    validator: (value) {
+      if (value == null || value.isEmpty) {
+        return "$label cannot be empty";
+      }
+
+      // EMAIL VALIDATOR
+      if (isEmail) {
+        final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$');
+        if (!emailRegex.hasMatch(value)) {
+          return "Enter a valid email address";
+        }
+      }
+
+      // PHONE VALIDATOR: 10–13 digit
+      if (isPhone) {
+        if (value.length < 10 || value.length > 13) {
+          return "Phone number must be 10-13 digits";
+        }
+      }
+
+      return null;
+    },
+  );
+}
+
+
+  // ---------------- TEXTFIELD LAMA (BERLABEL) ----------------
+  Widget _buildLabeledField(
+  TextEditingController controller,
+  String label,
+  String hint, {
+  bool isEmail = false,
+  bool isPhone = false,
+}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        label,
+        style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
+        ),
+      ),
+      const SizedBox(height: 6),
+
+      TextFormField(
+        controller: controller,
+        keyboardType:
+            isPhone ? TextInputType.number : TextInputType.text,
+        inputFormatters: isPhone
+            ? [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(13),
+              ]
+            : null,
+        decoration: InputDecoration(
+          hintText: hint,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return "$label cannot be empty";
+          }
+
+          if (isEmail) {
+            final emailRegex =
+                RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$');
+            if (!emailRegex.hasMatch(value)) {
+              return "Enter a valid email address";
+            }
+          }
+
+          if (isPhone) {
+            if (value.length < 10 || value.length > 13) {
+              return "Phone number must be 10–13 digits";
+            }
+          }
+
+          return null;
+        },
+      ),
+    ],
+  );
+}
+
+
   // ---------------- PAGE 1 ----------------
   Widget _buildPage1() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: _boxDecoration(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildTextField(_emailController, "Work Email", "Enter your work email"),
-          const SizedBox(height: 16),
-          _buildTextField(_companyController, "Company Name", "Enter company name"),
-          const SizedBox(height: 16),
-          _buildTextField(_nameController, "Full Name", "Enter full name"),
-          const SizedBox(height: 16),
-          _buildTextField(_jobController, "Job Position", "Enter job position"),
-          const SizedBox(height: 16),
-          _buildTextField(_phoneController, "Phone Number", "Enter phone number"),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                setState(() => _currentPage = 1);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF07840B),
-              minimumSize: const Size(double.infinity, 48),
-            ),
-            child: const Text("Next", style: TextStyle(color: Colors.white)),
+  return Container(
+    padding: const EdgeInsets.all(20),
+    decoration: _boxDecoration(),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabeledField(
+          _emailController,
+          "Work Email",
+          "Enter your work email",
+          isEmail: true,
+        ),
+        const SizedBox(height: 16),
+
+        _buildLabeledField(
+          _companyController,
+          "Company Name",
+          "Enter company name",
+        ),
+        const SizedBox(height: 16),
+
+        _buildLabeledField(
+          _nameController,
+          "Full Name",
+          "Enter full name",
+        ),
+        const SizedBox(height: 16),
+
+        _buildLabeledField(
+          _jobController,
+          "Job Position",
+          "Enter job position",
+        ),
+        const SizedBox(height: 16),
+
+        _buildLabeledField(
+          _phoneController,
+          "Phone Number",
+          "Enter phone number",
+          isPhone: true,
+        ),
+
+        const SizedBox(height: 24),
+        ElevatedButton(
+          onPressed: () {
+            if (_formKey.currentState!.validate()) {
+              setState(() => _currentPage = 1);
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF07840B),
+            minimumSize: const Size(double.infinity, 48),
           ),
-        ],
-      ),
-    );
-  }
+          child: const Text("Next",
+              style: TextStyle(color: Colors.white)),
+        ),
+      ],
+    ),
+  );
+}
+
 
   // ---------------- PAGE 2 ----------------
   Widget _buildPage2() {
@@ -423,13 +567,30 @@ class _RequestInductionFormScreenState
           GestureDetector(
             onTap: _pickDate,
             child: AbsorbPointer(
-              child: _buildTextField(
+              child: _buildLabeledField(
                   _arrivalDateController, "Arrival Date", "Select date"),
             ),
           ),
           const SizedBox(height: 16),
-          _buildTextField(_reasonController, "Reason To Visit", "Enter reason"),
-          const SizedBox(height: 24),
+          _buildDropdownSection(
+  label: 'Reason To Visit',
+  child: TextFormField(
+    controller: _reasonController,
+    maxLines: 3,
+    decoration: _inputDecoration().copyWith(
+      hintText: "Enter reason",
+    ),
+    validator: (value) {
+      if (value == null || value.trim().isEmpty) {
+        return "Reason is required";
+      }
+      if (value.trim().length < 5) {
+        return "Reason must be at least 5 characters";
+      }
+      return null;
+    },
+  ),
+),
           ElevatedButton(
             onPressed: _isSubmitting ? null : _submitRequest,
             style: ElevatedButton.styleFrom(
@@ -464,24 +625,6 @@ class _RequestInductionFormScreenState
           color: Colors.black.withOpacity(0.05),
           blurRadius: 8,
           offset: const Offset(0, 4),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTextField(
-      TextEditingController controller, String label, String hint) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.w500)),
-        const SizedBox(height: 6),
-        TextFormField(
-          controller: controller,
-          validator: (value) =>
-              value == null || value.isEmpty ? "$label is required" : null,
-          decoration: _inputDecoration(hintText: hint),
         ),
       ],
     );

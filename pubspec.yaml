@@ -35,6 +35,7 @@ dependencies:
   flutter_svg: ^2.0.12
   cupertino_icons: ^1.0.8
   dropdown_button2: ^2.3.9
+  dropdown_search: ^5.0.6
 
   # State management & utilities
   provider: ^6.0.0

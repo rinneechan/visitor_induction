@@ -6,14 +6,17 @@ import 'package:go_router/go_router.dart';
 
 class MainmenuExternalScreen extends StatefulWidget {
   const MainmenuExternalScreen({super.key});
+
   @override
-  _MainmenuExternalScreenScreenState createState() => _MainmenuExternalScreenScreenState();
+  _MainmenuExternalScreenScreenState createState() =>
+      _MainmenuExternalScreenScreenState();
 }
 
-class _MainmenuExternalScreenScreenState extends State<MainmenuExternalScreen> {
+class _MainmenuExternalScreenScreenState
+    extends State<MainmenuExternalScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  late Box box; // Definisikan Box untuk Hive
+  late Box box;
   String? username;
   String? visitorid;
   String? email;
@@ -21,15 +24,10 @@ class _MainmenuExternalScreenScreenState extends State<MainmenuExternalScreen> {
   @override
   void initState() {
     super.initState();
-    //_openBox();
   }
 
-
-
-
-  // Fungsi untuk mencegah back ke halaman sebelumnya
   Future<bool> _onWillPop() async {
-    return true; // Mencegah navigasi ke halaman sebelumnya
+    return true;
   }
 
   @override
@@ -48,78 +46,70 @@ class _MainmenuExternalScreenScreenState extends State<MainmenuExternalScreen> {
               fontFamily: 'Hanken Grotesk',
               fontSize: 32.323,
               fontWeight: FontWeight.w900,
-              fontStyle: FontStyle.normal,
               height: 1.0,
             ),
           ),
-          backgroundColor: const Color(0xFFFFFFFF),
-          elevation: 0, // Untuk membuat AppBar tanpa bayangan
+          backgroundColor: Colors.white,
+          elevation: 0,
         ),
         drawer: CustomDrawer(username: username ?? "Guest"),
 
         body: Center(
           child: SizedBox(
             width: MediaQuery.of(context).size.shortestSide,
-            //height: MediaQuery.of(context).size.height,
             child: Stack(
-              children: <Widget>[
-                // Background Color
+              children: [
                 Positioned.fill(
-                  child: Container(
-                    color: Color(0xFFF0F0F0), // Background aplikasi
-                  ),
+                  child: Container(color: Color(0xFFF0F0F0)),
                 ),
 
-                // Card dengan teks dan dua opsi
                 Positioned(
-                  top: 90, // Posisikan Card di bagian atas layar
-                  left: 0, // Padding kiri
-                  right: 0, // Padding kanan
+                  top: 90,
+                  left: 0,
+                  right: 0,
                   child: Card(
                     elevation: 0,
                     color: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                          10), // Border radius yang lebih baik
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Padding(
-                       padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Text(
-                                'Welcome Back, Visitor!',
-                                style: TextStyle(
-                                  color: Color(0xFF757575),
-                                  fontFamily: 'Hanken Grotesk',
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w400,
-                                  fontStyle: FontStyle.normal,
-                                  height: 1.0,
-                                ),
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text(
+                              'Welcome Back, Visitor!',
+                              style: TextStyle(
+                                color: Color(0xFF757575),
+                                fontFamily: 'Hanken Grotesk',
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w400,
+                                height: 1.0,
                               ),
+                            ),
                           ),
-                          SizedBox(height: 16), // Jarak setelah teks
+
+                          SizedBox(height: 16),
 
                           InkWell(
                             onTap: () {
                               context.go(
-                                '/request-induction',
-                                extra: {'username': username}, // Gunakan `extra` untuk mengirim data
+                                '/request-form',
+                                extra: {
+                                  'username': username,
+                                },
                               );
                             },
                             child: Container(
                               decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Colors.grey,
-                                  width: 1.0,
-                                ),
+                                border: Border.all(color: Colors.grey, width: 1),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 16.0, vertical: 8.0),
+                                  horizontal: 16.0, vertical: 12.0),
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -127,7 +117,7 @@ class _MainmenuExternalScreenScreenState extends State<MainmenuExternalScreen> {
                                   Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
-                                    children: [
+                                    children: const [
                                       Text(
                                         'Visitor Induction',
                                         style: TextStyle(
@@ -142,8 +132,8 @@ class _MainmenuExternalScreenScreenState extends State<MainmenuExternalScreen> {
                                   ),
                                   SvgPicture.asset(
                                     'assets/images/Right-Scroll.svg',
-                                    height: 40.0,
-                                    width: 40.0,
+                                    height: 40,
+                                    width: 40,
                                   ),
                                 ],
                               ),
@@ -151,8 +141,6 @@ class _MainmenuExternalScreenScreenState extends State<MainmenuExternalScreen> {
                           ),
 
                           SizedBox(height: 16),
-
-
                         ],
                       ),
                     ),
