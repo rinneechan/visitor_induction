@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
+import 'package:she_vi/services/api_service_external.dart';
+import 'package:she_vi/models/InductionRequestIdExternal.dart';
 
 class Detaiinfoexternal extends StatefulWidget {
-  // Tambahkan parameter ke konstruktor
-  final String idprogress;
+  final String idprogress;   
   final String? idrequest;
   final String? compname;
   final String? jobposs;
@@ -22,68 +23,19 @@ class Detaiinfoexternal extends StatefulWidget {
 }
 
 class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
-  // Hapus variabel lokal untuk data yang diterima dari konstruktor
-  // String? idrequest;
-  // String? username;
-  // String? compname;
-  // String? jobposs;
-
-  // Data dummy untuk detail induksi
-  late Map<String, String> _dummyInductionData;
+  late Future<InductionRequestIdExternal?> _detailFuture;
 
   @override
   void initState() {
     super.initState();
-    // Gunakan data dari widget
-    // setState(() {
-    //   idrequest = widget.idrequest;
-    //   username = widget.username;
-    //   compname = widget.compname;
-    //   jobposs = widget.jobposs;
-    // });
 
-    // Set data dummy berdasarkan idrequest dari widget
-    _dummyInductionData = _getDummyDataForId(widget.idprogress);
+    _detailFuture = ApiServiceExternal.fetchInductionRequestByIdExternal(
+      widget.idprogress,
+    );
   }
 
-  // Fungsi untuk mendapatkan data dummy berdasarkan ID
-  Map<String, String> _getDummyDataForId(String id) {
-    // Contoh data dummy
-    switch (id) {
-      case '102':
-        return {
-          'status': 'Induction Test',
-          'plantName': 'Pabrik Hijau Laut',
-          'department': 'R&D',
-          'picName': 'Ani Lestari',
-          'arrivalDate': '2025-11-22',
-          'visitDuration': '1 Hari',
-          'reasonToVisit': 'Audit Lingkungan',
-        };
-      case '103':
-        return {
-          'status': 'Active',
-          'plantName': 'Pabrik Biru Langit',
-          'department': 'Logistik',
-          'picName': 'Sigit Prabowo',
-          'arrivalDate': '2025-11-25',
-          'visitDuration': '3 Hari',
-          'reasonToVisit': 'Pengiriman Barang',
-        };
-      default:
-        return {
-          'status': 'Unknown',
-          'plantName': 'N/A',
-          'department': 'N/A',
-          'picName': 'N/A',
-          'arrivalDate': 'N/A',
-          'visitDuration': 'N/A',
-          'reasonToVisit': 'N/A',
-        };
-    }
-  }
-
-  String _formatDate(String dateString) {
+  String _formatDate(String? dateString) {
+    if (dateString == null || dateString.isEmpty) return "-";
     try {
       final date = DateTime.parse(dateString);
       return DateFormat('d MMMM yyyy', 'id_ID').format(date);
@@ -98,86 +50,135 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
       appBar: AppBar(
         title: const Text('Detail Info'),
         backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF343434),
+        foregroundColor: Color(0xFF343434),
         elevation: 1,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/'); // Atau default ke home jika tidak ada tempat lain
-            }
-          },
+          onPressed: () => context.pop(),
         ),
       ),
+
       body: SafeArea(
-        child: Column(
-          children: [
-            // Bagian konten yang bisa di-scroll
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 600),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSectionCard(
-                          title: 'Induction Request',
-                          // Ganti FutureBuilder dengan data dummy
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildInfoRow(Icons.check_circle_outline, 'Status', _dummyInductionData['status'] ?? 'N/A'),
-                              _buildInfoRow(Icons.location_on_outlined, 'Plant Name', _dummyInductionData['plantName'] ?? 'N/A'),
-                              _buildInfoRow(Icons.business, 'Department Destination', _dummyInductionData['department'] ?? 'N/A'),
-                              _buildInfoRow(Icons.person_outline, 'PIC Name', _dummyInductionData['picName'] ?? 'N/A'),
-                              _buildInfoRow(Icons.calendar_today_outlined, 'Arrival Date', _formatDate(_dummyInductionData['arrivalDate'] ?? 'N/A')),
-                              _buildInfoRow(Icons.access_time_outlined, 'Visit Duration', _dummyInductionData['visitDuration'] ?? 'N/A'),
-                              _buildInfoRow(Icons.description_outlined, 'Reason to Visit', _dummyInductionData['reasonToVisit'] ?? 'N/A'),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        _buildSectionCard(
-                          title: 'Visitor Profile',
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildInfoRow(Icons.person, 'Full Name', widget.idrequest ?? '-'), // Gunakan widget.username
-                              _buildInfoRow(Icons.business, 'Company Name', widget.compname ?? '-'), // Gunakan widget.compname
-                              _buildInfoRow(Icons.work_outline, 'Job Position', widget.jobposs ?? '-'), // Gunakan widget.jobposs
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+        child: FutureBuilder<InductionRequestIdExternal?>(
+          future: _detailFuture,
+          builder: (context, snapshot) {
+
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  'Error: ${snapshot.error}',
+                  style: const TextStyle(color: Colors.red),
                 ),
-              ),
-            ),
-            // Jarak kecil di atas tombol
-            const SizedBox(height: 12),
-            // Tombol tetap di bawah, lebar selaras
-            Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 600),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: _buildBottomButton(),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12), // jarak bawah opsional
-          ],
+              );
+            }
+
+            if (!snapshot.hasData || snapshot.data == null) {
+              return const Center(child: Text("No data found"));
+            }
+
+            final detail = snapshot.data!;
+
+            return _buildDetailContent(detail);
+          },
         ),
       ),
     );
   }
 
-  Widget _buildSectionCard({required String title, required Widget child}) {
+  Widget _buildDetailContent(InductionRequestIdExternal detail) {
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+
+                    /// SECTION 1 - INDUCTION REQUEST
+                    _buildSectionCard(
+                      title: 'Induction Request',
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildInfoRow(Icons.check_circle_outline,
+                              'Status', detail.statusName),
+
+                          _buildInfoRow(Icons.location_on_outlined,
+                              'Plant Name', detail.plantName),
+
+                          _buildInfoRow(Icons.business,
+                              'Department Destination', detail.departmentName),
+
+                          _buildInfoRow(Icons.person_outline, 
+                              'PIC Name', detail.picName),
+
+                          _buildInfoRow(Icons.calendar_today_outlined,
+                              'Arrival Date', _formatDate(detail.arrivalDate)),
+
+                          _buildInfoRow(Icons.access_time_outlined,
+                              'Visit Duration', detail.passType),
+
+                          _buildInfoRow(Icons.description_outlined,
+                              'Reason to Visit', detail.reasonToVisit),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    /// SECTION 2 - VISITOR PROFILE
+                    _buildSectionCard(
+                      title: 'Visitor Profile',
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildInfoRow(Icons.person, 'Full Name',
+                              detail.fullName),
+
+                          _buildInfoRow(Icons.business, 'Company Name',
+                              widget.compname ?? '-'),
+
+                          _buildInfoRow(Icons.work_outline, 'Job Position',
+                              widget.jobposs ?? '-'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: _buildBottomButton(detail),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 12),
+      ],
+    );
+  }
+
+  Widget _buildSectionCard({
+    required String title, 
+    required Widget child,
+  }) {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -239,35 +240,19 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
     );
   }
 
-  Widget _errorMessage(String message) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Text(
-        message,
-        style: const TextStyle(color: Colors.red, fontSize: 14),
-      ),
-    );
-  }
-
-  Widget _buildBottomButton() {
-    // Tombol bisa disesuaikan fungsinya saat backend diaktifkan kembali
-    return SizedBox(
-      child: ElevatedButton.icon(
-        onPressed: () {
-          // Fungsi untuk memulai induksi (akan diaktifkan saat backend siap)
-          debugPrint('Mulai induksi untuk request ID: ${widget.idprogress}'); // Gunakan widget.idrequest
-          // Contoh: context.push('/induction/welcome-test?id=${widget.idrequest}');
-        },
-        icon: const Icon(Icons.play_arrow, size: 18),
-        label: const Text('Start Induction', style: TextStyle(fontSize: 16)),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF07840B),
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          minimumSize: const Size.fromHeight(56),
-          visualDensity: VisualDensity.standard,
-        ),
+  Widget _buildBottomButton(InductionRequestIdExternal detail) {
+    return ElevatedButton.icon(
+      onPressed: () {
+        debugPrint('Mulai induksi untuk ID REQUEST: ${detail.id}');
+      },
+      icon: const Icon(Icons.play_arrow, size: 18),
+      label: const Text('Start Induction', style: TextStyle(fontSize: 16)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF07840B),
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        minimumSize: const Size.fromHeight(56),
       ),
     );
   }

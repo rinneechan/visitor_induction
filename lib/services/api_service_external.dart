@@ -7,6 +7,7 @@ import 'package:she_vi/models/duration_external_model.dart';
 import 'package:she_vi/models/plant_external.dart';
 import 'package:she_vi/models/user_plant_external.dart';
 import 'package:she_vi/models/InductionRequestProgressExternal.dart';
+import 'package:she_vi/models/InductionRequestIdExternal.dart';
 
 class ApiServiceExternal {
   static const String _apiKey = 'rahasia123';
@@ -148,5 +149,35 @@ class ApiServiceExternal {
         .map((item) => InductionRequestProgressExternal.fromJson(item))
         .toList();
   }
+  // ------------------- Get Induction Request by REQUEST ID (EXTERNAL) -------------------
+static Future<InductionRequestIdExternal?> fetchInductionRequestByIdExternal(
+    String requestId) async {
+
+  final String apiUrl = EnvHelper.get('API_URL');
+
+  final url =
+      '$apiUrl/inductionrequest-external/get-inductionrequest-id-exsternal';
+
+  final response = await http.post(
+    Uri.parse(url),
+    headers: {
+      'x-api-key': _apiKey,
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({"id": requestId}),
+  );
+
+  if (response.statusCode != 200) {
+    throw Exception("Failed: ${response.statusCode}");
+  }
+
+  final data = jsonDecode(response.body);
+
+  if (data['data'] == null || data['data'].isEmpty) {
+    return null;
+  }
+
+  return InductionRequestIdExternal.fromJson(data['data'][0]);
+}
 }
 
