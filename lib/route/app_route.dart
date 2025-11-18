@@ -71,6 +71,7 @@ import 'package:she_vi/screens/setting/navigator_service.dart';
 // -----------------------
 import 'package:she_vi/screens/home/external/approved_mail_exsternal_screen.dart';
 import 'package:she_vi/screens/external/menu_exsternal_screen.dart';
+import 'package:she_vi/screens/external/page/detaiinfoexternal.dart';
 
 /// ======================================================
 /// ✅ AppRouter: Kelas tunggal untuk mengatur semua route
@@ -343,7 +344,30 @@ class AppRouter {
               ),
             );
           }
-          return MenuExsternalScreen(idrequest: idRequest);
+          return MenuExternalScreen(idrequest: idRequest);
+        },
+      ),
+
+      // GoRoute(
+      //   path: '/exsternal/detail-info',
+      //   builder: (context, state) {
+      //     final idRequest = state.uri.queryParameters['id'] ?? 'defaultID';
+      //     return Detaiinfoexternal(idrequest: idRequest);
+      //   },
+      // ),
+      GoRoute(
+        path: '/exsternal/detail-info',
+        builder: (context, state) {
+          final idprogress = state.uri.queryParameters['id'] ?? 'defaultID';
+          final idrequest = state.uri.queryParameters['idrequest'] ?? '';
+
+          // Sekarang kirim semua data sebagai parameter konstruktor
+          return Detaiinfoexternal(
+            idprogress: idprogress,
+            idrequest: idrequest,
+            // compname: compname,
+            // jobposs: jobposs,
+          );
         },
       ),
     ],
