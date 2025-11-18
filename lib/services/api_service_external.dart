@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import 'package:dio/dio.dart';
 import 'package:she_vi/models/InductionRequestProgressExternal.dart';
 import 'package:she_vi/utils/env_helper.dart';
 import 'package:she_vi/models/duration_external_model.dart';
@@ -8,9 +9,12 @@ import 'package:she_vi/models/plant_external.dart';
 import 'package:she_vi/models/user_plant_external.dart';
 import 'package:she_vi/models/InductionRequestProgressExternal.dart';
 import 'package:she_vi/models/InductionRequestIdExternal.dart';
+import 'package:she_vi/models/MaterialExternal.dart';
 
 class ApiServiceExternal {
   static const String _apiKey = 'rahasia123';
+
+  final Dio _dio = Dio();
 
   // ------------------- Plants -------------------
   static Future<List<PlantExternal>> fetchPlantsExternal() async {
@@ -178,6 +182,33 @@ static Future<InductionRequestIdExternal?> fetchInductionRequestByIdExternal(
   }
 
   return InductionRequestIdExternal.fromJson(data['data'][0]);
+}
+Future<MaterialExternal> materiExternalByPlant(String plantId) async {
+  final String apiUrl = EnvHelper.get('API_URL');
+  final url = '$apiUrl/materials-external/materialplant-external/$plantId';
+
+  try {
+    final response = await _dio.get(
+      url,
+      options: Options(
+        headers: {
+          "x-api-key": "rahasia123",
+        },
+      ),
+    );
+
+    if (response.statusCode == 200 &&
+        response.data != null &&
+        response.data['data'] != null) {
+
+      return MaterialExternal.fromJson(response.data['data']);
+    }
+
+    throw Exception("Material not found");
+
+  } catch (e) {
+    throw Exception("Error materiExternalByPlant: $e");
+  }
 }
 }
 

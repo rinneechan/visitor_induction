@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:she_vi/services/api_service_external.dart';
 import 'package:she_vi/models/InductionRequestIdExternal.dart';
+import 'package:she_vi/screens/external/page/welcome_testsatu_external.dart';
+
 
 class Detaiinfoexternal extends StatefulWidget {
   final String idprogress;   
@@ -241,19 +243,35 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
   }
 
   Widget _buildBottomButton(InductionRequestIdExternal detail) {
-    return ElevatedButton.icon(
-      onPressed: () {
-        debugPrint('Mulai induksi untuk ID REQUEST: ${detail.id}');
-      },
-      icon: const Icon(Icons.play_arrow, size: 18),
-      label: const Text('Start Induction', style: TextStyle(fontSize: 16)),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF07840B),
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        minimumSize: const Size.fromHeight(56),
-      ),
-    );
-  }
+  return ElevatedButton.icon(
+    onPressed: () {
+      context.push(
+  '/external/welcome-test-satu',
+  extra: {
+    "idrequest": detail.id.toString(),
+    "plantId": detail.plantId.toString(),
+    "plantName": detail.plantName ?? "",
+  },
+);
+
+      debugPrint("➡ Navigasi ke Welcome Test Satu External");
+      debugPrint("ID REQUEST: ${detail.id}");
+      debugPrint("Plant ID: ${detail.plantId}");
+      debugPrint("Plant Name: ${detail.plantName}");
+    },
+    icon: const Icon(Icons.play_arrow, size: 18),
+    label: const Text(
+      'Start Induction',
+      style: TextStyle(fontSize: 16),
+    ),
+    style: ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFF07840B),
+      foregroundColor: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      minimumSize: const Size.fromHeight(56),
+    ),
+  );
 }
+  }
+

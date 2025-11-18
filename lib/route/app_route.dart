@@ -72,6 +72,7 @@ import 'package:she_vi/screens/setting/navigator_service.dart';
 import 'package:she_vi/screens/home/external/approved_mail_exsternal_screen.dart';
 import 'package:she_vi/screens/external/menu_exsternal_screen.dart';
 import 'package:she_vi/screens/external/page/detaiinfoexternal.dart';
+import 'package:she_vi/screens/external/page/welcome_testsatu_external.dart';
 
 /// ======================================================
 /// ✅ AppRouter: Kelas tunggal untuk mengatur semua route
@@ -370,6 +371,18 @@ class AppRouter {
           );
         },
       ),
+      GoRoute(
+      path: '/external/welcome-test-satu',
+      builder: (context, state) {
+        final extras = state.extra as Map<String, dynamic>?;
+
+        return WelcomeTestSatuExternalScreen(
+          idrequest: extras?['idrequest'] ?? '',
+          plantId: extras?['plantId'] ?? '',
+          plantName: extras?['plantName'] ?? '',
+        );
+      },
+    ),
     ],
   );
 }
