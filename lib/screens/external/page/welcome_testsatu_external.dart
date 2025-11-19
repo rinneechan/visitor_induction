@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:path_provider/path_provider.dart';
@@ -268,27 +269,40 @@ class _WelcomeTestSatuExternalScreenState
   }
 
   Widget _buildConfirmationButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: isDocumentRead ? () {} : null,
-        style: ElevatedButton.styleFrom(
-          backgroundColor:
-              isDocumentRead ? const Color(0xFF07840B) : Colors.grey,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-        ),
-        child: Text(
-          'I have read and understood the safety rules.',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: isDocumentRead ? Colors.white : Colors.black54,
-          ),
+  return SizedBox(
+    width: double.infinity,
+    child: ElevatedButton(
+      onPressed: isDocumentRead
+          ? () {
+              // Navigasi ke Welcome Test Dua
+              context.go(
+                '/external/welcome-test-dua',
+                extra: {
+                  'idrequest': widget.idrequest,
+                  'plantId': widget.plantId,
+                  'plantName': widget.plantName,
+                },
+              );
+            }
+          : null,
+      style: ElevatedButton.styleFrom(
+        backgroundColor:
+            isDocumentRead ? const Color(0xFF07840B) : Colors.grey,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+      ),
+      child: Text(
+        'I have read and understood the safety rules.',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+          color: isDocumentRead ? Colors.white : Colors.black54,
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   // -----------------------------------------
   // SHOW DOCUMENT HANDLER
@@ -341,7 +355,7 @@ class _WelcomeTestSatuExternalScreenState
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => MobilePdfViewer(
+              builder: (_) => MobilePdfViewerExternal(
                 localPath: file,
                 onFinishedReading: () {
                   setState(() => isDocumentRead = true);

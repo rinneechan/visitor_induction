@@ -3,19 +3,27 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import 'package:hive/hive.dart';
 import 'package:she_vi/models/InductionRequestProgressExternal.dart';
 import 'package:she_vi/utils/env_helper.dart';
 import 'package:she_vi/models/duration_external_model.dart';
 import 'package:she_vi/models/plant_external.dart';
 import 'package:she_vi/models/user_plant_external.dart';
-// import 'package:she_vi/models/InductionRequestProgressExternal.dart'; // Duplikat, hapus
 import 'package:she_vi/models/InductionRequestIdExternal.dart';
 import 'package:she_vi/models/MaterialExternal.dart';
+import 'package:she_vi/models/question_request_external.dart';
+import 'package:she_vi/models/answer_question_external.dart';
 
 class ApiServiceExternal {
   static const String _apiKey = 'rahasia123';
 
   final Dio _dio = Dio();
+
+  Future<String?> getTokenExternal() async {
+  final box = Hive.box('userBox');
+  return box.get('token_external'); // jika memang suatu saat token ada
+}
+
 
   // ------------------- Plants -------------------
   static Future<List<PlantExternal>> fetchPlantsExternal() async {
@@ -218,4 +226,61 @@ class ApiServiceExternal {
       throw Exception("Error materiExternalByPlant: $e");
     }
   }
+  Future<List<QuestionRequestExternal>> fetchQuestionrequestplantExternal(String plantId) async {
+  final String apiUrl = EnvHelper.get('API_URL');
+  final url = "$apiUrl/question-external/get-question-plant?id=$plantId";
+
+  try {
+    final response = await _dio.get(url);
+
+    debugPrint('Response fetchQuestionrequestplantExternal: ${response.data}');
+
+    if (response.statusCode == 200 && response.data['status'] == true) {
+      final List data = response.data['data'];
+      return data.map((json) => QuestionRequestExternal.fromJson(json)).toList();
+    } else {
+      throw Exception("Gagal memuat soal external");
+    }
+  } catch (e) {
+    debugPrint("❌ Error fetchQuestionrequestplantExternal: $e");
+    rethrow;
+  }
+}
+// -------------------- CREATE ANSWER QUESTION EXTERNAL --------------------
+Future<AnswerQuestionExternalResponse?> createAnswerQuestionExternal(
+    int inductionId,
+    int questionId,
+    int choiceId,
+) async {
+  final String apiUrl = EnvHelper.get('API_URL');
+  final url = "$apiUrl/question-external/create-answer-question";
+
+  try {
+    final response = await _dio.post(
+      url,
+      options: Options(
+        headers: {
+          "x-api-key": ApiServiceExternal._apiKey,
+          "Content-Type": "application/json",
+        },
+      ),
+      data: {
+        "induction_id": inductionId,
+        "question_id": questionId,
+        "choice_id": choiceId,
+      },
+    );
+
+    if (response.statusCode == 200 && response.data["status"] == true) {
+      return AnswerQuestionExternalResponse.fromJson(response.data);
+    } else {
+      debugPrint("❌ Create Answer Failed: ${response.data}");
+    }
+  } catch (e) {
+    debugPrint("❌ createAnswerQuestionExternal Exception: $e");
+  }
+
+  return null;
+}
+
 }

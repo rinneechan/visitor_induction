@@ -73,6 +73,8 @@ import 'package:she_vi/screens/home/external/approved_mail_exsternal_screen.dart
 import 'package:she_vi/screens/external/menu_exsternal_screen.dart';
 import 'package:she_vi/screens/external/page/detaiinfoexternal.dart';
 import 'package:she_vi/screens/external/page/welcome_testsatu_external.dart';
+import 'package:she_vi/screens/external/page/welcome_testdua_external.dart';
+import 'package:she_vi/screens/external/page/question_screen_external.dart';
 
 /// ======================================================
 /// ✅ AppRouter: Kelas tunggal untuk mengatur semua route
@@ -378,6 +380,32 @@ class AppRouter {
           idrequest: extras?['idrequest'] ?? '',
           plantId: extras?['plantId'] ?? '',
           plantName: extras?['plantName'] ?? '',
+        );
+      },
+    ),
+      GoRoute(
+      path: '/external/welcome-test-dua',
+      builder: (context, state) {
+        final extras = state.extra as Map<String, dynamic>?;
+
+        return WelcomeTestDuaExternalScreen(
+          idrequest: extras?['idrequest'] ?? '',
+          plantId: extras?['plantId'] ?? '',
+          plantName: extras?['plantName'] ?? '',
+        );
+      },
+    ),
+    GoRoute(
+      path: '/external/induction/question',
+      name: 'external-question',
+      builder: (context, state) {
+        final idrequest = state.uri.queryParameters['idrequest'] ?? '';
+        final plantId = state.uri.queryParameters['plantId'] ?? '';
+        final plantName = state.uri.queryParameters['plantName'] ?? '';
+
+        return QuestionScreenExternal(
+          idrequest: idrequest,
+          plantName: plantName,
         );
       },
     ),

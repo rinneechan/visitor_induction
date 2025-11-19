@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
 
 class VideoPlayerPage extends StatefulWidget {
   final String videoUrl;
@@ -12,62 +13,85 @@ class VideoPlayerPage extends StatefulWidget {
   });
 
   @override
-  State<VideoPlayerPage> createState() => _VideoPlayerPageState();
+  _VideoPlayerPageState createState() => _VideoPlayerPageState();
 }
 
 class _VideoPlayerPageState extends State<VideoPlayerPage> {
-  late VideoPlayerController _controller;
-  bool isLoading = true;
+  late VideoPlayerController _videoController;
+  ChewieController? _chewieController;
 
   @override
   void initState() {
     super.initState();
+    _initializeVideo();
+  }
 
-    _controller = VideoPlayerController.network(widget.videoUrl)
-      ..initialize().then((_) {
-        setState(() => isLoading = false);
-        _controller.play();
+  Future<void> _initializeVideo() async {
+    _videoController = VideoPlayerController.network(widget.videoUrl);
+
+    try {
+      await _videoController.initialize();
+
+      // Listener: Detect video selesai
+      _videoController.addListener(() {
+        final isEnded =
+            _videoController.value.position >= _videoController.value.duration &&
+                !_videoController.value.isPlaying;
+
+        if (isEnded) {
+          widget.onFinishedWatching(); // Trigger welcome screen
+        }
       });
 
-    // LISTENER – detect video selesai
-    _controller.addListener(() {
-      if (_controller.value.position >= _controller.value.duration &&
-          !_controller.value.isPlaying) {
-        widget.onFinishedWatching(); // callback untuk welcome screen
-      }
-    });
+      // Chewie setup
+      _chewieController = ChewieController(
+        videoPlayerController: _videoController,
+        autoPlay: true,
+        looping: false,
+        allowPlaybackSpeedChanging: true, // <= SPEED ENABLED
+        allowMuting: true,
+        playbackSpeeds: const [
+          0.5,
+          1.0,
+          1.25,
+          1.5,
+          1.75,
+          2.0,
+        ],
+      );
+
+      setState(() {});
+    } catch (e) {
+      debugPrint("❌ Video load error: $e");
+      setState(() {});
+    }
+  }
+
+  @override
+  void dispose() {
+    _videoController.dispose();
+    _chewieController?.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Video Player")),
+      appBar: AppBar(title: const Text('Video Induction')),
       body: Center(
-        child: isLoading
-            ? const CircularProgressIndicator()
-            : AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                child: VideoPlayer(_controller),
-              ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _controller.value.isPlaying
-                ? _controller.pause()
-                : _controller.play();
-          });
-        },
-        child: Icon(
-          _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-        ),
+        child: _chewieController != null &&
+                _videoController.value.isInitialized
+            ? AspectRatio(
+                aspectRatio: _videoController.value.aspectRatio,
+                child: Chewie(controller: _chewieController!),
+              )
+            : _videoController.value.hasError
+                ? const Text(
+                    "Gagal memuat video",
+                    style: TextStyle(color: Colors.red),
+                  )
+                : const CircularProgressIndicator(),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 }

@@ -8,21 +8,19 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:go_router/go_router.dart';
-import 'route/app_route.dart'; // Pastikan file ini TIDAK punya main()
+import 'route/app_route.dart'; 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:she_vi/screens/setting/navigator_service.dart';
-
 import 'package:she_vi/utils/env_helper.dart';
-
+import 'package:provider/provider.dart';
+import 'package:she_vi/screens/external/page/user_profile.dart'; // Provider UserProfile
 
 // =============== HANDLER NOTIFIKASI ===============
 
-/// Handler untuk notifikasi saat aplikasi di background
 Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
   try {
     debugPrint("🔔 [Background] Notifikasi diterima");
     if (message.data.containsKey('route')) {
-      // Gunakan pushNamed karena tidak ada BuildContext di background
       NavigatorService.pushNamed(
         message.data['route']!,
         arguments: message.data,
@@ -33,7 +31,6 @@ Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
   }
 }
 
-/// Navigasi terpusat dari notifikasi (foreground & terminated)
 void _handleNotificationNavigation(RemoteMessage message) {
   if (!message.data.containsKey('route')) {
     debugPrint("⚠️ Tidak ada 'route' dalam payload notifikasi");
@@ -89,13 +86,13 @@ Future<void> main() async {
     debugPrint("❌ Gagal inisialisasi Hive: $e");
   }
 
-  // 🔹 Daftarkan listener notifikasi (dibuka dari luar app)
+  // 🔹 Daftarkan listener notifikasi
   FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationNavigation);
 
   // 🔹 Inisialisasi notifikasi
   await FirebaseNotificationService().init();
 
-  // 🔹 Tangani notifikasi saat app dalam keadaan terminated
+  // 🔹 Tangani notifikasi saat app terminated
   final RemoteMessage? initialMessage =
       await FirebaseMessaging.instance.getInitialMessage();
   if (initialMessage != null) {
@@ -105,8 +102,17 @@ Future<void> main() async {
   // 🔹 Cek pembaruan aplikasi
   await AppUpdateService().checkForUpdate();
 
-  // 🔹 Jalankan aplikasi
-  runApp(const MyApp());
+  // 🔹 Jalankan aplikasi dengan Provider UserProfile
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) {
+        final profile = UserProfile();
+        profile.loadPlantIdFromHive(); // otomatis load plantId
+        return profile;
+      },
+      child: const MyApp(),
+    ),
+  );
 }
 
 // =============== APLIKASI UTAMA ===============
@@ -144,14 +150,10 @@ class FirebaseNotificationService {
 
       _initLocalNotifications();
 
-      // ✅ Gunakan static stream, BUKAN instance method
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         debugPrint(
             "🔔 [Foreground] Notifikasi: ${message.notification?.title}");
         _showLocalNotification(message);
-
-        // Opsional: navigasi otomatis saat notifikasi diklik di foreground
-        // (biasanya tidak diperlukan, karena user klik notifikasi → onMessageOpenedApp)
       });
 
       FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
@@ -275,7 +277,8 @@ class AppUpdateService {
               TextButton(
                 onPressed: () async {
                   if (await canLaunchUrl(uri)) {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                    await launchUrl(uri,
+                        mode: LaunchMode.externalApplication);
                   }
                   Navigator.of(context).pop();
                 },

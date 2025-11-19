@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 
-class MobilePdfViewer extends StatelessWidget {
+class MobilePdfViewerExternal extends StatelessWidget {
   final String localPath;
   final VoidCallback? onFinishedReading;
 
-  const MobilePdfViewer({
+  const MobilePdfViewerExternal({
     super.key,
     required this.localPath,
     this.onFinishedReading,
