@@ -1,8 +1,7 @@
+// lib/screens/external/page/question_screen_external.dart
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:html' as html;
-import 'package:provider/provider.dart';
 
 // MODELS EXTERNAL
 import 'package:she_vi/models/question_request_external.dart';
@@ -13,15 +12,16 @@ import 'package:she_vi/models/plant_external.dart';
 
 // API SERVICE EXTERNAL
 import 'package:she_vi/services/api_service_external.dart';
-import 'user_profile.dart'; // 🔹 Import Provider
 
 class QuestionScreenExternal extends StatefulWidget {
   final String idrequest;
+  final String plantId;
   final String plantName;
 
   const QuestionScreenExternal({
     super.key,
     required this.idrequest,
+    required this.plantId,
     required this.plantName,
   });
 
@@ -30,9 +30,6 @@ class QuestionScreenExternal extends StatefulWidget {
 }
 
 class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
-  late Box box;
-  String? visitorid;
-  String? email;
   DateTime? lastPressed;
 
   final ApiServiceExternal _api = ApiServiceExternal();
@@ -48,7 +45,7 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
   @override
   void initState() {
     super.initState();
-    _openBox();
+    Future.microtask(() => _loadQuestions());
 
     // Prevent browser back (web)
     try {
@@ -59,26 +56,11 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
     } catch (_) {}
   }
 
-  Future<void> _openBox() async {
-    box = await Hive.openBox('userBox');
-
-    setState(() {
-      visitorid = box.get('visitorid');
-      email = box.get('email');
-    });
-
-    await _loadQuestions();
-  }
-
   Future<void> _loadQuestions() async {
     setState(() => _isLoading = true);
 
     try {
-      // 🔹 Ambil plantId dari Provider
-      final plantId = Provider.of<UserProfile>(context, listen: false).plantId;
-
-      final data = await _api.fetchQuestionrequestplantExternal(plantId);
-
+      final data = await _api.fetchQuestionrequestplantExternal(widget.plantId);
       pertanyaan = data;
 
       questions = data.map((item) {
@@ -128,11 +110,9 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
     if (selectedOptionIndex == null) return;
 
     final correctAnswer = questions[currentQuestionIndex]['answer'] ?? '';
-    final options =
-        List<String>.from(questions[currentQuestionIndex]['options'] ?? []);
+    final options = List<String>.from(questions[currentQuestionIndex]['options'] ?? []);
 
-    final isCorrect =
-        options.isNotEmpty && options[selectedOptionIndex!] == correctAnswer;
+    final isCorrect = options.isNotEmpty && options[selectedOptionIndex!] == correctAnswer;
 
     try {
       final success = await _api.createAnswerQuestionExternal(
@@ -216,7 +196,7 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                         });
                       } else {
                         context.go(
-                          "/external/test-completed?idrequest=${Uri.encodeComponent(widget.idrequest)}&plantId=${Uri.encodeComponent(Provider.of<UserProfile>(context, listen: false).plantId)}&plantName=${Uri.encodeComponent(widget.plantName)}",
+                          "/external/test-completed?idrequest=${Uri.encodeComponent(widget.idrequest)}&plantId=${Uri.encodeComponent(widget.plantId)}&plantName=${Uri.encodeComponent(widget.plantName)}",
                         );
                       }
                     },
@@ -224,6 +204,9 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                       minimumSize: const Size(double.infinity, 48),
                       backgroundColor:
                           isCorrect ? const Color(0xFF07840B) : const Color(0xFF8F0B0B),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                     child: Text(
                       isCorrect ? "Continue" : "I Understood",
@@ -267,12 +250,15 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SafeArea(
-          child: Stack(
-            children: [
-              SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12), // ✅ SAMA DENGAN INTERNAL
+            child: Center( // ✅ SAMA DENGAN INTERNAL
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600), // ✅ SAMA DENGAN INTERNAL
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // ✅ HEADER: SAMA 100%
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -281,7 +267,7 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF343434),
+                            color: Color(0xFF343434), // ✅ SAMA
                           ),
                         ),
                         Image.asset(
@@ -292,18 +278,20 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                                   : incorrectCount == 3
                                       ? 'assets/images/groupOfHeart3.png'
                                       : 'assets/images/groupOfHeart.png',
-                          height: 40,
+                          height: 40, // ✅ SAMA
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 20), // ✅ SAMA
+
+                    // ✅ CARD SOAL: SAMA 100%
                     if (incorrectCount < 3)
                       Card(
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
                         child: Padding(
-                          padding: const EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(20), // ✅ SAMA
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -312,7 +300,7 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                                 style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF343434),
+                                  color: Color(0xFF343434), // ✅ SAMA
                                 ),
                               ),
                               const SizedBox(height: 16),
@@ -325,8 +313,7 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                                   final selected = selectedOptionIndex == index;
 
                                   return Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 6),
+                                    padding: const EdgeInsets.symmetric(vertical: 6),
                                     child: ElevatedButton(
                                       onPressed: () =>
                                           setState(() => selectedOptionIndex = index),
@@ -338,7 +325,7 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                                           borderRadius: BorderRadius.circular(8),
                                         ),
                                         padding: const EdgeInsets.symmetric(
-                                            vertical: 14, horizontal: 16),
+                                            vertical: 14, horizontal: 16), // ✅ SAMA
                                       ),
                                       child: Align(
                                         alignment: Alignment.centerLeft,
@@ -373,8 +360,7 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                                     backgroundColor: selectedOptionIndex != null
                                         ? const Color(0xFF07840B)
                                         : Colors.grey,
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(vertical: 16), // ✅ SAMA
                                     shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(8)),
                                   ),
@@ -388,10 +374,12 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                           ),
                         ),
                       ),
+
+                    // ✅ CARD "START OVER": SAMA 100%
                     if (incorrectCount >= 3)
                       Center(
                         child: Card(
-                          margin: const EdgeInsets.only(top: 40),
+                          margin: const EdgeInsets.only(top: 40), // ✅ SAMA
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16)),
                           child: Padding(
@@ -401,13 +389,13 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                               children: [
                                 Image.asset(
                                   'assets/images/groupOfHeart3.png',
-                                  height: 40,
+                                  height: 40, // ✅ SAMA
                                 ),
                                 const SizedBox(height: 16),
                                 const Text(
                                   "You've lost all your hearts.\nPlease start over.",
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 18),
+                                  style: TextStyle(fontSize: 18), // ✅ SAMA
                                 ),
                                 const SizedBox(height: 20),
                                 SizedBox(
@@ -417,14 +405,13 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                                       context.go(
                                         '/external/welcome-test-satu'
                                         '?idrequest=${Uri.encodeComponent(widget.idrequest)}'
-                                        '&plantId=${Uri.encodeComponent(Provider.of<UserProfile>(context, listen: false).plantId)}'
+                                        '&plantId=${Uri.encodeComponent(widget.plantId)}'
                                         '&plantName=${Uri.encodeComponent(widget.plantName)}',
                                       );
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFF8F0B0B),
-                                      padding:
-                                          const EdgeInsets.symmetric(vertical: 16),
+                                      padding: const EdgeInsets.symmetric(vertical: 16), // ✅ SAMA
                                       shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(8)),
                                     ),
@@ -441,8 +428,8 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                       ),
                   ],
                 ),
-              )
-            ],
+              ),
+            ),
           ),
         ),
       ),

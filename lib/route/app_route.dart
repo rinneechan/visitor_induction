@@ -72,9 +72,11 @@ import 'package:she_vi/screens/setting/navigator_service.dart';
 import 'package:she_vi/screens/home/external/approved_mail_exsternal_screen.dart';
 import 'package:she_vi/screens/external/menu_exsternal_screen.dart';
 import 'package:she_vi/screens/external/page/detaiinfoexternal.dart';
+import 'package:she_vi/screens/external/page/completedscreenexternal.dart';
 import 'package:she_vi/screens/external/page/welcome_testsatu_external.dart';
-import 'package:she_vi/screens/external/page/welcome_testdua_external.dart';
-import 'package:she_vi/screens/external/page/question_screen_external.dart';
+import 'package:she_vi/screens/external/page/welcome_testdua_external.dart'; // Import dari upstream
+import 'package:she_vi/screens/external/page/question_screen_external.dart'; // Import dari upstream
+import 'package:she_vi/screens/external/page/detailvisitexternal.dart'; // Import dari stashed changes
 
 /// ======================================================
 /// ✅ AppRouter: Kelas tunggal untuk mengatur semua route
@@ -372,6 +374,18 @@ class AppRouter {
         },
       ),
       GoRoute(
+        path: '/exsternal/detail-qr',
+        builder: (context, state) {
+          final idprogress = state.uri.queryParameters['id'] ?? 'defaultID';
+          final idrequest = state.uri.queryParameters['idrequest'] ?? '';
+
+          return CompletedScreenExsternal(
+              idprogress: idprogress, // <-- Hapus baris ini sesuai dengan perubahan lokal
+              idrequest: idrequest, // <-- Gunakan idrequest yang diambil dari queryParameters
+            );
+        },
+      ),
+      GoRoute(
       path: '/external/welcome-test-satu',
       builder: (context, state) {
         final extras = state.extra as Map<String, dynamic>?;
@@ -383,7 +397,8 @@ class AppRouter {
         );
       },
     ),
-      GoRoute(
+    // --- Rute-rute External dari 'Updated upstream' ---
+    GoRoute(
       path: '/external/welcome-test-dua',
       builder: (context, state) {
         final extras = state.extra as Map<String, dynamic>?;
@@ -405,10 +420,20 @@ class AppRouter {
 
         return QuestionScreenExternal(
           idrequest: idrequest,
+          plantId: plantId,
           plantName: plantName,
         );
       },
     ),
+    // --- Rute dari 'Stashed changes' (DetailVisitExternal) ---
+    GoRoute(
+        path: '/external/detail-scan',
+        builder: (context, state) {
+          final idRequest = state.uri.queryParameters['id'] ?? 'defaultID';
+          return DetailVisitExternal(idrequest: idRequest);
+        },
+      ),
+    // --- Akhir dari bagian yang digabungkan ---
     ],
   );
 }

@@ -161,11 +161,11 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
                               profil?.companyName ?? '-'),
                           _buildInfoRow(Icons.work_outline, 'Job Position',
                               profil?.jobPosition ?? '-'),
-      _buildInfoRow(Icons.email_outlined, 'Work Email',
-          profil?.workEmail ?? '-'),
-      // Tambahkan baris ini untuk menampilkan nomor HP
-      _buildInfoRow(Icons.phone_outlined, 'Phone Number',
-          profil?.nohp ?? '-'),
+                              _buildInfoRow(Icons.email_outlined, 'Work Email',
+                                  profil?.workEmail ?? '-'),
+                              // Tambahkan baris ini untuk menampilkan nomor HP
+                              _buildInfoRow(Icons.phone_outlined, 'Phone Number',
+                                  profil?.nohp ?? '-'),
                         ],
                       ),
                     ),

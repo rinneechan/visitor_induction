@@ -130,6 +130,9 @@ class _MenuExternalScreenState extends State<MenuExternalScreen> {
         if (item.statusId == 1 ) {
           context.push('/exsternal/detail-info?id=${item.id}&idrequest=${widget.idrequest}');
         }
+        else if (item.statusId == 3 ) {
+          context.push('/exsternal/detail-qr?id=${item.id}&idrequest=${widget.idrequest}');
+        }
 
       },
       child: Container(
