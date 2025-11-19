@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:hive/hive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'dart:io';
-import 'package:she_vi/services/api_service_external.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:universal_html/html.dart' as html;
 import 'dart:typed_data';
+import 'package:path_provider/path_provider.dart';
+import 'package:she_vi/services/api_service_external.dart';
+import 'package:universal_html/html.dart' as html;
 
 // Viewer Pages
 import 'video_player_page.dart';
@@ -33,52 +32,44 @@ class WelcomeTestSatuExternalScreen extends StatefulWidget {
 
 class _WelcomeTestSatuExternalScreenState
     extends State<WelcomeTestSatuExternalScreen> {
-  Box? box;
   String username = "";
-  String visitorid = "";
-  String email = "";
-
   bool isDocumentRead = false;
   bool isLoading = false;
+  bool isFetchingProfile = true;
 
   @override
   void initState() {
     super.initState();
-    _initHive();
-    _debugRoutingData();
+    _fetchProfileAndSetUsername();
   }
 
-  void _debugRoutingData() {
-    debugPrint("📌 ROUTING CHECK:");
-    debugPrint("  → idrequest = ${widget.idrequest}");
-    debugPrint("  → plantId   = ${widget.plantId}");
-    debugPrint("  → plantName = ${widget.plantName}");
-  }
-
-  Future<void> _initHive() async {
+  // 🔹 Ambil profil dari API
+  Future<void> _fetchProfileAndSetUsername() async {
     try {
-      final opened = await Hive.openBox('userBox');
+      final request = await ApiServiceExternal.fetchInductionRequestByIdExternal(widget.idrequest);
 
       setState(() {
-        box = opened;
-        username = opened.get('username') ?? "";
-        visitorid = opened.get('visitorid') ?? "";
-        email = opened.get('email') ?? "";
+        // Ambil nama dari profil, fallback ke data[0].fullName
+        username = request?.profil?.fullName ??
+            (request != null && request.data.isNotEmpty
+                ? request.data[0].fullName
+                : "Guest");
+        isFetchingProfile = false;
       });
 
-      debugPrint("📌 HIVE LOADED:");
-      debugPrint("  → username = $username");
-      debugPrint("  → visitorid = $visitorid");
-      debugPrint("  → email = $email");
+      debugPrint("📌 USERNAME FETCHED: $username");
     } catch (e) {
-      debugPrint("❌ Hive Error: $e");
+      debugPrint("❌ Failed to fetch profile: $e");
+      setState(() {
+        username = "Guest";
+        isFetchingProfile = false;
+      });
     }
   }
 
   // -----------------------------------------
   // DOWNLOAD HANDLERS
   // -----------------------------------------
-
   Future<String> _downloadFile(String url, String filename) async {
     try {
       final dir = await getTemporaryDirectory();
@@ -112,7 +103,6 @@ class _WelcomeTestSatuExternalScreenState
   // -----------------------------------------
   // PAGE BUILD
   // -----------------------------------------
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -120,7 +110,6 @@ class _WelcomeTestSatuExternalScreenState
         child: Stack(
           children: [
             _buildMainContent(),
-
             if (isLoading)
               Container(
                 color: Colors.black.withOpacity(0.3),
@@ -167,7 +156,6 @@ class _WelcomeTestSatuExternalScreenState
   // -----------------------------------------
   // UI SECTIONS
   // -----------------------------------------
-
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -211,21 +199,21 @@ class _WelcomeTestSatuExternalScreenState
   }
 
   Widget _buildUserGreeting() {
-  if (box == null) {
-    return const Text(
-      "Loading...",
-      style: TextStyle(color: Color(0xFF757575), fontSize: 16),
+    if (isFetchingProfile) {
+      return const Text(
+        "Loading...",
+        style: TextStyle(color: Color(0xFF757575), fontSize: 16),
+      );
+    }
+
+    return Text(
+      username.isEmpty ? "Hello, Guest" : "Hello, $username",
+      style: const TextStyle(
+        color: Color(0xFF757575),
+        fontSize: 16,
+      ),
     );
   }
-
-  return Text(
-    (username?.isEmpty ?? true) ? "Hello, Guest" : "Hello, $username",
-    style: const TextStyle(
-      color: Color(0xFF757575),
-      fontSize: 16,
-    ),
-  );
-}
 
   Widget _buildCG() {
     return const Text(
@@ -305,7 +293,6 @@ class _WelcomeTestSatuExternalScreenState
   // -----------------------------------------
   // SHOW DOCUMENT HANDLER
   // -----------------------------------------
-
   Future<void> _showDocument(String plantId) async {
     if (isLoading) return;
 
@@ -322,7 +309,6 @@ class _WelcomeTestSatuExternalScreenState
       final url = material.linkData;
       final ext = url.split('.').last.split('?').first.toLowerCase();
 
-      // ---------- MP4 ----------
       if (ext == "mp4") {
         Navigator.push(
           context,
@@ -335,13 +321,9 @@ class _WelcomeTestSatuExternalScreenState
             ),
           ),
         );
-      }
-
-      // ---------- PDF ----------
-      else if (ext == "pdf") {
+      } else if (ext == "pdf") {
         if (kIsWeb) {
           final bytes = await _downloadPdfForWeb(url);
-
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -354,9 +336,8 @@ class _WelcomeTestSatuExternalScreenState
             ),
           );
         } else {
-          final file =
-              await _downloadFile(url, "material_${DateTime.now().millisecondsSinceEpoch}.pdf");
-
+          final file = await _downloadFile(
+              url, "material_${DateTime.now().millisecondsSinceEpoch}.pdf");
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -369,16 +350,12 @@ class _WelcomeTestSatuExternalScreenState
             ),
           );
         }
-      }
-
-      // ---------- Unsupported ----------
-      else {
+      } else {
         throw Exception("Format tidak didukung: $ext");
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Gagal memuat material: $e")),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Gagal memuat material: $e")));
     } finally {
       setState(() => isLoading = false);
     }

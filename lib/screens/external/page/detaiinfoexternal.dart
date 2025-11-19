@@ -30,11 +30,11 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
   void initState() {
     super.initState();
 
-    // Debug: Cetak nilai idrequest yang diterima
+    // Debug: Cetak nilai idprogress yang digunakan untuk API
     debugPrint("Detaiinfoexternal: Menerima idprogress = '${widget.idprogress}'");
     debugPrint("Detaiinfoexternal: Menerima idrequest = '${widget.idrequest}'");
 
-    // Gunakan widget.idrequest untuk mengambil data dari API
+    // Gunakan widget.idprogress untuk mengambil data dari API
     _detailFuture = ApiServiceExternal.fetchInductionRequestByIdExternal(
       widget.idprogress,
     );
@@ -104,6 +104,14 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
   }
 
   Widget _buildDetailContent(InductionRequestIdExternal detail) {
+    // Ambil item pertama dari data list
+    final item = detail.data.isNotEmpty ? detail.data[0] : null;
+    final profil = detail.profil;
+
+    if (item == null) {
+      return const Center(child: Text("No detail data found"));
+    }
+
     return Column(
       children: [
         Expanded(
@@ -122,19 +130,19 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildInfoRow(Icons.check_circle_outline,
-                              'Status', detail.statusName),
+                              'Status', item.statusName),
                           _buildInfoRow(Icons.location_on_outlined,
-                              'Plant Name', detail.plantName),
+                              'Plant Name', item.plantName),
                           _buildInfoRow(Icons.business,
-                              'Department Destination', detail.departmentName),
+                              'Department Destination', item.departmentName),
                           _buildInfoRow(Icons.person_outline,
-                              'PIC Name', detail.picName),
+                              'PIC Name', item.picName),
                           _buildInfoRow(Icons.calendar_today_outlined,
-                              'Arrival Date', _formatDate(detail.arrivalDate)),
+                              'Arrival Date', _formatDate(item.arrivalDate)),
                           _buildInfoRow(Icons.access_time_outlined,
-                              'Visit Duration', detail.passType),
+                              'Visit Duration', item.passType),
                           _buildInfoRow(Icons.description_outlined,
-                              'Reason to Visit', detail.reasonToVisit),
+                              'Reason to Visit', item.reasonToVisit),
                         ],
                       ),
                     ),
@@ -148,15 +156,16 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildInfoRow(Icons.person, 'Full Name',
-                              detail.profil.fullName),
+                              profil?.fullName ?? '-'),
                           _buildInfoRow(Icons.business, 'Company Name',
-                              detail.profil.companyName),
+                              profil?.companyName ?? '-'),
                           _buildInfoRow(Icons.work_outline, 'Job Position',
-                              detail.profil.jobPosition),
-                          _buildInfoRow(Icons.email_outlined, 'Work Email',
-                              detail.profil.workEmail),
-                          _buildInfoRow(Icons.phone_outlined, 'Phone Number',
-                              detail.profil.nohp),
+                              profil?.jobPosition ?? '-'),
+      _buildInfoRow(Icons.email_outlined, 'Work Email',
+          profil?.workEmail ?? '-'),
+      // Tambahkan baris ini untuk menampilkan nomor HP
+      _buildInfoRow(Icons.phone_outlined, 'Phone Number',
+          profil?.nohp ?? '-'),
                         ],
                       ),
                     ),
@@ -174,7 +183,7 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
             constraints: const BoxConstraints(maxWidth: 600),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: _buildBottomButton(detail),
+              child: _buildBottomButton(item),
             ),
           ),
         ),
@@ -249,22 +258,22 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
     );
   }
 
-  Widget _buildBottomButton(InductionRequestIdExternal detail) {
+  Widget _buildBottomButton(InductionRequestData item) {
     return ElevatedButton.icon(
       onPressed: () {
         context.push(
           '/external/welcome-test-satu',
           extra: {
-            "idrequest": detail.id,
-            "plantId": detail.plantId,
-            "plantName": detail.plantName,
+            "idrequest": item.id,
+            "plantId": item.plantId,
+            "plantName": item.plantName,
           },
         );
 
         debugPrint("➡ Navigasi ke Welcome Test Satu External");
-        debugPrint("ID REQUEST: ${detail.id}");
-        debugPrint("Plant ID: ${detail.plantId}");
-        debugPrint("Plant Name: ${detail.plantName}");
+        debugPrint("ID REQUEST: ${item.id}");
+        debugPrint("Plant ID: ${item.plantId}");
+        debugPrint("Plant Name: ${item.plantName}");
       },
       icon: const Icon(Icons.play_arrow, size: 18),
       label: const Text(
