@@ -92,90 +92,89 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
   }
 
   Widget _buildDetailContent(InductionRequestIdExternal detail) {
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 600),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+  // Ambil item pertama dari data list
+  final item = detail.data.isNotEmpty ? detail.data[0] : null;
+  final profil = detail.profil;
 
-                    /// SECTION 1 - INDUCTION REQUEST
-                    _buildSectionCard(
-                      title: 'Induction Request',
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildInfoRow(Icons.check_circle_outline,
-                              'Status', detail.statusName),
+  if (item == null) {
+    return const Center(child: Text("No detail data found"));
+  }
 
-                          _buildInfoRow(Icons.location_on_outlined,
-                              'Plant Name', detail.plantName),
-
-                          _buildInfoRow(Icons.business,
-                              'Department Destination', detail.departmentName),
-
-                          _buildInfoRow(Icons.person_outline, 
-                              'PIC Name', detail.picName),
-
-                          _buildInfoRow(Icons.calendar_today_outlined,
-                              'Arrival Date', _formatDate(detail.arrivalDate)),
-
-                          _buildInfoRow(Icons.access_time_outlined,
-                              'Visit Duration', detail.passType),
-
-                          _buildInfoRow(Icons.description_outlined,
-                              'Reason to Visit', detail.reasonToVisit),
-                        ],
-                      ),
+  return Column(
+    children: [
+      Expanded(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// SECTION 1 - INDUCTION REQUEST
+                  _buildSectionCard(
+                    title: 'Induction Request',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildInfoRow(Icons.check_circle_outline,
+                            'Status', item.statusName),
+                        _buildInfoRow(Icons.location_on_outlined,
+                            'Plant Name', item.plantName),
+                        _buildInfoRow(Icons.business,
+                            'Department Destination', item.departmentName),
+                        _buildInfoRow(Icons.person_outline,
+                            'PIC Name', item.picName),
+                        _buildInfoRow(Icons.calendar_today_outlined,
+                            'Arrival Date', _formatDate(item.arrivalDate)),
+                        _buildInfoRow(Icons.access_time_outlined,
+                            'Visit Duration', item.passType),
+                        _buildInfoRow(Icons.description_outlined,
+                            'Reason to Visit', item.reasonToVisit),
+                      ],
                     ),
+                  ),
 
-                    const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                    /// SECTION 2 - VISITOR PROFILE
-                    _buildSectionCard(
-                      title: 'Visitor Profile',
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildInfoRow(Icons.person, 'Full Name',
-                              detail.fullName),
-
-                          _buildInfoRow(Icons.business, 'Company Name',
-                              widget.compname ?? '-'),
-
-                          _buildInfoRow(Icons.work_outline, 'Job Position',
-                              widget.jobposs ?? '-'),
-                        ],
-                      ),
+                  /// SECTION 2 - VISITOR PROFILE
+                  _buildSectionCard(
+                    title: 'Visitor Profile',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildInfoRow(Icons.person, 'Full Name',
+                            profil?.fullName ?? '-'),
+                        _buildInfoRow(Icons.business, 'Company Name',
+                            profil?.companyName ?? '-'),
+                        _buildInfoRow(Icons.work_outline, 'Job Position',
+                            profil?.jobPosition ?? '-'),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
         ),
+      ),
 
-        const SizedBox(height: 12),
+      const SizedBox(height: 12),
 
-        Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: _buildBottomButton(detail),
-            ),
+      Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: _buildBottomButton(item),
           ),
         ),
+      ),
 
-        const SizedBox(height: 12),
-      ],
-    );
-  }
+      const SizedBox(height: 12),
+    ],
+  );
+}
 
   Widget _buildSectionCard({
     required String title, 
@@ -242,22 +241,22 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
     );
   }
 
-  Widget _buildBottomButton(InductionRequestIdExternal detail) {
+  Widget _buildBottomButton(InductionRequestData item) {
   return ElevatedButton.icon(
     onPressed: () {
       context.push(
-  '/external/welcome-test-satu',
-  extra: {
-    "idrequest": detail.id.toString(),
-    "plantId": detail.plantId.toString(),
-    "plantName": detail.plantName ?? "",
-  },
-);
+        '/external/welcome-test-satu',
+        extra: {
+          "idrequest": item.id,
+          "plantId": item.plantId,
+          "plantName": item.plantName,
+        },
+      );
 
       debugPrint("➡ Navigasi ke Welcome Test Satu External");
-      debugPrint("ID REQUEST: ${detail.id}");
-      debugPrint("Plant ID: ${detail.plantId}");
-      debugPrint("Plant Name: ${detail.plantName}");
+      debugPrint("ID REQUEST: ${item.id}");
+      debugPrint("Plant ID: ${item.plantId}");
+      debugPrint("Plant Name: ${item.plantName}");
     },
     icon: const Icon(Icons.play_arrow, size: 18),
     label: const Text(

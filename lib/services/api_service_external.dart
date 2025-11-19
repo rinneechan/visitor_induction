@@ -155,34 +155,38 @@ class ApiServiceExternal {
   }
   // ------------------- Get Induction Request by REQUEST ID (EXTERNAL) -------------------
 static Future<InductionRequestIdExternal?> fetchInductionRequestByIdExternal(
-    String requestId) async {
+      String requestId) async {
+    final String apiUrl = EnvHelper.get('API_URL') ?? '';
+    final url =
+        '$apiUrl/inductionrequest-external/get-inductionrequest-id-exsternal';
 
-  final String apiUrl = EnvHelper.get('API_URL');
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'x-api-key': _apiKey,
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({"id": requestId}),
+      );
 
-  final url =
-      '$apiUrl/inductionrequest-external/get-inductionrequest-id-exsternal';
+      if (response.statusCode != 200) {
+        throw Exception("Failed: ${response.statusCode}");
+      }
 
-  final response = await http.post(
-    Uri.parse(url),
-    headers: {
-      'x-api-key': _apiKey,
-      'Content-Type': 'application/json',
-    },
-    body: jsonEncode({"id": requestId}),
-  );
+      final Map<String, dynamic> jsonData = jsonDecode(response.body);
 
-  if (response.statusCode != 200) {
-    throw Exception("Failed: ${response.statusCode}");
+      // Cek status dan data
+      if (jsonData['status'] != true) {
+        return null;
+      }
+
+      // Parse seluruh response termasuk profil
+      return InductionRequestIdExternal.fromJson(jsonData);
+    } catch (e) {
+      throw Exception("Error fetchInductionRequestByIdExternal: $e");
+    }
   }
-
-  final data = jsonDecode(response.body);
-
-  if (data['data'] == null || data['data'].isEmpty) {
-    return null;
-  }
-
-  return InductionRequestIdExternal.fromJson(data['data'][0]);
-}
 Future<MaterialExternal> materiExternalByPlant(String plantId) async {
   final String apiUrl = EnvHelper.get('API_URL');
   final url = '$apiUrl/materials-external/materialplant-external/$plantId';
