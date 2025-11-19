@@ -127,8 +127,7 @@ class _MenuExternalScreenState extends State<MenuExternalScreen> {
         //   // Gunakan properti 'id' dari model external
         //   context.push('/exsternal/detail-info?id=${item.id}');
         // }
-        if (item.status.toLowerCase() == "induction test" ||
-            item.status.toLowerCase() == "active") {
+        if (item.statusId == 1 ) {
           context.push('/exsternal/detail-info?id=${item.id}&idrequest=${widget.idrequest}');
         }
 

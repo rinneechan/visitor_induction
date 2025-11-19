@@ -1,14 +1,13 @@
+// lib/screens/external/page/detaiinfoexternal.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:she_vi/services/api_service_external.dart';
 import 'package:she_vi/models/InductionRequestIdExternal.dart';
-import 'package:she_vi/screens/external/page/welcome_testsatu_external.dart';
-
 
 class Detaiinfoexternal extends StatefulWidget {
-  final String idprogress;   
-  final String? idrequest;
+  final String idprogress;
+  final String? idrequest; // Parameter yang digunakan untuk API
   final String? compname;
   final String? jobposs;
 
@@ -31,6 +30,11 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
   void initState() {
     super.initState();
 
+    // Debug: Cetak nilai idrequest yang diterima
+    debugPrint("Detaiinfoexternal: Menerima idprogress = '${widget.idprogress}'");
+    debugPrint("Detaiinfoexternal: Menerima idrequest = '${widget.idrequest}'");
+
+    // Gunakan widget.idrequest untuk mengambil data dari API
     _detailFuture = ApiServiceExternal.fetchInductionRequestByIdExternal(
       widget.idprogress,
     );
@@ -42,6 +46,7 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
       final date = DateTime.parse(dateString);
       return DateFormat('d MMMM yyyy', 'id_ID').format(date);
     } catch (e) {
+      debugPrint("Error formatting date: $dateString, Error: $e");
       return dateString;
     }
   }
@@ -59,20 +64,27 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
           onPressed: () => context.pop(),
         ),
       ),
-
       body: SafeArea(
         child: FutureBuilder<InductionRequestIdExternal?>(
           future: _detailFuture,
           builder: (context, snapshot) {
-
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             }
 
             if (snapshot.hasError) {
+              // Debug: Cetak error secara lengkap
+              debugPrint("Detaiinfoexternal: Error dari Future = ${snapshot.error}");
+              // Jika error adalah instance dari Exception yang kita lempar, tampilkan pesan spesifik
+              String errorMessage = "An error occurred.";
+              if (snapshot.error is String) {
+                 errorMessage = snapshot.error as String;
+              } else if (snapshot.error is Exception) {
+                 errorMessage = (snapshot.error as Exception).toString();
+              }
               return Center(
                 child: Text(
-                  'Error: ${snapshot.error}',
+                  'Error: $errorMessage',
                   style: const TextStyle(color: Colors.red),
                 ),
               );
@@ -103,7 +115,6 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
                     /// SECTION 1 - INDUCTION REQUEST
                     _buildSectionCard(
                       title: 'Induction Request',
@@ -112,22 +123,16 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
                         children: [
                           _buildInfoRow(Icons.check_circle_outline,
                               'Status', detail.statusName),
-
                           _buildInfoRow(Icons.location_on_outlined,
                               'Plant Name', detail.plantName),
-
                           _buildInfoRow(Icons.business,
                               'Department Destination', detail.departmentName),
-
-                          _buildInfoRow(Icons.person_outline, 
+                          _buildInfoRow(Icons.person_outline,
                               'PIC Name', detail.picName),
-
                           _buildInfoRow(Icons.calendar_today_outlined,
                               'Arrival Date', _formatDate(detail.arrivalDate)),
-
                           _buildInfoRow(Icons.access_time_outlined,
                               'Visit Duration', detail.passType),
-
                           _buildInfoRow(Icons.description_outlined,
                               'Reason to Visit', detail.reasonToVisit),
                         ],
@@ -143,13 +148,15 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildInfoRow(Icons.person, 'Full Name',
-                              detail.fullName),
-
+                              detail.profil.fullName),
                           _buildInfoRow(Icons.business, 'Company Name',
-                              widget.compname ?? '-'),
-
+                              detail.profil.companyName),
                           _buildInfoRow(Icons.work_outline, 'Job Position',
-                              widget.jobposs ?? '-'),
+                              detail.profil.jobPosition),
+                          _buildInfoRow(Icons.email_outlined, 'Work Email',
+                              detail.profil.workEmail),
+                          _buildInfoRow(Icons.phone_outlined, 'Phone Number',
+                              detail.profil.nohp),
                         ],
                       ),
                     ),
@@ -178,7 +185,7 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
   }
 
   Widget _buildSectionCard({
-    required String title, 
+    required String title,
     required Widget child,
   }) {
     return Card(
@@ -243,35 +250,34 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
   }
 
   Widget _buildBottomButton(InductionRequestIdExternal detail) {
-  return ElevatedButton.icon(
-    onPressed: () {
-      context.push(
-  '/external/welcome-test-satu',
-  extra: {
-    "idrequest": detail.id.toString(),
-    "plantId": detail.plantId.toString(),
-    "plantName": detail.plantName ?? "",
-  },
-);
+    return ElevatedButton.icon(
+      onPressed: () {
+        context.push(
+          '/external/welcome-test-satu',
+          extra: {
+            "idrequest": detail.id,
+            "plantId": detail.plantId,
+            "plantName": detail.plantName,
+          },
+        );
 
-      debugPrint("➡ Navigasi ke Welcome Test Satu External");
-      debugPrint("ID REQUEST: ${detail.id}");
-      debugPrint("Plant ID: ${detail.plantId}");
-      debugPrint("Plant Name: ${detail.plantName}");
-    },
-    icon: const Icon(Icons.play_arrow, size: 18),
-    label: const Text(
-      'Start Induction',
-      style: TextStyle(fontSize: 16),
-    ),
-    style: ElevatedButton.styleFrom(
-      backgroundColor: const Color(0xFF07840B),
-      foregroundColor: Colors.white,
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      minimumSize: const Size.fromHeight(56),
-    ),
-  );
-}
+        debugPrint("➡ Navigasi ke Welcome Test Satu External");
+        debugPrint("ID REQUEST: ${detail.id}");
+        debugPrint("Plant ID: ${detail.plantId}");
+        debugPrint("Plant Name: ${detail.plantName}");
+      },
+      icon: const Icon(Icons.play_arrow, size: 18),
+      label: const Text(
+        'Start Induction',
+        style: TextStyle(fontSize: 16),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF07840B),
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        minimumSize: const Size.fromHeight(56),
+      ),
+    );
   }
-
+}

@@ -366,8 +366,6 @@ class AppRouter {
           return Detaiinfoexternal(
             idprogress: idprogress,
             idrequest: idrequest,
-            // compname: compname,
-            // jobposs: jobposs,
           );
         },
       ),

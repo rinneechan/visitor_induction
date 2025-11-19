@@ -7,6 +7,7 @@ class InductionRequestProgressExternal {
   final String arrivalDate;       // arrival_date
   final String passType;          // pass_type
   final String reason;            // reason_to_visit
+  final int statusId;
   final String status;            // status_name
   final String createdAt;
 
@@ -19,6 +20,7 @@ class InductionRequestProgressExternal {
     required this.arrivalDate,
     required this.passType,
     required this.reason,
+    required this.statusId,
     required this.status,
     required this.createdAt,
   });
@@ -33,6 +35,7 @@ class InductionRequestProgressExternal {
       arrivalDate: json['arrival_date'] ?? '',
       passType: json['pass_type'] ?? '',
       reason: json['reason_to_visit'] ?? '',
+      statusId: json['status_id'],
       status: json['status_name'] ?? '',
       createdAt: json['created_at'] ?? '',
     );
