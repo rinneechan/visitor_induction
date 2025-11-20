@@ -26,11 +26,10 @@ import 'package:she_vi/screens/home/menusatu_screen.dart';
 // -----------------------
 import 'package:she_vi/screens/home/mainmenuExternal_screen.dart';
 import 'package:she_vi/screens/home/external/register_screen.dart';
-import 'package:she_vi/screens/home/external/request_induction_form_screen.dart'
-    as form;
+
 import 'package:she_vi/screens/home/external/request_induction_screen.dart'
     as screen;
-import 'package:she_vi/screens/home/external/request_submitted_screen.dart';
+
 import 'package:she_vi/screens/home/external/induction_landing_screen.dart';
 
 // -----------------------
@@ -69,6 +68,9 @@ import 'package:she_vi/screens/setting/navigator_service.dart';
 // -----------------------
 // Exsternal
 // -----------------------
+import 'package:she_vi/screens/external/request_induction_form_screen.dart'
+    as form;
+import 'package:she_vi/screens/external/request_submitted_screen.dart';
 import 'package:she_vi/screens/home/external/approved_mail_exsternal_screen.dart';
 import 'package:she_vi/screens/external/menu_exsternal_screen.dart';
 import 'package:she_vi/screens/external/page/detaiinfoexternal.dart';
@@ -175,17 +177,8 @@ class AppRouter {
         },
       ),
 
-      GoRoute(
-        path: '/request-form',
-        builder: (context, state) => const form.RequestInductionFormScreen(),
-      ),
-      GoRoute(
-        path: '/request-submitted',
-        builder: (context, state) {
-          final email = state.uri.queryParameters['email'] ?? "guest@email.com";
-          return RequestSubmittedScreen(email: email);
-        },
-      ),
+     
+     
       GoRoute(
         path: '/visitor/detail-scan',
         builder: (context, state) {
@@ -320,7 +313,17 @@ class AppRouter {
         path: '/request-induction',
         builder: (context, state) => const screen.RequestInductionScreen(),
       ),
-
+       GoRoute(
+        path: '/request-form',
+        builder: (context, state) => const form.RequestInductionFormScreen(),
+      ),
+       GoRoute(
+        path: '/exsternal/request-submitted',
+        builder: (context, state) {
+          final email = state.uri.queryParameters['email'] ?? "guest@email.com";
+          return RequestSubmittedScreen(email: email);
+        },
+      ),
       GoRoute(
         path: '/exsternal/approved-email',
         builder: (context, state) {

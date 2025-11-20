@@ -29,7 +29,7 @@ class _WelcomeTestDuaExternalScreenState
   @override
   void initState() {
     super.initState();
-    _openBox();
+    //_openBox();
   }
 
   Future<void> _openBox() async {

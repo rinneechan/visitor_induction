@@ -105,7 +105,7 @@ class RequestSubmittedScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     onPressed: () {
-                      context.go("/request-induction");
+                      context.go("/main-menu-ext");
                     },
                     child: Text(
                       "BACK TO MAIN MENU",

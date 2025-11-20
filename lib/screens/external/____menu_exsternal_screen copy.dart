@@ -121,12 +121,19 @@ class _MenuExternalScreenState extends State<MenuExternalScreen> {
   Widget _buildProgressItem(InductionRequestProgressExternal item) {
     return InkWell( // Bungkus dengan InkWell
       onTap: () {
+        // Karena tidak ada statusid, cek berdasarkan teks status
+        // Sesuaikan "Induction Test" dengan teks status sebenarnya dari API
+        // if (item.status.toLowerCase() == "induction test" || item.status.toLowerCase() == "active") {
+        //   // Gunakan properti 'id' dari model external
+        //   context.push('/exsternal/detail-info?id=${item.id}');
+        // }
         if (item.statusId == 1 ) {
           context.push('/exsternal/detail-info?id=${item.id}&idrequest=${widget.idrequest}');
         }
         else if (item.statusId == 3 ) {
           context.push('/exsternal/detail-qr?id=${item.id}&idrequest=${widget.idrequest}');
         }
+
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 6),
@@ -201,53 +208,146 @@ class _MenuExternalScreenState extends State<MenuExternalScreen> {
     );
   }
 
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    key: _scaffoldKey,
-    drawer: const CustomDrawer(),
-    backgroundColor: const Color(0xFFF7F7F9),
-    appBar: PreferredSize(
-      preferredSize: const Size.fromHeight(56),
-      child: Container(
-        color: Colors.white,
-        child: SafeArea(
-          bottom: false,
-          child: Container(
-            height: 56,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.menu, color: Colors.black87, size: 24),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-                ),
-                const SizedBox(width: 32),
-                const Text(
-                  "Visitor Induction",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.black87),
-                ),
-              ],
+  @override
+//  Widget build(BuildContext context) {
+//     return Scaffold(
+//       key: _scaffoldKey,
+//       drawer: const CustomDrawer(),
+//       backgroundColor: const Color(0xFFF7F7F9),
+//       appBar: PreferredSize(
+//         preferredSize: const Size.fromHeight(56),
+//         child: Container(
+//           color: Colors.white,
+//           child: SafeArea(
+//             bottom: false,
+//             child: Container(
+//               height: 56,
+//               padding: const EdgeInsets.symmetric(horizontal: 16),
+//               child: Row(
+//                 children: [
+//                   IconButton(
+//                     icon: const Icon(Icons.menu, color: Colors.black87, size: 24),
+//                     padding: EdgeInsets.zero,
+//                     constraints: const BoxConstraints(),
+//                     onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+//                   ),
+//                   const SizedBox(width: 32),
+//                   const Text(
+//                     "Visitor Induction",
+//                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.black87),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ),
+//         ),
+//       ),
+//       // Hapus Center dan gunakan SafeArea untuk body
+//       body: SafeArea(
+//         top: false, // Karena AppBar sudah diwrap SafeArea
+//         child: ConstrainedBox(
+//           constraints: const BoxConstraints(maxWidth: 900),
+//           // Bungkus ConstrainedBox dengan Container agar mengisi tinggi
+//           child: Container(
+//             width: double.infinity, // Agar ConstrainedBox bisa mengisi lebar
+//             // padding: const EdgeInsets.symmetric(horizontal: 24), // Pindahkan ke ScrollView
+//             child: SingleChildScrollView(
+//               padding: const EdgeInsets.symmetric(horizontal: 24), // Gunakan padding di sini
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   // Tambahkan SizedBox kecil di sini untuk mengatur jarak dari AppBar
+//                   const SizedBox(height: 8), // Atur jarak dari AppBar
+//                   // ON PROGRESS SECTION
+//                   _buildSectionCard(
+//                     title: "On Progress",
+//                     icon: Icons.history,
+//                     child: _isLoadingProgress
+//                         ? const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()))
+//                         : _errorMessageProgress != null
+//                             ? Center(
+//                                 child: Padding(
+//                                   padding: const EdgeInsets.all(16),
+//                                   child: Column(
+//                                     mainAxisSize: MainAxisSize.min,
+//                                     children: [
+//                                       Text(
+//                                         _errorMessageProgress!,
+//                                         style: const TextStyle(color: Colors.red),
+//                                         textAlign: TextAlign.center,
+//                                       ),
+//                                       const SizedBox(height: 8),
+//                                       ElevatedButton(
+//                                         onPressed: _loadProgress,
+//                                         child: const Text("Retry"),
+//                                       ),
+//                                     ],
+//                                   ),
+//                                 ),
+//                               )
+//                             : Column(
+//                                 children: progressList.map((item) => _buildProgressItem(item)).toList(),
+//                               ),
+//                   ),
+//                   const SizedBox(height: 24),
+//                   // TRAINING MODULE SECTION
+//                   // _buildSectionCard(
+//                   //   title: "SHE Training Module",
+//                   //   icon: Icons.menu_book_outlined,
+//                   //   child: Column(
+//                   //     children: trainingModules.map((module) => _buildTrainingModuleItem(module)).toList(),
+//                   //   ),
+//                   // ),
+//                 ],
+//               ),
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+  Widget build(BuildContext context) {
+    return Scaffold(
+      key: _scaffoldKey,
+      drawer: const CustomDrawer(),
+      backgroundColor: const Color(0xFFF7F7F9),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(56),
+        child: Container(
+          color: Colors.white,
+          child: SafeArea(
+            bottom: false,
+            child: Container(
+              height: 56,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.menu, color: Colors.black87, size: 24),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+                  ),
+                  const SizedBox(width: 32),
+                  const Text(
+                    "Visitor Induction",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.black87),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ),
-    body: SafeArea(
-      top: false,
-      // Gunakan Center untuk memusatkan secara horizontal
-      child: Center(
+      body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 900),
           child: SingleChildScrollView(
-            // Hilangkan padding horizontal dari ScrollView, biarkan pada container internal
-            padding: const EdgeInsets.only(top: 8, left: 24, right: 24), // Gunakan only agar bottom bisa diatur sendiri jika perlu
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8), //, vertical: 24
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ON PROGRESS SECTION - SEKARANG LANGSUNG DI ATAS
+                // ON PROGRESS SECTION
                 _buildSectionCard(
                   title: "On Progress",
                   icon: Icons.history,
@@ -279,15 +379,19 @@ Widget build(BuildContext context) {
                             ),
                 ),
                 const SizedBox(height: 24),
-                // TRAINING MODULE SECTION atau section lainnya bisa ditambahkan di sini
-                // ...
+                // TRAINING MODULE SECTION
+                // _buildSectionCard(
+                //   title: "SHE Training Module",
+                //   icon: Icons.menu_book_outlined,
+                //   child: Column(
+                //     children: trainingModules.map((module) => _buildTrainingModuleItem(module)).toList(),
+                //   ),
+                // ),
               ],
             ),
           ),
         ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 }

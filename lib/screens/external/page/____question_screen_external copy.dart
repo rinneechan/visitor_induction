@@ -40,7 +40,6 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
   List<Map<String, dynamic>> questions = [];
 
   bool _isLoading = false;
-  bool isSubmitting = false;   // ⭐ FIX: Anti double click
   int currentQuestionIndex = 0;
   int incorrectCount = 0;
   int? selectedOptionIndex;
@@ -111,10 +110,6 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
 
   Future<void> nextQuestion(int questionId, int selectedChoiceId) async {
     if (selectedOptionIndex == null) return;
-    
-    if (isSubmitting) return; // ⭐ FIX: cegah klik dobel
-    isSubmitting = true;
-    setState(() {});
 
     final correctAnswer = questions[currentQuestionIndex]['answer'] ?? '';
     final options = List<String>.from(questions[currentQuestionIndex]['options'] ?? []);
@@ -132,9 +127,7 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
         if (!isCorrect) incorrectCount++;
 
         if (!mounted) return;
-
-        // ⭐ FIX: BottomSheet menunggu selesai dulu
-        await showModalBottomSheet(
+        showModalBottomSheet(
           context: context,
           isDismissible: false,
           enableDrag: false,
@@ -192,12 +185,28 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      if (incorrectCount >= 3) {
+                        setState(() {});
+                        return;
+                      }
+                      if (currentQuestionIndex < questions.length - 1) {
+                        setState(() {
+                          currentQuestionIndex++;
+                          selectedOptionIndex = null;
+                        });
+                      } else {
+                        context.go(
+                          "/external/test-completed?idrequest=${Uri.encodeComponent(widget.idrequest)}&plantId=${Uri.encodeComponent(widget.plantId)}&plantName=${Uri.encodeComponent(widget.plantName)}&urlakses=${Uri.encodeComponent(widget.urlakses)}",
+                        );
+                        //context.push('/exsternal/test-completed?id=${item.id}&idrequest=${widget.idrequest}');
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 48),
-                      backgroundColor: isCorrect
-                          ? const Color(0xFF07840B)
-                          : const Color(0xFF8F0B0B),
+                      backgroundColor:
+                          isCorrect ? const Color(0xFF07840B) : const Color(0xFF8F0B0B),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -212,34 +221,12 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
             );
           },
         );
-
-        // ⭐ FIX: Hanya setelah bottom sheet ditutup → reset
-        isSubmitting = false;
-        setState(() {});
-
-        if (incorrectCount >= 3) return;
-
-        if (currentQuestionIndex < questions.length - 1) {
-          setState(() {
-            currentQuestionIndex++;
-            selectedOptionIndex = null;
-          });
-        } else {
-          context.go(
-            "/external/test-completed?idrequest=${Uri.encodeComponent(widget.idrequest)}&plantId=${Uri.encodeComponent(widget.plantId)}&plantName=${Uri.encodeComponent(widget.plantName)}&urlakses=${Uri.encodeComponent(widget.urlakses)}",
-          );
-        }
       } else {
-        _showErrorDialog("Gagal mengirim jawaban.");
-        isSubmitting = false;
-        setState(() {});
+        _showErrorDialog("Gagal mengirim jawaban. Coba lagi.");
       }
     } catch (e) {
       debugPrint("Error submitting answer external: $e");
       _showErrorDialog("Terjadi kesalahan saat mengirim jawaban.");
-
-      isSubmitting = false;
-      setState(() {});
     }
   }
 
@@ -267,14 +254,14 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
         backgroundColor: Colors.white,
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-            child: Center(
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12), // ✅ SAMA DENGAN INTERNAL
+            child: Center( // ✅ SAMA DENGAN INTERNAL
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 600),
+                constraints: const BoxConstraints(maxWidth: 600), // ✅ SAMA DENGAN INTERNAL
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // HEADER
+                    // ✅ HEADER: SAMA 100%
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -283,7 +270,7 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF343434),
+                            color: Color(0xFF343434), // ✅ SAMA
                           ),
                         ),
                         Image.asset(
@@ -294,21 +281,20 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                                   : incorrectCount == 3
                                       ? 'assets/images/groupOfHeart3.png'
                                       : 'assets/images/groupOfHeart.png',
-                          height: 40,
+                          height: 40, // ✅ SAMA
                         ),
                       ],
                     ),
+                    const SizedBox(height: 20), // ✅ SAMA
 
-                    const SizedBox(height: 20),
-
-                    // CARD SOAL
+                    // ✅ CARD SOAL: SAMA 100%
                     if (incorrectCount < 3)
                       Card(
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
                         child: Padding(
-                          padding: const EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(20), // ✅ SAMA
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -317,11 +303,10 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                                 style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF343434),
+                                  color: Color(0xFF343434), // ✅ SAMA
                                 ),
                               ),
                               const SizedBox(height: 16),
-
                               ListView.builder(
                                 shrinkWrap: true,
                                 physics: const NeverScrollableScrollPhysics(),
@@ -333,10 +318,8 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                                   return Padding(
                                     padding: const EdgeInsets.symmetric(vertical: 6),
                                     child: ElevatedButton(
-                                      onPressed: () {
-                                        if (isSubmitting) return; // ⭐ FIX
-                                        setState(() => selectedOptionIndex = index);
-                                      },
+                                      onPressed: () =>
+                                          setState(() => selectedOptionIndex = index),
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: selected
                                             ? Colors.green
@@ -345,16 +328,14 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                                           borderRadius: BorderRadius.circular(8),
                                         ),
                                         padding: const EdgeInsets.symmetric(
-                                            vertical: 14, horizontal: 16),
+                                            vertical: 14, horizontal: 16), // ✅ SAMA
                                       ),
                                       child: Align(
                                         alignment: Alignment.centerLeft,
                                         child: Text(
                                           choice.choiceText,
                                           style: TextStyle(
-                                            color: selected
-                                                ? Colors.white
-                                                : Colors.black,
+                                            color: selected ? Colors.white : Colors.black,
                                           ),
                                         ),
                                       ),
@@ -362,13 +343,11 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                                   );
                                 },
                               ),
-
                               const SizedBox(height: 20),
-
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
-                                  onPressed: (selectedOptionIndex == null || isSubmitting)
+                                  onPressed: selectedOptionIndex == null
                                       ? null
                                       : () {
                                           final choice = current
@@ -384,7 +363,7 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                                     backgroundColor: selectedOptionIndex != null
                                         ? const Color(0xFF07840B)
                                         : Colors.grey,
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(vertical: 16), // ✅ SAMA
                                     shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(8)),
                                   ),
@@ -399,11 +378,11 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                         ),
                       ),
 
-                    // CARD START OVER
+                    // ✅ CARD "START OVER": SAMA 100%
                     if (incorrectCount >= 3)
                       Center(
                         child: Card(
-                          margin: const EdgeInsets.only(top: 40),
+                          margin: const EdgeInsets.only(top: 40), // ✅ SAMA
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16)),
                           child: Padding(
@@ -413,31 +392,37 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                               children: [
                                 Image.asset(
                                   'assets/images/groupOfHeart3.png',
-                                  height: 40,
+                                  height: 40, // ✅ SAMA
                                 ),
                                 const SizedBox(height: 16),
                                 const Text(
                                   "You've lost all your hearts.\nPlease start over.",
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 18),
+                                  style: TextStyle(fontSize: 18), // ✅ SAMA
                                 ),
                                 const SizedBox(height: 20),
                                 SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton(
                                     onPressed: () {
+                                      // context.go(
+                                      //   '/external/welcome-test-satu'
+                                      //   '?idrequest=${Uri.encodeComponent(widget.idrequest)}'
+                                      //   '&plantId=${Uri.encodeComponent(widget.plantId)}'
+                                      //   '&plantName=${Uri.encodeComponent(widget.plantName)}',
+                                      // );
                                       context.push(
-                                        '/external/welcome-test-satu',
-                                        extra: {
-                                          "idrequest": widget.idrequest,
-                                          "plantId": widget.plantId,
-                                          "plantName": widget.plantName,
-                                        },
-                                      );
+                                      '/external/welcome-test-satu',
+                                      extra: {
+                                        "idrequest": widget.idrequest,
+                                        "plantId": widget.plantId,
+                                        "plantName": widget.plantName,
+                                      },
+                                    );
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFF8F0B0B),
-                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      padding: const EdgeInsets.symmetric(vertical: 16), // ✅ SAMA
                                       shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(8)),
                                     ),

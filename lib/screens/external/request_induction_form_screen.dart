@@ -237,23 +237,23 @@ class _RequestInductionFormScreenState
 
 
   // ---------------- EMAIL SENDER ----------------
-  Future<void> _sendEmail(String recipient) async {
-    try {
-      final url = Uri.parse("http://10.10.10.72:3007/send-email");
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "to": recipient,
-          "subject": "Visitor Induction Request",
-          "message": "Visitor induction request Anda berhasil dibuat.",
-        }),
-      );
-      debugPrint("Email response: ${response.statusCode} ${response.body}");
-    } catch (e) {
-      debugPrint("Failed to send email: $e");
-    }
-  }
+  // Future<void> _sendEmail(String recipient) async {
+  //   try {
+  //     final url = Uri.parse("http://10.10.10.72:3007/send-email");
+  //     final response = await http.post(
+  //       url,
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: jsonEncode({
+  //         "to": recipient,
+  //         "subject": "Visitor Induction Request",
+  //         "message": "Visitor induction request Anda berhasil dibuat.",
+  //       }),
+  //     );
+  //     debugPrint("Email response: ${response.statusCode} ${response.body}");
+  //   } catch (e) {
+  //     debugPrint("Failed to send email: $e");
+  //   }
+  // }
 
   // ---------------- SUBMIT ----------------
   Future<void> _submitRequest() async {
@@ -311,7 +311,13 @@ class _RequestInductionFormScreenState
                 onPressed: () async {
                   Navigator.pop(context);
                   //await _sendEmail(_emailController.text.trim());
-                  if (mounted) context.go('/request-submitted');
+                  // if (mounted) context.go('/exsternal/request-submitted');
+                  if (mounted) {
+                    String email = _emailController.text.trim();
+                    // Gunakan Uri untuk membangun URL dengan query parameters
+                    Uri uri = Uri(path: '/exsternal/request-submitted', queryParameters: {'email': email});
+                    context.go(uri.toString());
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF07840B),
