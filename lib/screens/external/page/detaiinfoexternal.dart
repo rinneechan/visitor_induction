@@ -267,6 +267,7 @@ class _DetaiinfoexternalState extends State<Detaiinfoexternal> {
             "idrequest": item.id,
             "plantId": item.plantId,
             "plantName": item.plantName,
+            "urlakses": widget.idrequest,
           },
         );
 

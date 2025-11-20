@@ -18,12 +18,14 @@ class WelcomeTestSatuExternalScreen extends StatefulWidget {
   final String idrequest;
   final String plantId;
   final String plantName;
+  final String urlakses;
 
   const WelcomeTestSatuExternalScreen({
     super.key,
     required this.idrequest,
     required this.plantId,
     required this.plantName,
+    required this.urlakses,
   });
 
   @override
@@ -281,6 +283,7 @@ class _WelcomeTestSatuExternalScreenState
                   'idrequest': widget.idrequest,
                   'plantId': widget.plantId,
                   'plantName': widget.plantName,
+                  "urlakses": widget.urlakses,
                 },
               );
             }

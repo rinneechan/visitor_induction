@@ -17,12 +17,14 @@ class QuestionScreenExternal extends StatefulWidget {
   final String idrequest;
   final String plantId;
   final String plantName;
+  final String urlakses;
 
   const QuestionScreenExternal({
     super.key,
     required this.idrequest,
     required this.plantId,
     required this.plantName,
+    required this.urlakses,
   });
 
   @override
@@ -196,8 +198,9 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                         });
                       } else {
                         context.go(
-                          "/external/test-completed?idrequest=${Uri.encodeComponent(widget.idrequest)}&plantId=${Uri.encodeComponent(widget.plantId)}&plantName=${Uri.encodeComponent(widget.plantName)}",
+                          "/external/test-completed?idrequest=${Uri.encodeComponent(widget.idrequest)}&plantId=${Uri.encodeComponent(widget.plantId)}&plantName=${Uri.encodeComponent(widget.plantName)}&urlakses=${Uri.encodeComponent(widget.urlakses)}",
                         );
+                        //context.push('/exsternal/test-completed?id=${item.id}&idrequest=${widget.idrequest}');
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -402,12 +405,20 @@ class _QuestionScreenExternalState extends State<QuestionScreenExternal> {
                                   width: double.infinity,
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      context.go(
-                                        '/external/welcome-test-satu'
-                                        '?idrequest=${Uri.encodeComponent(widget.idrequest)}'
-                                        '&plantId=${Uri.encodeComponent(widget.plantId)}'
-                                        '&plantName=${Uri.encodeComponent(widget.plantName)}',
-                                      );
+                                      // context.go(
+                                      //   '/external/welcome-test-satu'
+                                      //   '?idrequest=${Uri.encodeComponent(widget.idrequest)}'
+                                      //   '&plantId=${Uri.encodeComponent(widget.plantId)}'
+                                      //   '&plantName=${Uri.encodeComponent(widget.plantName)}',
+                                      // );
+                                      context.push(
+                                      '/external/welcome-test-satu',
+                                      extra: {
+                                        "idrequest": widget.idrequest,
+                                        "plantId": widget.plantId,
+                                        "plantName": widget.plantName,
+                                      },
+                                    );
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFF8F0B0B),

@@ -77,6 +77,7 @@ import 'package:she_vi/screens/external/page/welcome_testsatu_external.dart';
 import 'package:she_vi/screens/external/page/welcome_testdua_external.dart'; // Import dari upstream
 import 'package:she_vi/screens/external/page/question_screen_external.dart'; // Import dari upstream
 import 'package:she_vi/screens/external/page/detailvisitexternal.dart'; // Import dari stashed changes
+import 'package:she_vi/screens/external/page/testcomplatedexternal.dart';
 
 /// ======================================================
 /// ✅ AppRouter: Kelas tunggal untuk mengatur semua route
@@ -394,6 +395,7 @@ class AppRouter {
           idrequest: extras?['idrequest'] ?? '',
           plantId: extras?['plantId'] ?? '',
           plantName: extras?['plantName'] ?? '',
+          urlakses: extras?['urlakses'] ?? '',
         );
       },
     ),
@@ -407,6 +409,7 @@ class AppRouter {
           idrequest: extras?['idrequest'] ?? '',
           plantId: extras?['plantId'] ?? '',
           plantName: extras?['plantName'] ?? '',
+           urlakses: extras?['urlakses'] ?? '',
         );
       },
     ),
@@ -417,11 +420,13 @@ class AppRouter {
         final idrequest = state.uri.queryParameters['idrequest'] ?? '';
         final plantId = state.uri.queryParameters['plantId'] ?? '';
         final plantName = state.uri.queryParameters['plantName'] ?? '';
+        final urlakses = state.uri.queryParameters['urlakses'] ?? '';
 
         return QuestionScreenExternal(
           idrequest: idrequest,
           plantId: plantId,
           plantName: plantName,
+          urlakses: urlakses,
         );
       },
     ),
@@ -433,7 +438,18 @@ class AppRouter {
           return DetailVisitExternal(idrequest: idRequest);
         },
       ),
-    // --- Akhir dari bagian yang digabungkan ---
+    GoRoute(
+      path: '/external/test-completed',
+      builder: (context, state) {
+        final queryParams = state.uri.queryParameters;
+        return TestComplatedScreenExternal(
+          idrequest: queryParams['idrequest'] ?? 'defaultID',
+          plantId: queryParams['plantId'] ?? 'defaultID',
+          plantName: queryParams['plantName'] ?? 'defaultID',
+          urlakses: queryParams['urlakses'] ?? 'defaultID',
+        );
+      },
+    ),
     ],
   );
 }

@@ -204,40 +204,40 @@ class _CompletedScreenState extends State<CompletedScreenExsternal> {
                         ),
                       ),
                       const SizedBox(height: 15),
-                      const Text(
-                        "Kartu akses Anda juga telah dikirimkan ke",
-                        style: TextStyle(fontSize: 16),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 5),
-                      const Text(
-                        "email Anda:",
-                        style: TextStyle(fontSize: 16),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 10),
-                      // Gunakan email dari profil API
-                      FutureBuilder<InductionRequestIdExternal?>(
-                        future: _fetchInductionId, // Gunakan Future yang sama
-                        builder: (context, emailSnapshot) {
-                           if (emailSnapshot.connectionState == ConnectionState.waiting) {
-                              return const Text('—'); // Placeholder
-                           }
-                           if (emailSnapshot.hasError) {
-                             return Text('Email Error: ${emailSnapshot.error}');
-                           }
-                           if (!emailSnapshot.hasData || emailSnapshot.data == null) {
-                             return const Text('—');
-                           }
-                           final emailDetail = emailSnapshot.data!;
-                           final emailFromProfil = emailDetail.profil?.workEmail ?? '—';
-                           return Text(
-                             emailFromProfil, // Ambil dari profil
-                             style: const TextStyle(fontSize: 16),
-                             textAlign: TextAlign.center,
-                           );
-                        },
-                      ),
+                      // const Text(
+                      //   "Kartu akses Anda juga telah dikirimkan ke",
+                      //   style: TextStyle(fontSize: 16),
+                      //   textAlign: TextAlign.center,
+                      // ),
+                      // const SizedBox(height: 5),
+                      // const Text(
+                      //   "email Anda:",
+                      //   style: TextStyle(fontSize: 16),
+                      //   textAlign: TextAlign.center,
+                      // ),
+                      // const SizedBox(height: 10),
+                      // // Gunakan email dari profil API
+                      // FutureBuilder<InductionRequestIdExternal?>(
+                      //   future: _fetchInductionId, // Gunakan Future yang sama
+                      //   builder: (context, emailSnapshot) {
+                      //      if (emailSnapshot.connectionState == ConnectionState.waiting) {
+                      //         return const Text('—'); // Placeholder
+                      //      }
+                      //      if (emailSnapshot.hasError) {
+                      //        return Text('Email Error: ${emailSnapshot.error}');
+                      //      }
+                      //      if (!emailSnapshot.hasData || emailSnapshot.data == null) {
+                      //        return const Text('—');
+                      //      }
+                      //      final emailDetail = emailSnapshot.data!;
+                      //      final emailFromProfil = emailDetail.profil?.workEmail ?? '—';
+                      //      return Text(
+                      //        emailFromProfil, // Ambil dari profil
+                      //        style: const TextStyle(fontSize: 16),
+                      //        textAlign: TextAlign.center,
+                      //      );
+                      //   },
+                      // ),
                       const SizedBox(height: 24),
                       ElevatedButton.icon(
                         onPressed: () {

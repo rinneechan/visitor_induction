@@ -7,12 +7,14 @@ class WelcomeTestDuaExternalScreen extends StatefulWidget {
   final String idrequest;
   final String plantId;
   final String plantName;
+  final String urlakses;
 
   const WelcomeTestDuaExternalScreen({
     super.key,
     required this.idrequest,
     required this.plantId,
     required this.plantName,
+    required this.urlakses,
   });
 
   @override
@@ -141,7 +143,8 @@ class _WelcomeTestDuaExternalScreenState
           '/external/induction/question'
           '?idrequest=${Uri.encodeComponent(widget.idrequest)}'
           '&plantId=${Uri.encodeComponent(widget.plantId)}'
-          '&plantName=${Uri.encodeComponent(widget.plantName)}',
+          '&plantName=${Uri.encodeComponent(widget.plantName)}'
+          '&urlakses=${Uri.encodeComponent(widget.urlakses)}',
         );
       },
       style: ElevatedButton.styleFrom(

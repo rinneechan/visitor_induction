@@ -16,7 +16,7 @@ import 'package:she_vi/models/answer_question_external.dart';
 
 class ApiServiceExternal {
   static const String _apiKey = 'rahasia123';
-  final Dio _dio = Dio();
+  static Dio _dio = Dio();
 
   Future<String?> getTokenExternal() async {
   final box = Hive.box('userBox');
@@ -258,41 +258,6 @@ class ApiServiceExternal {
 }
 
 // -------------------- CREATE ANSWER QUESTION EXTERNAL --------------------
-// Future<AnswerQuestionExternalResponse?> createAnswerQuestionExternal(
-//     int inductionId,
-//     int questionId,
-//     int choiceId,
-// ) async {
-//   final String apiUrl = EnvHelper.get('API_URL');
-//   final url = "$apiUrl/question-external/create-answer-question";
-
-//   try {
-//     final response = await _dio.post(
-//       url,
-//       options: Options(
-//         headers: {
-//           "x-api-key": _apiKey,
-//           "Content-Type": "application/json",
-//         },
-//       ),
-//       data: {
-//         "induction_id": inductionId,
-//         "question_id": questionId,
-//         "choice_id": choiceId,
-//       },
-//     );
-
-//     if (response.statusCode == 200 && response.data["status"] == true) {
-//       return AnswerQuestionExternalResponse.fromJson(response.data);
-//     } else {
-//       debugPrint("❌ Create Answer Failed: ${response.data}");
-//     }
-//   } catch (e) {
-//     debugPrint("❌ createAnswerQuestionExternal Exception: $e");
-//   }
-
-//   return null;
-// }
 Future<AnswerQuestionExternalResponse?> createAnswerQuestionExternal(
     int inductionId,
     int questionId,
@@ -338,95 +303,42 @@ Future<AnswerQuestionExternalResponse?> createAnswerQuestionExternal(
   return null;
 }
 
-//  Future<bool> createAnswerQuestionExternal(
-//       int inductionId,
-//       int questionId,
-//       int choiceId,
-//   ) async {
-//     final String apiUrl = EnvHelper.get('API_URL');
-//     final url = "$apiUrl/question-external/create-answer-question";
+// -------------------- UPDATE INDUCTION REQUEST TEST EXTERNAL --------------------
+ static Future<bool> updateInductionRequestTestExternal( // <-- TAMBAHKAN 'static' DI SINI
+      String idrequest, // Gunakan String jika ID dari API berupa string
+      int statusId,
+  ) async {
+    final String apiUrl = EnvHelper.get('API_URL');
+    final url = "$apiUrl/inductionrequest-external/update-inductionrequest-test/$idrequest";
 
-//     try {
-//       final response = await _dio.post(
-//         url,
-//         options: Options(
-//           headers: {
-//             "x-api-key": _apiKey, // ✅ Gunakan API key yang benar
-//             "Content-Type": "application/json",
-//           },
-//         ),
-//          {
-//           "induction_id": inductionId,
-//           "question_id": questionId,
-//           "choice_id": choiceId,
-//         },
-//       );
+    try {
+      final response = await _dio.put( // Anda mungkin perlu instance _dio, gunakan instance atau buat Dio baru
+        url,
+        options: Options(
+          headers: {
+            "x-api-key": _apiKey,
+            "Content-Type": "application/json",
+          },
+        ),
+        data: {
+          "status_id": statusId,
+        },
+      );
 
-//       // ✅ Periksa status code dan status dari response body
-//       if (response.statusCode == 200 || response.statusCode == 201) {
-//         final responseData = response.data;
-//         if (responseData is Map<String, dynamic> && responseData['status'] == true) {
-//           debugPrint("✅ Create Answer Success: ${responseData['message'] ?? 'Success'}");
-//           return true; // ✅ Kembalikan true jika sukses
-//         } else {
-//           debugPrint("❌ Create Answer Failed (status false): ${responseData}");
-//           return false; // ✅ Kembalikan false jika status false
-//         }
-//       } else {
-//         debugPrint("❌ Create Answer Failed (status code): ${response.statusCode}, ${response.data}");
-//         return false; // ✅ Kembalikan false jika status code bukan 200/201
-//       }
-//     } catch (e) {
-//       debugPrint("❌ createAnswerQuestionExternal Exception: $e");
-//       // ✅ Jangan return null, tapi false untuk menandakan gagal
-//       return false;
-//     }
-//   }
+      debugPrint("DEBUG Update Test: Status Code: ${response.statusCode}, Data: ${response.data}");
 
-// Future<bool> createAnswerQuestionExternal(
-//     int inductionId,
-//     int questionId,
-//     int choiceId,
-// ) async {
-//   final String apiUrl = EnvHelper.get('API_URL');
-//   final url = "$apiUrl/question-external/create-answer-question";
-
-//   try {
-//     final response = await _dio.post(
-//       url,
-//       options: Options(
-//         headers: {
-//           "x-api-key": _apiKey, // ✅ Gunakan API key yang benar
-//           "Content-Type": "application/json",
-//         },
-//       ),
-//       data: {
-//         "induction_id": inductionId,
-//         "question_id": questionId,
-//         "choice_id": choiceId,
-//       },
-//     );
-
-//     // ✅ Periksa status code dan status dari response body
-//     if (response.statusCode == 200 || response.statusCode == 201) {
-//       final responseData = response.data;
-//       if (responseData is Map<String, dynamic> && responseData['status'] == true) {
-//         debugPrint("✅ Create Answer Success: ${responseData['message'] ?? 'Success'}");
-//         return true; // ✅ Kembalikan true jika sukses
-//       } else {
-//         debugPrint("❌ Create Answer Failed (status false): ${responseData}");
-//         return false; // ✅ Kembalikan false jika status false
-//       }
-//     } else {
-//       debugPrint("❌ Create Answer Failed (status code): ${response.statusCode}, ${response.data}");
-//       return false; // ✅ Kembalikan false jika status code bukan 200/201
-//     }
-//   } catch (e) {
-//     debugPrint("❌ createAnswerQuestionExternal Exception: $e");
-//     // ✅ Jangan return null, tapi false untuk menandakan gagal
-//     return false;
-//   }
-
- 
+      // Periksa status code dan status dari response body
+      if ((response.statusCode == 200 || response.statusCode == 201) && response.data["status"] == true) {
+        debugPrint("✅ Update Test Success: ${response.data["message"] ?? 'Success'}");
+        return true;
+      } else {
+        debugPrint("❌ Update Test Failed (status false or bad code): ${response.data}");
+        return false;
+      }
+    } catch (e) {
+      debugPrint("❌ updateInductionRequestTestExternal Exception: $e");
+      return false;
+    }
+  }
 
 }
