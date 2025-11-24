@@ -364,7 +364,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _showPopup = kIsWeb && isMobileBrowser();
+    //_showPopup = kIsWeb && isMobileBrowser();
     _usernameController.addListener(_checkIfButtonShouldBeEnabled);
     _passwordController.addListener(_checkIfButtonPassBeEnabled);
     _init();

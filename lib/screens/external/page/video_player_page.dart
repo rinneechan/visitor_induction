@@ -20,6 +20,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   late VideoPlayerController _videoController;
   ChewieController? _chewieController;
 
+  bool isFinished = false;
+
   @override
   void initState() {
     super.initState();
@@ -31,33 +33,33 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       Uri.parse(widget.videoUrl),
     );
 
-    // ⬇️ WAJIB: iPhone Safari butuh mute untuk autoplay
+    // ⬇️ Wajib mute untuk autoplay Safari Web iPhone
     await _videoController.setVolume(0);
 
-    // initialize
     await _videoController.initialize();
 
-    // Chewie controller
     _chewieController = ChewieController(
       videoPlayerController: _videoController,
       autoPlay: true,
       looping: false,
 
-      // ⬇️ FIX untuk Safari Web iPhone
+      // Fix untuk iPhone Safari Web
       allowFullScreen: false,
       allowMuting: true,
-      autoInitialize: true,
       showControlsOnInitialize: true,
+      autoInitialize: true,
 
-      // Boleh diubah sesuai internal
+      // Samakan dengan internal
       allowPlaybackSpeedChanging: false,
       additionalOptions: (_) => [],
     );
 
-    // detect selesai nonton
+    // Detect selesai nonton
     _videoController.addListener(() {
-      final value = _videoController.value;
-      if (value.position >= value.duration && !value.isPlaying) {
+      final v = _videoController.value;
+
+      if (!isFinished && v.position >= v.duration && !v.isPlaying) {
+        isFinished = true;
         widget.onFinishedWatching();
         if (mounted) Navigator.pop(context);
       }
