@@ -20,6 +20,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   late VideoPlayerController _videoController;
   ChewieController? _chewieController;
 
+  bool hasStartedPlaying = false;
   bool isFinished = false;
 
   @override
@@ -33,7 +34,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       Uri.parse(widget.videoUrl),
     );
 
-    // 🔥 WAJIB: Safari Web hanya boleh autoplay jika video MUTE
+    // Untuk autoplay Safari iPhone
     await _videoController.setVolume(0);
 
     await _videoController.initialize();
@@ -42,23 +43,31 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       videoPlayerController: _videoController,
       autoPlay: true,
       looping: false,
-
-      // Safari Web Fix
-      allowFullScreen: false,
+      allowFullScreen: false, // iPhone Safari sering error
       allowMuting: true,
-      allowPlaybackSpeedChanging: false,
       showControlsOnInitialize: true,
+      allowPlaybackSpeedChanging: false,
     );
 
-    // Detect video selesai (hindari double pop)
+    // Listener diperbaiki
     _videoController.addListener(() {
       final v = _videoController.value;
 
-      if (!isFinished && v.position >= v.duration && !v.isPlaying) {
+      // Safari fix: tunggu sampai benar-benar mulai play
+      if (!hasStartedPlaying && v.isPlaying && v.position > Duration.zero) {
+        hasStartedPlaying = true;
+      }
+
+      // Jangan deteksi selesai sebelum mulai play
+      if (!hasStartedPlaying) return;
+
+      // Deteksi selesai menonton
+      if (!isFinished &&
+          v.duration > Duration.zero &&
+          v.position >= v.duration &&
+          !v.isPlaying) {
         isFinished = true;
-
         widget.onFinishedWatching();
-
         if (mounted) Navigator.pop(context);
       }
     });

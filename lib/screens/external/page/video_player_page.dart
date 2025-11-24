@@ -33,7 +33,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       Uri.parse(widget.videoUrl),
     );
 
-    // ⬇️ Wajib mute untuk autoplay Safari Web iPhone
+    // 🔥 WAJIB: Safari Web hanya izinkan autoplay jika video mute
     await _videoController.setVolume(0);
 
     await _videoController.initialize();
@@ -43,24 +43,28 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       autoPlay: true,
       looping: false,
 
-      // Fix untuk iPhone Safari Web
+      // Fix Safari iPhone
       allowFullScreen: false,
       allowMuting: true,
-      showControlsOnInitialize: true,
       autoInitialize: true,
+      showControlsOnInitialize: true,
 
-      // Samakan dengan internal
+      // Konsisten dengan internal
       allowPlaybackSpeedChanging: false,
       additionalOptions: (_) => [],
     );
 
-    // Detect selesai nonton
+    // 🔥 FIX: Deteksi selesai nonton dengan error margin
     _videoController.addListener(() {
       final v = _videoController.value;
 
-      if (!isFinished && v.position >= v.duration && !v.isPlaying) {
+      if (!isFinished &&
+          v.position.inMilliseconds >= (v.duration.inMilliseconds - 500) &&
+          !v.isPlaying) {
         isFinished = true;
+
         widget.onFinishedWatching();
+
         if (mounted) Navigator.pop(context);
       }
     });
