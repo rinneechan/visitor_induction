@@ -268,6 +268,8 @@ class _RequestInductionFormScreenState
     }
 
     setState(() => _isSubmitting = true);
+    //String? picEmail = _selectedEmplo!.company_email_id; 
+    String? picEmail = _selectedEmplo!.companyEmailId;
 
     final success = await ApiServiceExternal.submitInductionRequestExternal(
       fullName: _nameController.text.trim(),
@@ -280,11 +282,12 @@ class _RequestInductionFormScreenState
       plantId: _selectedPlant!.id,
       departmentName: _selectedEmplo!.unitName,
       picName: _selectedEmplo!.fullName,
+      picEmail: picEmail ?? '',
       arrivalDate: _arrivalDateController.text.trim(),
       durationId: _selectedDuration!.id,
       reasonToVisit: _reasonController.text.trim(),
-      createdBy: "01122070002",
-      updatedBy: "01122070002",
+      createdBy: "00000000000",
+      updatedBy: "00000000000",
     );
 
     setState(() => _isSubmitting = false);

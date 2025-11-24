@@ -286,6 +286,7 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
     final plantId = _selectedPlant!.id.toString();
     final departmentname = _selectedEmplo!.unitname;
     final picname = _selectedEmplo!.fullname;
+    final picEmail = _selectedEmplo!.companyemailid ?? ''; 
     final arrivaldate = _selectedDate!.toIso8601String();
     final durationid = _selectedDuras!.id.toString();
     final reasontovisit = _reasonController.text.trim();
@@ -299,6 +300,7 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
         plantId,
         departmentname,
         picname,
+        picEmail,
         arrivaldate,
         durationid,
         reasontovisit,
@@ -310,7 +312,7 @@ class _ReqInductionySatuScreenState extends State<ReqInductionySatu> {
 
       if (result == true) {
         GoRouter.of(context).go(
-          '/request-submitted',
+          '/employee/request-submitted',
           extra: {'username': username ?? ''},
         );
       } else {
