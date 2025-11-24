@@ -163,7 +163,7 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
   }
 
   void _goToCmsQuestionScreen() {
-    if (selectedPlant == null) return;
+    if (selectedPlant == null || selectedPlant!.name == "All Plant") return;
     context.push('/cms/questions',
         extra: {'plantId': selectedPlant!.id.toString()});
   }
@@ -269,15 +269,29 @@ class _CmsInductionScreenState extends State<CmsInductionScreen> {
                       Text("Daftar Soal",
                           style: GoogleFonts.hankenGrotesk(
                               fontSize: 18, fontWeight: FontWeight.bold)),
+                      // ElevatedButton.icon(
+                      //   style: ElevatedButton.styleFrom(
+                      //       backgroundColor: const Color(0xFF2E7D32)),
+                      //   onPressed: _goToCmsQuestionScreen,
+                      //   icon: const Icon(Icons.add, color: Colors.white),
+                      //   label: Text("Tambah Soal",
+                      //       style:
+                      //           GoogleFonts.hankenGrotesk(color: Colors.white)),
+                      // ),
                       ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2E7D32)),
-                        onPressed: _goToCmsQuestionScreen,
-                        icon: const Icon(Icons.add, color: Colors.white),
-                        label: Text("Tambah Soal",
-                            style:
-                                GoogleFonts.hankenGrotesk(color: Colors.white)),
-                      ),
+  style: ElevatedButton.styleFrom(
+    backgroundColor: selectedPlant?.name == "All Plant"
+        ? Colors.grey[400] // warna disabled
+        : const Color(0xFF2E7D32),
+    foregroundColor: Colors.white,
+  ),
+  // 🔴 Kunci utama: nonaktifkan jika "All Plant"
+  onPressed: selectedPlant?.name == "All Plant"
+      ? null
+      : _goToCmsQuestionScreen,
+  icon: const Icon(Icons.add),
+  label: Text("Tambah Soal", style: GoogleFonts.hankenGrotesk()),
+),
                     ],
                   ),
                   const SizedBox(height: 10),

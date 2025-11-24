@@ -23,31 +23,42 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   @override
   void initState() {
     super.initState();
+    initPlayer();
+  }
 
-    _videoController = VideoPlayerController.network(widget.videoUrl)
-      ..addListener(() {
-        final isEnded = _videoController.value.position >=
-                _videoController.value.duration &&
-            !_videoController.value.isPlaying;
+  Future<void> initPlayer() async {
+    _videoController = VideoPlayerController.networkUrl(
+      Uri.parse(widget.videoUrl),
+    );
 
-        if (isEnded) {
-          widget.onFinishedWatching();
-          if (mounted) {
-            Navigator.of(context)
-                .pop(); // otomatis kembali ke halaman sebelumnya
-          }
-        }
-      })
-      ..initialize().then((_) {
-        _chewieController = ChewieController(
-          videoPlayerController: _videoController,
-          autoPlay: true,
-          looping: false,
-        );
-        setState(() {});
-      }).catchError((e) {
-        debugPrint("Video error: $e");
-      });
+    await _videoController.initialize();
+
+    _chewieController = ChewieController(
+      videoPlayerController: _videoController,
+      autoPlay: true,
+      looping: false,
+
+      // ⬇️ FIX UNTUK MOBILE SAFARI
+      allowFullScreen: false,
+      allowMuting: true,
+      allowPlaybackSpeedChanging: false,
+      additionalOptions: (context) => [],
+
+      // ⬇️ INLINE mode untuk iPhone Safari
+      showControlsOnInitialize: true,
+      autoInitialize: true,
+    );
+
+    // detect selesai nonton
+    _videoController.addListener(() {
+      final value = _videoController.value;
+      if (value.position >= value.duration && !value.isPlaying) {
+        widget.onFinishedWatching();
+        if (mounted) Navigator.pop(context);
+      }
+    });
+
+    setState(() {});
   }
 
   @override
@@ -60,16 +71,15 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Video Induction')),
+      appBar: AppBar(title: const Text("Video Induction")),
       body: Center(
-        child: _chewieController != null && _videoController.value.isInitialized
+        child: (_chewieController != null &&
+                _videoController.value.isInitialized)
             ? AspectRatio(
                 aspectRatio: _videoController.value.aspectRatio,
                 child: Chewie(controller: _chewieController!),
               )
-            : _videoController.value.hasError
-                ? Text("Gagal memuat video")
-                : CircularProgressIndicator(),
+            : const CircularProgressIndicator(),
       ),
     );
   }
