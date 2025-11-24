@@ -23,48 +23,47 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   @override
   void initState() {
     super.initState();
-    _initializeVideo();
+    initPlayer();
   }
 
-  Future<void> _initializeVideo() async {
-    _videoController = VideoPlayerController.network(widget.videoUrl);
+  Future<void> initPlayer() async {
+    _videoController = VideoPlayerController.networkUrl(
+      Uri.parse(widget.videoUrl),
+    );
 
-    try {
-      await _videoController.initialize();
+    // ⬇️ WAJIB: iPhone Safari butuh mute untuk autoplay
+    await _videoController.setVolume(0);
 
-      // Listener: Detect video selesai
-      _videoController.addListener(() {
-        final isEnded =
-            _videoController.value.position >= _videoController.value.duration &&
-                !_videoController.value.isPlaying;
+    // initialize
+    await _videoController.initialize();
 
-        if (isEnded) {
-          widget.onFinishedWatching(); // Trigger welcome screen
-        }
-      });
+    // Chewie controller
+    _chewieController = ChewieController(
+      videoPlayerController: _videoController,
+      autoPlay: true,
+      looping: false,
 
-      // Chewie setup
-      _chewieController = ChewieController(
-        videoPlayerController: _videoController,
-        autoPlay: true,
-        looping: false,
-        allowPlaybackSpeedChanging: true, // <= SPEED ENABLED
-        allowMuting: true,
-        playbackSpeeds: const [
-          0.5,
-          1.0,
-          1.25,
-          1.5,
-          1.75,
-          2.0,
-        ],
-      );
+      // ⬇️ FIX untuk Safari Web iPhone
+      allowFullScreen: false,
+      allowMuting: true,
+      autoInitialize: true,
+      showControlsOnInitialize: true,
 
-      setState(() {});
-    } catch (e) {
-      debugPrint("❌ Video load error: $e");
-      setState(() {});
-    }
+      // Boleh diubah sesuai internal
+      allowPlaybackSpeedChanging: false,
+      additionalOptions: (_) => [],
+    );
+
+    // detect selesai nonton
+    _videoController.addListener(() {
+      final value = _videoController.value;
+      if (value.position >= value.duration && !value.isPlaying) {
+        widget.onFinishedWatching();
+        if (mounted) Navigator.pop(context);
+      }
+    });
+
+    setState(() {});
   }
 
   @override
@@ -77,20 +76,15 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Video Induction')),
+      appBar: AppBar(title: const Text("Video Induction")),
       body: Center(
-        child: _chewieController != null &&
-                _videoController.value.isInitialized
+        child: (_chewieController != null &&
+                _videoController.value.isInitialized)
             ? AspectRatio(
                 aspectRatio: _videoController.value.aspectRatio,
                 child: Chewie(controller: _chewieController!),
               )
-            : _videoController.value.hasError
-                ? const Text(
-                    "Gagal memuat video",
-                    style: TextStyle(color: Colors.red),
-                  )
-                : const CircularProgressIndicator(),
+            : const CircularProgressIndicator(),
       ),
     );
   }
