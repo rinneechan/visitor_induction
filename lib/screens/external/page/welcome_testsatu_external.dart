@@ -239,7 +239,7 @@ class _WelcomeTestSatuExternalScreenState
 
   Widget _buildInstructions() {
     return const Text(
-      'Before taking your access pass test, please download and read our safety materials for external visitors.',
+      'Before taking your access pass test, please view and read our safety materials for external visitors.',
       textAlign: TextAlign.center,
       style: TextStyle(
         color: Color(0xFF343434),
@@ -259,7 +259,7 @@ class _WelcomeTestSatuExternalScreenState
           padding: const EdgeInsets.symmetric(vertical: 14),
         ),
         child: const Text(
-          'Download Induction Material',
+          'View Induction Material',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,

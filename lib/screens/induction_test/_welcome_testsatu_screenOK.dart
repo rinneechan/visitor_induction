@@ -295,7 +295,7 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
   // Instructions for the visitor
   Widget _buildInstructions() {
     return Text(
-      'Before taking your access pass test, please download and read our safety materials to fully understand the safety rules at our plant sites.',
+      'Before taking your access pass test, please view and read our safety materials to fully understand the safety rules at our plant sites.',
       textAlign: TextAlign.center,
       style: const TextStyle(
         color: Color(0xFF343434),
@@ -320,7 +320,7 @@ class _WelcomeTestSatuScreenState extends State<WelcomeTestSatuScreen> {
         ),
         child: const Center(
           child: Text(
-            'Download Induction Material',
+            'View Induction Material',
             style: TextStyle(
               fontFamily: 'Hanken Grotesk',
               fontSize: 16.0,
